@@ -1,0 +1,357 @@
+openapi: 3.0.3
+info:
+  title: Pax8 Subscriptions API - Client Contract
+  description: |
+    OpenAPI contract for the Subscriptions API client implementation.
+    Covers listing subscriptions, retrieving details, updating quantity,
+    canceling subscriptions, and retrieving subscription history.
+  version: 1.0.0
+  contact:
+    name: Pax8 API Client
+servers:
+  - url: https://api.pax8.com/v1
+    description: Pax8 Production API
+
+paths:
+  /subscriptions:
+    get:
+      operationId: listSubscriptions
+      summary: List subscriptions
+      description: |
+        Retrieves a paginated list of subscriptions with optional filters.
+      tags:
+        - Subscriptions
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/CompanyIdParam'
+        - $ref: '#/components/parameters/ProductIdParam'
+        - $ref: '#/components/parameters/StatusParam'
+      responses:
+        '200':
+          description: Successfully retrieved subscriptions list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /subscriptions/{subscriptionId}:
+    get:
+      operationId: getSubscription
+      summary: Get subscription
+      description: Retrieves a subscription by ID.
+      tags:
+        - Subscriptions
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved subscription
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      operationId: updateSubscription
+      summary: Update subscription
+      description: Updates subscription quantity.
+      tags:
+        - Subscriptions
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionRequest'
+      responses:
+        '200':
+          description: Subscription updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /subscriptions/{subscriptionId}/cancel:
+    post:
+      operationId: cancelSubscription
+      summary: Cancel subscription
+      description: Cancels a subscription immediately or schedules cancellation on a billing date.
+      tags:
+        - Subscriptions
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionIdParam'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelOptions'
+      responses:
+        '204':
+          description: Subscription cancelled
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /subscriptions/{subscriptionId}/history:
+    get:
+      operationId: listSubscriptionHistory
+      summary: List subscription history
+      description: Retrieves the change history for a subscription.
+      tags:
+        - Subscriptions
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved subscription history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubscriptionHistory'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  parameters:
+    PageParam:
+      in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      description: 0-based page number
+    SizeParam:
+      in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 10
+      description: Page size (max 200)
+    SortParam:
+      in: query
+      name: sort
+      schema:
+        type: string
+      description: Sort expression supported by the service (e.g., field,direction)
+    CompanyIdParam:
+      in: query
+      name: companyId
+      schema:
+        type: string
+        format: uuid
+      description: Filter subscriptions by company ID
+    ProductIdParam:
+      in: query
+      name: productId
+      schema:
+        type: string
+        format: uuid
+      description: Filter subscriptions by product ID
+    StatusParam:
+      in: query
+      name: status
+      schema:
+        $ref: '#/components/schemas/SubscriptionStatus'
+      description: Filter subscriptions by status
+    SubscriptionIdParam:
+      in: path
+      name: subscriptionId
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Subscription identifier
+
+  schemas:
+    SubscriptionListResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+        page:
+          $ref: '#/components/schemas/Page'
+      required: [content, page]
+
+    Page:
+      type: object
+      properties:
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        number:
+          type: integer
+      required: [size, totalElements, totalPages, number]
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        quantity:
+          type: number
+        status:
+          $ref: '#/components/schemas/SubscriptionStatus'
+        price:
+          type: number
+        billingTerm:
+          $ref: '#/components/schemas/BillingTerm'
+        billingStart:
+          type: string
+          format: date-time
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+          nullable: true
+        createdDate:
+          type: string
+          format: date-time
+        commitmentTermId:
+          type: string
+          format: uuid
+          nullable: true
+        commitmentTermMonths:
+          type: number
+          nullable: true
+        commitmentEndDate:
+          type: string
+          format: date-time
+          nullable: true
+      required: [id, companyId, productId, quantity, status, billingTerm, startDate, createdDate]
+
+    SubscriptionStatus:
+      type: string
+      enum: [Active, Cancelled, PendingManual, PendingAutomated, PendingCancel, WaitingForDetails, Trial, Converted, PendingActivation, Activated]
+
+    BillingTerm:
+      type: string
+      enum: [Monthly, Annual, 2-Year, 3-Year, One-Time, Trial, Activation]
+
+    UpdateSubscriptionRequest:
+      type: object
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+      required: [quantity]
+
+    CancelOptions:
+      type: object
+      properties:
+        billingDate:
+          type: string
+          format: date
+      required: []
+
+    SubscriptionHistory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        subscriptionId:
+          type: string
+          format: uuid
+        action:
+          type: string
+        date:
+          type: string
+          format: date-time
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+        previousQuantity:
+          type: number
+          nullable: true
+        newQuantity:
+          type: number
+          nullable: true
+      required: [id, subscriptionId, action, date]
+
+  responses:
+    UnauthorizedError:
+      description: Unauthorized
+    ForbiddenError:
+      description: Forbidden
+    NotFoundError:
+      description: Not found
+    ValidationError:
+      description: Validation error
+    RateLimitError:
+      description: Rate limit exceeded
+    InternalError:
+      description: Internal server error
