@@ -19,6 +19,7 @@ console.log(page.page.totalElements);
 const subscription = await client.subscriptions.get('subscription-id');
 console.log(subscription.quantity);
 console.log(subscription.billingTerm);
+console.log(subscription.status);
 ```
 
 ## Update subscription quantity
@@ -27,7 +28,7 @@ const updated = await client.subscriptions.update('subscription-id', {
   quantity: 15
 });
 
-console.log(updated.quantity);
+console.log(updated.quantity); // 15
 ```
 
 ## Cancel a subscription (immediate or scheduled)
@@ -46,10 +47,12 @@ await client.subscriptions.cancel('subscription-id', {
 const history = await client.subscriptions.getHistory('subscription-id');
 console.log(history[0]?.action);
 console.log(history[0]?.date);
+console.log(history[0]?.previousQuantity);
+console.log(history[0]?.newQuantity);
 ```
 
 ### Notes
 - Pagination is page-based (`page`, `size` up to 200) and supports optional filters: `companyId`, `productId`, `status`, `sort`.
-- Updates are limited to `quantity`; invalid or negative quantities should return validation errors.
+- Updates are limited to `quantity`; invalid or negative quantities return 422 validation errors.
 - Cancellations return HTTP 204 with no body; `billingDate` is optional for future-effective cancellation.
 - History returns an array of change records (action, timestamp, old/new quantity, userId) without pagination.

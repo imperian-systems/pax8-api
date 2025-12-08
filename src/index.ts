@@ -172,4 +172,34 @@ export {
   isOrderListResponse,
 } from './models/orders';
 
+// Subscriptions API
+export {
+  SubscriptionsApi,
+  getSubscription,
+  listSubscriptions,
+  updateSubscription,
+  cancelSubscription,
+  getSubscriptionHistory,
+  type SubscriptionsApiClient,
+} from './api';
+
+// Subscription models and types
+export type {
+  CancelOptions,
+  ListSubscriptionsOptions,
+  Subscription,
+  SubscriptionHistory,
+  SubscriptionListResponse,
+  SubscriptionStatus,
+  UpdateSubscriptionRequest,
+  PageMetadata as SubscriptionsPageMetadata,
+} from './models/subscriptions';
+
+export {
+  DEFAULT_PAGE_SIZE as SUBSCRIPTIONS_DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE as SUBSCRIPTIONS_MAX_PAGE_SIZE,
+  MIN_PAGE_SIZE as SUBSCRIPTIONS_MIN_PAGE_SIZE,
+  SUBSCRIPTION_STATUSES,
+} from './models/subscriptions';
+
 // Pagination utilities (none exported for companies; contacts use page/size helpers internally)
