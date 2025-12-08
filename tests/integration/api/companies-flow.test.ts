@@ -18,7 +18,7 @@ describe('Companies API Integration Tests', () => {
     };
   });
 
-  const makeCompany = (id: string, nameSuffix = ''): Company => ({
+  const makeCompany = (id: string, nameSuffix = '', updatedDate = '2024-01-01T00:00:00Z'): Company => ({
     id,
     name: `Company ${nameSuffix || id}`,
     address: {},
@@ -28,7 +28,7 @@ describe('Companies API Integration Tests', () => {
     selfServiceAllowed: true,
     orderApprovalRequired: false,
     status: 'Active',
-    updatedDate: '2024-01-01T00:00:00Z',
+    updatedDate,
   });
 
   describe('User Story 1: List Companies with Pagination', () => {
@@ -145,7 +145,7 @@ describe('Companies API Integration Tests', () => {
     it('should filter companies by updatedSince', async () => {
       const cutoffDate = '2024-06-01T00:00:00Z';
       const mockResponse: CompanyListResponse = {
-        content: [makeCompany('comp-recent-1', 'Recently Updated')],
+        content: [makeCompany('comp-recent-1', 'Recently Updated', '2024-07-01T00:00:00Z')],
         page: { size: 10, totalElements: 1, totalPages: 1, number: 0 },
       };
 
@@ -156,7 +156,7 @@ describe('Companies API Integration Tests', () => {
         })
       );
 
-      const result = await listCompanies(mockClient, { page: 0, size: 10 });
+      const result = await listCompanies(mockClient, { page: 0, size: 10, updatedSince: cutoffDate });
 
       expect(result.content).toHaveLength(1);
       expect(new Date(result.content[0].updatedDate).getTime()).toBeGreaterThan(new Date(cutoffDate).getTime());

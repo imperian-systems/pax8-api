@@ -120,16 +120,17 @@ describe('Companies API Contract Tests', () => {
   describe('GET /companies/{companyId} - getCompany', () => {
     it('should return 200 with valid company structure', async () => {
       const mockCompany: Company = {
-        companyId: 'comp-456',
-        legalName: 'Another Company LLC',
-        displayName: 'Another Company',
-        status: 'active',
-        primaryDomains: ['another.com'],
-        primaryContact: {
-          email: 'contact@another.com',
-        },
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
+        id: 'comp-456',
+        name: 'Another Company',
+        address: {},
+        phone: '+1-555-9999',
+        website: 'https://another.com',
+        externalId: 'ext-456',
+        billOnBehalfOfEnabled: true,
+        selfServiceAllowed: true,
+        orderApprovalRequired: false,
+        status: 'Active',
+        updatedDate: '2024-01-01T00:00:00Z',
       };
 
       vi.mocked(mockClient.request).mockResolvedValueOnce(
@@ -142,9 +143,8 @@ describe('Companies API Contract Tests', () => {
       const result = await getCompany(mockClient, 'comp-456');
 
       expect(result).toEqual(mockCompany);
-      expect(result).toHaveProperty('companyId', 'comp-456');
-      expect(result).toHaveProperty('legalName');
-      expect(result).toHaveProperty('displayName');
+      expect(result).toHaveProperty('id', 'comp-456');
+      expect(result).toHaveProperty('name');
       expect(result).toHaveProperty('status');
     });
 

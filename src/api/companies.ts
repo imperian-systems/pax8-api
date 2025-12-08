@@ -33,6 +33,7 @@ export interface ListCompaniesParams {
   billOnBehalfOfEnabled?: boolean;
   orderApprovalRequired?: boolean;
   status?: CompanyStatus;
+  updatedSince?: string;
 }
 
 export interface SearchCompaniesParams {
@@ -149,6 +150,16 @@ export const listCompanies = async (
     throw new TypeError('orderApprovalRequired must be a boolean when provided');
   }
 
+  if (params.updatedSince !== undefined) {
+    if (typeof params.updatedSince !== 'string') {
+      throw new TypeError('updatedSince must be an ISO date-time string when provided');
+    }
+
+    if (Number.isNaN(Date.parse(params.updatedSince))) {
+      throw new TypeError('updatedSince must be a valid ISO date-time string');
+    }
+  }
+
   // Build query parameters
   const searchParams = new URLSearchParams();
   searchParams.set('page', page.toString());
@@ -188,6 +199,10 @@ export const listCompanies = async (
 
   if (params.status) {
     searchParams.set('status', params.status);
+  }
+
+  if (params.updatedSince) {
+    searchParams.set('updatedSince', params.updatedSince);
   }
 
   const path = `/companies?${searchParams.toString()}`;
