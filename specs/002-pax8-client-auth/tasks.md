@@ -29,10 +29,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Implement base Pax8Error class in src/errors/pax8-error.ts
-- [ ] T007 [P] Implement Pax8AuthenticationError extending Pax8Error in src/errors/auth-error.ts
-- [ ] T008 [P] Implement exponential backoff retry logic with jitter in src/http/retry.ts
-- [ ] T009 [P] Create auth types (TokenRequest, TokenResponse, TokenErrorResponse, AccessToken) in src/auth/types.ts
+- [X] T006 Implement base Pax8Error class in src/errors/pax8-error.ts
+- [X] T007 [P] Implement Pax8AuthenticationError extending Pax8Error in src/errors/auth-error.ts
+- [X] T008 [P] Implement exponential backoff retry logic with jitter in src/http/retry.ts
+- [X] T009 [P] Create auth types (TokenRequest, TokenResponse, TokenErrorResponse, AccessToken) in src/auth/types.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
