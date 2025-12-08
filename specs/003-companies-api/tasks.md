@@ -5,15 +5,15 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Confirm toolchain and install dependencies via `package.json` (Node 22, `npm install`) at repo root
+- [X] T001 Confirm toolchain and install dependencies via `package.json` (Node 22, `npm install`) at repo root
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T002 Create company domain models and runtime validation helpers in `src/models/companies.ts`
-- [ ] T003 [P] Add cursor pagination helper utilities in `src/pagination/cursor.ts`
-- [ ] T004 [P] Prepare companies API module scaffold and exports in `src/api/index.ts` for upcoming methods
+- [X] T002 Create company domain models and runtime validation helpers in `src/models/companies.ts`
+- [X] T003 [P] Add cursor pagination helper utilities in `src/pagination/cursor.ts`
+- [X] T004 [P] Prepare companies API module scaffold and exports in `src/api/index.ts` for upcoming methods
 
 **Checkpoint**: Foundation ready — models, cursor helpers, and exports scaffolded.
 
