@@ -1,0 +1,125 @@
+openapi: 3.0.1
+info:
+  title: Pax8 Authentication API
+  description: OAuth 2.0 token endpoint for Pax8 API authentication
+  version: 1.0.0
+  
+servers:
+  - url: https://token-manager.pax8.com/oauth
+
+paths:
+  /token:
+    post:
+      operationId: createAccessToken
+      summary: Create a new Access Token
+      description: |
+        Obtain an OAuth 2.0 access token using client credentials grant.
+        The token is valid for 24 hours (86400 seconds).
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+            example:
+              client_id: "your-client-id"
+              client_secret: "your-client-secret"
+              audience: "https://api.pax8.com"
+              grant_type: "client_credentials"
+      responses:
+        '200':
+          description: Token successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+              example:
+                access_token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+                expires_in: 86400
+                token_type: "Bearer"
+        '401':
+          description: Authentication failed - invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenErrorResponse'
+              example:
+                error: "access_denied"
+                error_description: "Unauthorized"
+
+components:
+  schemas:
+    TokenRequest:
+      type: object
+      required:
+        - client_id
+        - client_secret
+        - audience
+        - grant_type
+      properties:
+        client_id:
+          type: string
+          description: OAuth client ID from Pax8 Integrations Hub
+          example: "your-client-id"
+        client_secret:
+          type: string
+          description: OAuth client secret from Pax8 Integrations Hub
+          format: password
+          example: "your-client-secret"
+        audience:
+          type: string
+          description: Target API audience
+          enum:
+            - "https://api.pax8.com"
+            - "api://p8p.client"
+            - "api://provisioning"
+            - "api://usage"
+          example: "https://api.pax8.com"
+        grant_type:
+          type: string
+          description: OAuth grant type
+          enum:
+            - "client_credentials"
+          example: "client_credentials"
+    
+    TokenResponse:
+      type: object
+      required:
+        - access_token
+        - expires_in
+        - token_type
+      properties:
+        access_token:
+          type: string
+          description: The Bearer token to use in Authorization header
+          example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expires_in:
+          type: integer
+          description: Token lifetime in seconds (always 86400)
+          enum:
+            - 86400
+          example: 86400
+        token_type:
+          type: string
+          description: Token type (always Bearer)
+          enum:
+            - "Bearer"
+          example: "Bearer"
+    
+    TokenErrorResponse:
+      type: object
+      required:
+        - error
+        - error_description
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "access_denied"
+        error_description:
+          type: string
+          description: Human-readable error message
+          example: "Unauthorized"
