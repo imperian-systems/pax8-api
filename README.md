@@ -392,55 +392,134 @@ const newAdmin = await client.contacts.create('comp-123', {
 
 ### Products
 
-Access the Pax8 product catalog.
+Browse and query the Pax8 product catalog. This API uses **page-based pagination** (default size: 10, max: 200).
 
 ```typescript
-// List products with optional filters
-client.products.list(options?: ListProductsOptions): Promise<Page<Product>>
+// List products with default pagination
+const result = await client.products.list();
+console.log(result.content);           // Product[]
+console.log(result.page.size);         // 10
+console.log(result.page.totalElements); // Total products
+console.log(result.page.totalPages);   // Total pages
+console.log(result.page.number);       // Current page (0-indexed)
+
+// Filter products by vendor
+const msProducts = await client.products.list({
+  vendorName: 'Microsoft',
+  size: 25,
+  sort: 'name'
+});
+
+// Search products
+const searchResults = await client.products.list({
+  search: 'Office 365',
+  size: 50
+});
 
 // Get a specific product by ID
-client.products.get(id: string): Promise<Product>
+const product = await client.products.get('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+console.log(product.name, product.vendorName);
+console.log(product.description);
 
 // Get provisioning details for a product
-client.products.getProvisioningDetails(id: string): Promise<ProvisioningDetails>
+const provisioning = await client.products.getProvisioningDetails('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+for (const field of provisioning.content) {
+  console.log(`${field.label} (${field.valueType}): ${field.description}`);
+}
 
 // Get product dependencies
-client.products.getDependencies(id: string): Promise<ProductDependency[]>
+const deps = await client.products.getDependencies('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+if (deps.productDependencies) {
+  for (const dep of deps.productDependencies) {
+    console.log(`Requires: ${dep.name}`);
+  }
+}
 
-// Get pricing information for a product
-client.products.getPricing(id: string, options?: PricingOptions): Promise<Pricing>
+// Get pricing information
+const pricing = await client.products.getPricing('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+for (const price of pricing.content) {
+  console.log(`${price.billingTerm}: $${price.rates[0].partnerBuyRate}`);
+}
+
+// Get company-specific pricing
+const companyPricing = await client.products.getPricing(
+  'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+  { companyId: 'f9e8d7c6-b5a4-3210-fedc-ba9876543210' }
+);
 ```
 
-#### List Options
+#### Types
 
 ```typescript
 interface ListProductsOptions {
-  page?: number;
-  size?: number;
-  sort?: string;
-  vendorName?: string;     // Filter by vendor
-  availability?: string;   // Filter by availability status
+  page?: number;            // Optional: 0-indexed page number (default 0)
+  size?: number;            // Optional: page size (default 10, max 200)
+  sort?: 'name' | 'vendor'; // Optional: sort field
+  vendorName?: string;      // Optional: filter by vendor name
+  search?: string;          // Optional: search across name, vendor, SKU, ID
+}
+
+interface Product {
+  id: string;
+  name: string;
+  vendorName: string;
+  shortDescription?: string;
+  sku?: string;
+  vendorSku?: string;
+  altVendorSku?: string;    // Deprecated: Microsoft legacy SKU
+  requiresCommitment?: boolean;
+}
+
+interface ProductDetail extends Product {
+  description?: string;     // Long product description
+}
+
+interface ProvisioningDetail {
+  label: string;
+  key: string;
+  description?: string;
+  valueType: 'Input' | 'Single-Value' | 'Multi-Value';
+  possibleValues?: string[];
+}
+
+interface Dependencies {
+  commitmentDependencies?: Commitment[];
+  productDependencies?: ProductDependency[];
+}
+
+interface Pricing {
+  productId: string;
+  productName: string;
+  billingTerm: 'Monthly' | 'Annual' | '2-Year' | '3-Year' | 'One-Time' | 'Trial' | 'Activation';
+  commitmentTerm?: string;
+  commitmentTermInMonths?: number;
+  type: 'Flat' | 'Volume' | 'Tiered' | 'Mark-Up';
+  unitOfMeasurement?: string;
+  rates: Rate[];
+}
+
+interface Rate {
+  partnerBuyRate: number;
+  suggestedRetailPrice: number;
+  startQuantityRange?: number;
+  endQuantityRange?: number;
+  chargeType: 'Per Unit' | 'Flat Rate';
+}
+
+interface ProductListResponse {
+  content: Product[];
+  page: {
+    size: number;           // Page size used
+    totalElements: number;  // Total products across all pages
+    totalPages: number;     // Total pages
+    number: number;         // Current page (0-indexed)
+  };
 }
 ```
 
-#### Example
+#### Dynamic Data Warning
 
-```typescript
-// List Microsoft products
-const products = await client.products.list({ 
-  vendorName: 'Microsoft',
-  size: 100
-});
-
-// Get product details
-const product = await client.products.get('product-id');
-console.log(`${product.name} - ${product.vendorName}`);
-
-// Get pricing for a product
-const pricing = await client.products.getPricing('product-id', {
-  companyId: 'company-id'
-});
-```
+⚠️ **Important**: Provisioning details, dependencies, and pricing are dynamic and can change frequently based on vendor updates. Always fetch fresh data when creating orders or subscriptions. Do not cache this information for extended periods.
 
 ### Orders
 

@@ -18,3 +18,13 @@ export {
   updateContact,
   type ContactsApiClient,
 } from './contacts';
+
+export {
+  ProductsApi,
+  getDependencies,
+  getPricing,
+  getProduct,
+  getProvisioningDetails,
+  listProducts,
+  type ProductsApiClient,
+} from './products';
