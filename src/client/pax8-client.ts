@@ -19,6 +19,21 @@ export class Pax8Client {
     return { ...this.config };
   }
 
+  /** Manually refresh the access token. Useful when autoRefresh is disabled. */
+  async refreshToken(): Promise<void> {
+    await this.tokenManager.refreshToken();
+  }
+
+  /** Returns true if a non-expired token is currently cached. */
+  isTokenValid(): boolean {
+    return this.tokenManager.isTokenValid();
+  }
+
+  /** Returns the cached token expiration timestamp (ms) or null if no token is cached. */
+  getTokenExpiresAt(): number | null {
+    return this.tokenManager.getTokenExpiresAt();
+  }
+
   /** Perform an HTTP request with automatic token acquisition. */
   async request(path: string, init: RequestInit = {}): Promise<Response> {
     const token = await this.tokenManager.ensureValidToken();

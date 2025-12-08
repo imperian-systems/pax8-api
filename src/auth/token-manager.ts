@@ -62,14 +62,33 @@ export class TokenManager {
       return currentToken;
     }
 
-    this.refreshPromise = this.doRefresh()
-      .then((token) => {
-        this.token = token;
-        return token;
-      })
-      .finally(() => {
-        this.refreshPromise = null;
-      });
+    return this.startRefresh();
+  }
+
+  public refreshToken(): Promise<AccessToken> {
+    return this.startRefresh();
+  }
+
+  public isTokenValid(): boolean {
+    const currentToken = this.token;
+    return Boolean(currentToken && !this.isExpired(currentToken));
+  }
+
+  public getTokenExpiresAt(): number | null {
+    return this.token?.expiresAt ?? null;
+  }
+
+  private startRefresh(): Promise<AccessToken> {
+    if (!this.refreshPromise) {
+      this.refreshPromise = this.doRefresh()
+        .then((token) => {
+          this.token = token;
+          return token;
+        })
+        .finally(() => {
+          this.refreshPromise = null;
+        });
+    }
 
     return this.refreshPromise;
   }

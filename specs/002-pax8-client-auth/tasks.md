@@ -104,9 +104,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T025 [US4] Implement public refreshToken() method in Pax8Client in src/client/pax8-client.ts
-- [ ] T026 [US4] Implement isTokenValid() and getTokenExpiresAt() helper methods in src/auth/token-manager.ts
-- [ ] T027 [US4] Expose token status methods on Pax8Client for debugging/advanced use in src/client/pax8-client.ts
+- [X] T025 [US4] Implement public refreshToken() method in Pax8Client in src/client/pax8-client.ts
+- [X] T026 [US4] Implement isTokenValid() and getTokenExpiresAt() helper methods in src/auth/token-manager.ts
+- [X] T027 [US4] Expose token status methods on Pax8Client for debugging/advanced use in src/client/pax8-client.ts
 
 **Checkpoint**: Developers have full control over token lifecycle when needed.
 
