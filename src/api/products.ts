@@ -1,3 +1,4 @@
+import { handleErrorResponse, validatePage, validateSize, validateNonEmptyString } from '../http/api-utils.js';
 import {
   ProductDetail,
   ProductListResponse,
@@ -156,27 +157,7 @@ export class ProductsApi {
   }
 }
 
-const handleErrorResponse = async (response: Response): Promise<never> => {
-  const contentType = response.headers.get('content-type');
-  let errorData: unknown;
 
-  if (contentType?.includes('application/json')) {
-    try {
-      errorData = await response.json();
-    } catch {
-      errorData = { code: 'unknown_error', message: response.statusText || 'Unknown error' };
-    }
-  } else {
-    errorData = { code: 'unknown_error', message: response.statusText || 'Unknown error' };
-  }
-
-  const errorMessage =
-    typeof errorData === 'object' && errorData !== null && 'message' in errorData && typeof errorData.message === 'string'
-      ? errorData.message
-      : response.statusText || 'Unknown error';
-
-  throw new Error(errorMessage);
-};
 
 /**
  * List products from the Pax8 catalog with page-based pagination.
@@ -189,26 +170,9 @@ export const listProducts = async (
   client: ProductsApiClient,
   options?: ListProductsOptions,
 ): Promise<ProductListResponse> => {
-  // Validate and normalize page parameter
-  let page = 0;
-  if (options?.page !== undefined) {
-    if (typeof options.page !== 'number' || !Number.isInteger(options.page) || options.page < 0) {
-      throw new TypeError('page must be a non-negative integer');
-    }
-    page = options.page;
-  }
-
-  // Validate and normalize size parameter
-  let size = DEFAULT_PAGE_SIZE;
-  if (options?.size !== undefined) {
-    if (typeof options.size !== 'number' || !Number.isInteger(options.size)) {
-      throw new TypeError('size must be an integer');
-    }
-    if (options.size < MIN_PAGE_SIZE || options.size > MAX_PAGE_SIZE) {
-      throw new TypeError(`size must be between ${MIN_PAGE_SIZE} and ${MAX_PAGE_SIZE}`);
-    }
-    size = options.size;
-  }
+  // Validate and normalize pagination parameters
+  const page = validatePage(options?.page);
+  const size = validateSize(options?.size, DEFAULT_PAGE_SIZE, MIN_PAGE_SIZE, MAX_PAGE_SIZE);
 
   // Validate sort parameter
   if (options?.sort !== undefined) {
@@ -253,9 +217,7 @@ export const listProducts = async (
  * @returns Promise resolving to the product details
  */
 export const getProduct = async (client: ProductsApiClient, productId: string): Promise<ProductDetail> => {
-  if (!productId || typeof productId !== 'string' || productId.trim().length === 0) {
-    throw new TypeError('productId is required and must be a non-empty string');
-  }
+  validateNonEmptyString(productId, 'productId');
 
   const path = `/products/${encodeURIComponent(productId)}`;
   const response = await client.request(path, { method: 'GET' });
@@ -279,9 +241,7 @@ export const getProvisioningDetails = async (
   client: ProductsApiClient,
   productId: string,
 ): Promise<ProvisioningDetailsResponse> => {
-  if (!productId || typeof productId !== 'string' || productId.trim().length === 0) {
-    throw new TypeError('productId is required and must be a non-empty string');
-  }
+  validateNonEmptyString(productId, 'productId');
 
   const path = `/products/${encodeURIComponent(productId)}/provisioning-details`;
   const response = await client.request(path, { method: 'GET' });
@@ -302,9 +262,7 @@ export const getProvisioningDetails = async (
  * @returns Promise resolving to product dependency information
  */
 export const getDependencies = async (client: ProductsApiClient, productId: string): Promise<Dependencies> => {
-  if (!productId || typeof productId !== 'string' || productId.trim().length === 0) {
-    throw new TypeError('productId is required and must be a non-empty string');
-  }
+  validateNonEmptyString(productId, 'productId');
 
   const path = `/products/${encodeURIComponent(productId)}/dependencies`;
   const response = await client.request(path, { method: 'GET' });
@@ -330,9 +288,7 @@ export const getPricing = async (
   productId: string,
   options?: PricingOptions,
 ): Promise<PricingResponse> => {
-  if (!productId || typeof productId !== 'string' || productId.trim().length === 0) {
-    throw new TypeError('productId is required and must be a non-empty string');
-  }
+  validateNonEmptyString(productId, 'productId');
 
   // Build query parameters
   const searchParams = new URLSearchParams();
