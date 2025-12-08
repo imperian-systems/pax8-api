@@ -2,13 +2,22 @@ import { TokenManager } from '../auth/token-manager';
 import { Pax8ClientConfig, ResolvedPax8ClientConfig, validateConfig } from './config';
 
 /**
- * Main entry point for interacting with the Pax8 API. Handles configuration and authentication lifecycle.
+ * Main entry point for interacting with the Pax8 API.
+ *
+ * Handles configuration validation, token acquisition/refresh, and HTTP request
+ * execution with automatic Authorization headers.
  */
 export class Pax8Client {
   private readonly config: ResolvedPax8ClientConfig;
 
   private readonly tokenManager: TokenManager;
 
+  /**
+   * Create a new client instance.
+   *
+   * @param config User-supplied configuration; required values are validated and defaults applied.
+   * @throws TypeError when required fields are missing or invalid.
+   */
   constructor(config: Pax8ClientConfig) {
     this.config = validateConfig(config);
     this.tokenManager = new TokenManager(this.config);
@@ -24,17 +33,31 @@ export class Pax8Client {
     await this.tokenManager.refreshToken();
   }
 
-  /** Returns true if a non-expired token is currently cached. */
+  /**
+   * Check whether a non-expired token is cached.
+   *
+   * @returns true if a token exists and is still valid; false otherwise.
+   */
   isTokenValid(): boolean {
     return this.tokenManager.isTokenValid();
   }
 
-  /** Returns the cached token expiration timestamp (ms) or null if no token is cached. */
+  /**
+   * Get the cached token expiration timestamp.
+   *
+   * @returns Epoch milliseconds when the token expires, or null when no token is cached.
+   */
   getTokenExpiresAt(): number | null {
     return this.tokenManager.getTokenExpiresAt();
   }
 
-  /** Perform an HTTP request with automatic token acquisition. */
+  /**
+   * Perform an HTTP request with automatic token acquisition.
+   *
+   * @param path Relative path (e.g., "/companies") or absolute URL to request.
+   * @param init Fetch init options. Authorization header is set if not provided.
+   * @returns A fetch Response instance for the requested resource.
+   */
   async request(path: string, init: RequestInit = {}): Promise<Response> {
     const token = await this.tokenManager.ensureValidToken();
 

@@ -1,3 +1,4 @@
+/** User-supplied configuration for constructing a Pax8 client instance. */
 export interface Pax8ClientConfig {
   /** OAuth client ID from Pax8 Integrations Hub. */
   clientId: string;
@@ -19,6 +20,7 @@ export interface Pax8ClientConfig {
   autoRefresh?: boolean;
 }
 
+/** Fully resolved configuration with defaults applied. */
 export type ResolvedPax8ClientConfig = Pax8ClientConfig &
   Required<
     Pick<
@@ -27,6 +29,7 @@ export type ResolvedPax8ClientConfig = Pax8ClientConfig &
     >
   >;
 
+/** Default values used when optional configuration fields are omitted. */
 export const defaultPax8ClientConfig: Omit<ResolvedPax8ClientConfig, 'clientId' | 'clientSecret'> = {
   baseUrl: 'https://api.pax8.com/v1',
   tokenUrl: 'https://token-manager.pax8.com/oauth/token',
@@ -46,6 +49,12 @@ const isPositiveInteger = (value: unknown): value is number =>
 const isNonNegativeInteger = (value: unknown): value is number =>
   typeof value === 'number' && Number.isInteger(value) && value >= 0;
 
+/**
+ * Validate user-supplied configuration and apply defaults.
+ *
+ * @throws TypeError when required fields are missing or invalid.
+ * @returns A new configuration object with defaults and trimmed string fields.
+ */
 export const validateConfig = (config: Pax8ClientConfig): ResolvedPax8ClientConfig => {
   if (!isNonEmptyString(config.clientId)) {
     throw new TypeError('clientId is required and must be a non-empty string');

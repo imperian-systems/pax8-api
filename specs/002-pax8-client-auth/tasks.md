@@ -116,10 +116,10 @@
 
 **Purpose**: Public exports, documentation, and final validation
 
-- [ ] T028 [P] Create public API exports in src/index.ts (Pax8Client, errors, types)
-- [ ] T029 [P] Add comprehensive JSDoc comments to all public APIs
-- [ ] T030 Validate implementation against quickstart.md examples
-- [ ] T031 [P] Create README example code snippet for package documentation
+- [X] T028 [P] Create public API exports in src/index.ts (Pax8Client, errors, types)
+- [X] T029 [P] Add comprehensive JSDoc comments to all public APIs
+- [X] T030 Validate implementation against quickstart.md examples
+- [X] T031 [P] Create README example code snippet for package documentation
 
 ---
 
