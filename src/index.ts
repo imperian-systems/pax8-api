@@ -56,6 +56,48 @@ export {
   isPaginationMetadata,
 } from './models/companies';
 
+// Contacts API
+export {
+  ContactsApi,
+  createContact,
+  deleteContact,
+  getContact,
+  listContacts,
+  updateContact,
+  type ContactsApiClient,
+} from './api';
+
+// Contact models and types
+export type {
+  Contact,
+  ContactListResponse,
+  ContactType,
+  ContactTypeEnum,
+  CreateContactRequest,
+  ListContactsParams,
+  PageMetadata,
+  UpdateContactRequest,
+} from './models/contacts';
+
+export {
+  CONTACT_TYPES,
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE,
+  MIN_PAGE_SIZE,
+  assertContact,
+  assertContactListResponse,
+  assertCreateContactRequest,
+  assertPageMetadata,
+  assertUpdateContactRequest,
+  isContact,
+  isContactListResponse,
+  isContactType,
+  isContactTypeEnum,
+  isCreateContactRequest,
+  isPageMetadata,
+  isUpdateContactRequest,
+} from './models/contacts';
+
 // Pagination utilities
 export type { CursorParams, NormalizedCursorParams } from './pagination/cursor';
 export { appendCursorParams, hasMorePages, normalizeCursorParams, normalizeLimit } from './pagination/cursor';
