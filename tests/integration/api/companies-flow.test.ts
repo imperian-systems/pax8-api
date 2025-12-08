@@ -18,21 +18,28 @@ describe('Companies API Integration Tests', () => {
     };
   });
 
+  const makeCompany = (id: string, nameSuffix = ''): Company => ({
+    id,
+    name: `Company ${nameSuffix || id}`,
+    address: {},
+    phone: '+1-555-0000',
+    website: 'https://example.com',
+    billOnBehalfOfEnabled: true,
+    selfServiceAllowed: true,
+    orderApprovalRequired: false,
+    status: 'Active',
+    updatedDate: '2024-01-01T00:00:00Z',
+  });
+
   describe('User Story 1: List Companies with Pagination', () => {
     it('should retrieve first page with default pagination', async () => {
       const mockResponse: CompanyListResponse = {
-        items: Array.from({ length: 50 }, (_, i) => ({
-          companyId: `comp-${i + 1}`,
-          legalName: `Company ${i + 1} LLC`,
-          displayName: `Company ${i + 1}`,
-          status: 'active' as const,
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z',
-        })),
+        content: Array.from({ length: 10 }, (_, i) => makeCompany(`comp-${i + 1}`)),
         page: {
-          nextPageToken: 'next-page-token-1',
-          limit: 50,
-          hasMore: true,
+          size: 10,
+          totalElements: 20,
+          totalPages: 2,
+          number: 0,
         },
       };
 
@@ -45,44 +52,31 @@ describe('Companies API Integration Tests', () => {
 
       const result = await listCompanies(mockClient);
 
-      expect(result.items).toHaveLength(50);
-      expect(result.page.limit).toBe(50);
-      expect(result.page.nextPageToken).toBe('next-page-token-1');
-      expect(result.page.hasMore).toBe(true);
+      expect(result.content).toHaveLength(10);
+      expect(result.page.size).toBe(10);
+      expect(result.page.totalPages).toBe(2);
     });
 
     it('should paginate through multiple pages', async () => {
       // First page
       const firstPage: CompanyListResponse = {
-        items: Array.from({ length: 50 }, (_, i) => ({
-          companyId: `comp-page1-${i + 1}`,
-          legalName: `Page 1 Company ${i + 1}`,
-          displayName: `Page 1 Company ${i + 1}`,
-          status: 'active' as const,
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z',
-        })),
+        content: Array.from({ length: 10 }, (_, i) => makeCompany(`comp-page1-${i + 1}`)),
         page: {
-          nextPageToken: 'page-2-token',
-          limit: 50,
-          hasMore: true,
+          size: 10,
+          totalElements: 20,
+          totalPages: 2,
+          number: 0,
         },
       };
 
       // Second page
       const secondPage: CompanyListResponse = {
-        items: Array.from({ length: 30 }, (_, i) => ({
-          companyId: `comp-page2-${i + 1}`,
-          legalName: `Page 2 Company ${i + 1}`,
-          displayName: `Page 2 Company ${i + 1}`,
-          status: 'active' as const,
-          createdAt: '2024-01-02T00:00:00Z',
-          updatedAt: '2024-01-02T00:00:00Z',
-        })),
+        content: Array.from({ length: 10 }, (_, i) => makeCompany(`comp-page2-${i + 1}`)),
         page: {
-          prevPageToken: 'page-1-token',
-          limit: 50,
-          hasMore: false,
+          size: 10,
+          totalElements: 20,
+          totalPages: 2,
+          number: 1,
         },
       };
 
@@ -102,28 +96,19 @@ describe('Companies API Integration Tests', () => {
 
       // Fetch first page
       const page1 = await listCompanies(mockClient);
-      expect(page1.items).toHaveLength(50);
-      expect(page1.page.hasMore).toBe(true);
+      expect(page1.content).toHaveLength(10);
+      expect(page1.page.number).toBe(0);
 
-      // Fetch second page using token
-      const page2 = await listCompanies(mockClient, { pageToken: page1.page.nextPageToken });
-      expect(page2.items).toHaveLength(30);
-      expect(page2.page.hasMore).toBe(false);
+      // Fetch second page using page number
+      const page2 = await listCompanies(mockClient, { page: 1, size: 10 });
+      expect(page2.content).toHaveLength(10);
+      expect(page2.page.number).toBe(1);
     });
 
     it('should filter companies by status', async () => {
       const mockResponse: CompanyListResponse = {
-        items: [
-          {
-            companyId: 'comp-active-1',
-            legalName: 'Active Company',
-            displayName: 'Active Company',
-            status: 'active',
-            createdAt: '2024-01-01T00:00:00Z',
-            updatedAt: '2024-01-01T00:00:00Z',
-          },
-        ],
-        page: { limit: 50 },
+        content: [makeCompany('comp-active-1', 'Active Company')],
+        page: { size: 10, totalElements: 1, totalPages: 1, number: 0 },
       };
 
       vi.mocked(mockClient.request).mockResolvedValueOnce(
@@ -133,26 +118,16 @@ describe('Companies API Integration Tests', () => {
         })
       );
 
-      const result = await listCompanies(mockClient, { status: 'active' });
+      const result = await listCompanies(mockClient, { status: 'Active' });
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0].status).toBe('active');
+      expect(result.content).toHaveLength(1);
+      expect(result.content[0].status).toBe('Active');
     });
 
     it('should filter companies by region', async () => {
       const mockResponse: CompanyListResponse = {
-        items: [
-          {
-            companyId: 'comp-us-1',
-            legalName: 'US Company',
-            displayName: 'US Company',
-            status: 'active',
-            region: 'US',
-            createdAt: '2024-01-01T00:00:00Z',
-            updatedAt: '2024-01-01T00:00:00Z',
-          },
-        ],
-        page: { limit: 50 },
+        content: [makeCompany('comp-us-1', 'US Company')],
+        page: { size: 10, totalElements: 1, totalPages: 1, number: 0 },
       };
 
       vi.mocked(mockClient.request).mockResolvedValueOnce(
@@ -162,26 +137,16 @@ describe('Companies API Integration Tests', () => {
         })
       );
 
-      const result = await listCompanies(mockClient, { region: 'US' });
+      const result = await listCompanies(mockClient, { country: 'US' });
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0].region).toBe('US');
+      expect(result.content).toHaveLength(1);
     });
 
     it('should filter companies by updatedSince', async () => {
       const cutoffDate = '2024-06-01T00:00:00Z';
       const mockResponse: CompanyListResponse = {
-        items: [
-          {
-            companyId: 'comp-recent-1',
-            legalName: 'Recently Updated Company',
-            displayName: 'Recently Updated',
-            status: 'active',
-            createdAt: '2024-01-01T00:00:00Z',
-            updatedAt: '2024-06-15T00:00:00Z',
-          },
-        ],
-        page: { limit: 50 },
+        content: [makeCompany('comp-recent-1', 'Recently Updated')],
+        page: { size: 10, totalElements: 1, totalPages: 1, number: 0 },
       };
 
       vi.mocked(mockClient.request).mockResolvedValueOnce(
@@ -191,33 +156,16 @@ describe('Companies API Integration Tests', () => {
         })
       );
 
-      const result = await listCompanies(mockClient, { updatedSince: cutoffDate });
+      const result = await listCompanies(mockClient, { page: 0, size: 10 });
 
-      expect(result.items).toHaveLength(1);
-      expect(new Date(result.items[0].updatedAt).getTime()).toBeGreaterThan(new Date(cutoffDate).getTime());
+      expect(result.content).toHaveLength(1);
+      expect(new Date(result.content[0].updatedDate).getTime()).toBeGreaterThan(new Date(cutoffDate).getTime());
     });
 
     it('should sort companies by name', async () => {
       const mockResponse: CompanyListResponse = {
-        items: [
-          {
-            companyId: 'comp-a',
-            legalName: 'Alpha Company',
-            displayName: 'Alpha',
-            status: 'active',
-            createdAt: '2024-01-01T00:00:00Z',
-            updatedAt: '2024-01-01T00:00:00Z',
-          },
-          {
-            companyId: 'comp-b',
-            legalName: 'Beta Company',
-            displayName: 'Beta',
-            status: 'active',
-            createdAt: '2024-01-01T00:00:00Z',
-            updatedAt: '2024-01-01T00:00:00Z',
-          },
-        ],
-        page: { limit: 50 },
+        content: [makeCompany('comp-a', 'Alpha'), makeCompany('comp-b', 'Beta')],
+        page: { size: 10, totalElements: 2, totalPages: 1, number: 0 },
       };
 
       vi.mocked(mockClient.request).mockResolvedValueOnce(
@@ -229,8 +177,8 @@ describe('Companies API Integration Tests', () => {
 
       const result = await listCompanies(mockClient, { sort: 'name' });
 
-      expect(result.items[0].displayName).toBe('Alpha');
-      expect(result.items[1].displayName).toBe('Beta');
+      expect(result.content[0].name).toContain('Alpha');
+      expect(result.content[1].name).toContain('Beta');
     });
 
     it('should handle unauthorized error gracefully', async () => {
@@ -246,10 +194,12 @@ describe('Companies API Integration Tests', () => {
 
     it('should handle empty results with correct pagination metadata', async () => {
       const mockResponse: CompanyListResponse = {
-        items: [],
+        content: [],
         page: {
-          limit: 50,
-          hasMore: false,
+          size: 10,
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
         },
       };
 
@@ -262,31 +212,31 @@ describe('Companies API Integration Tests', () => {
 
       const result = await listCompanies(mockClient);
 
-      expect(result.items).toHaveLength(0);
-      expect(result.page.hasMore).toBe(false);
+      expect(result.content).toHaveLength(0);
+      expect(result.page.totalElements).toBe(0);
     });
   });
 
   describe('User Story 2: View Company Detail', () => {
     it('should retrieve company by ID with all attributes', async () => {
       const mockCompany: Company = {
-        companyId: 'comp-detail-123',
-        legalName: 'Detailed Company LLC',
-        displayName: 'Detailed Company',
-        status: 'active',
-        primaryDomains: ['detailed.com', 'detail.net'],
-        primaryContact: {
-          name: 'Jane Smith',
-          email: 'jane@detailed.com',
+        id: 'comp-detail-123',
+        name: 'Detailed Company LLC',
+        address: {
+          addressLine1: '123 Main St',
+          city: 'Denver',
+          stateOrProvince: 'CO',
+          postalCode: '80202',
+          country: 'US',
         },
-        region: 'EU',
-        externalReferences: [
-          { system: 'crm', id: 'crm-456' },
-          { system: 'erp', id: 'erp-789' },
-        ],
-        tags: ['partner', 'enterprise', 'verified'],
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-06-15T10:30:00Z',
+        phone: '+1-555-1111',
+        website: 'https://detailed.example.com',
+        externalId: 'crm-456',
+        billOnBehalfOfEnabled: true,
+        selfServiceAllowed: true,
+        orderApprovalRequired: false,
+        status: 'Active',
+        updatedDate: '2024-06-15T10:30:00Z',
       };
 
       vi.mocked(mockClient.request).mockResolvedValueOnce(
@@ -299,10 +249,8 @@ describe('Companies API Integration Tests', () => {
       const result = await getCompany(mockClient, 'comp-detail-123');
 
       expect(result).toEqual(mockCompany);
-      expect(result.primaryDomains).toHaveLength(2);
-      expect(result.primaryContact?.name).toBe('Jane Smith');
-      expect(result.externalReferences).toHaveLength(2);
-      expect(result.tags).toHaveLength(3);
+      expect(result.address.city).toBe('Denver');
+      expect(result.externalId).toBe('crm-456');
     });
 
     it('should handle not-found error for invalid company ID', async () => {
@@ -318,12 +266,16 @@ describe('Companies API Integration Tests', () => {
 
     it('should handle company with minimal optional fields', async () => {
       const mockCompany: Company = {
-        companyId: 'comp-minimal',
-        legalName: 'Minimal Company',
-        displayName: 'Minimal',
-        status: 'prospect',
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
+        id: 'comp-minimal',
+        name: 'Minimal Company',
+        address: {},
+        phone: '+1-555-2222',
+        website: 'https://minimal.example.com',
+        billOnBehalfOfEnabled: false,
+        selfServiceAllowed: false,
+        orderApprovalRequired: false,
+        status: 'Inactive',
+        updatedDate: '2024-01-01T00:00:00Z',
       };
 
       vi.mocked(mockClient.request).mockResolvedValueOnce(
@@ -335,35 +287,16 @@ describe('Companies API Integration Tests', () => {
 
       const result = await getCompany(mockClient, 'comp-minimal');
 
-      expect(result.companyId).toBe('comp-minimal');
-      expect(result.primaryDomains).toBeUndefined();
-      expect(result.primaryContact).toBeUndefined();
-      expect(result.region).toBeUndefined();
+      expect(result.id).toBe('comp-minimal');
+      expect(result.address).toBeDefined();
     });
   });
 
   describe('User Story 3: Search Companies', () => {
     it('should search by partial company name with relevance ordering', async () => {
       const mockResponse: CompanyListResponse = {
-        items: [
-          {
-            companyId: 'comp-acme-1',
-            legalName: 'Acme Corporation',
-            displayName: 'Acme Corp',
-            status: 'active',
-            createdAt: '2024-01-01T00:00:00Z',
-            updatedAt: '2024-01-01T00:00:00Z',
-          },
-          {
-            companyId: 'comp-acme-2',
-            legalName: 'Acme Industries LLC',
-            displayName: 'Acme Industries',
-            status: 'active',
-            createdAt: '2024-01-02T00:00:00Z',
-            updatedAt: '2024-01-02T00:00:00Z',
-          },
-        ],
-        page: { limit: 50 },
+        content: [makeCompany('comp-acme-1', 'Acme Corp'), makeCompany('comp-acme-2', 'Acme Industries')],
+        page: { size: 10, totalElements: 2, totalPages: 1, number: 0 },
       };
 
       vi.mocked(mockClient.request).mockResolvedValueOnce(
@@ -375,25 +308,15 @@ describe('Companies API Integration Tests', () => {
 
       const result = await searchCompanies(mockClient, { query: 'Acme' });
 
-      expect(result.items).toHaveLength(2);
-      expect(result.items[0].displayName).toContain('Acme');
-      expect(result.items[1].displayName).toContain('Acme');
+      expect(result.content).toHaveLength(2);
+      expect(result.content[0].name).toContain('Acme');
+      expect(result.content[1].name).toContain('Acme');
     });
 
     it('should search by domain', async () => {
       const mockResponse: CompanyListResponse = {
-        items: [
-          {
-            companyId: 'comp-example',
-            legalName: 'Example Company',
-            displayName: 'Example',
-            status: 'active',
-            primaryDomains: ['example.com'],
-            createdAt: '2024-01-01T00:00:00Z',
-            updatedAt: '2024-01-01T00:00:00Z',
-          },
-        ],
-        page: { limit: 50 },
+        content: [makeCompany('comp-example', 'Example Company')],
+        page: { size: 10, totalElements: 1, totalPages: 1, number: 0 },
       };
 
       vi.mocked(mockClient.request).mockResolvedValueOnce(
@@ -405,16 +328,17 @@ describe('Companies API Integration Tests', () => {
 
       const result = await searchCompanies(mockClient, { query: 'example.com' });
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0].primaryDomains).toContain('example.com');
+      expect(result.content).toHaveLength(1);
     });
 
     it('should return empty results when no matches found', async () => {
       const mockResponse: CompanyListResponse = {
-        items: [],
+        content: [],
         page: {
-          limit: 50,
-          hasMore: false,
+          size: 10,
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
         },
       };
 
@@ -427,24 +351,18 @@ describe('Companies API Integration Tests', () => {
 
       const result = await searchCompanies(mockClient, { query: 'nonexistent-xyz-company' });
 
-      expect(result.items).toHaveLength(0);
-      expect(result.page.hasMore).toBe(false);
+      expect(result.content).toHaveLength(0);
+      expect(result.page.totalElements).toBe(0);
     });
 
     it('should handle search pagination', async () => {
       const firstPage: CompanyListResponse = {
-        items: Array.from({ length: 25 }, (_, i) => ({
-          companyId: `search-result-${i + 1}`,
-          legalName: `Result ${i + 1}`,
-          displayName: `Result ${i + 1}`,
-          status: 'active' as const,
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z',
-        })),
+        content: Array.from({ length: 10 }, (_, i) => makeCompany(`search-result-${i + 1}`)),
         page: {
-          nextPageToken: 'search-page-2',
-          limit: 25,
-          hasMore: true,
+          size: 10,
+          totalElements: 20,
+          totalPages: 2,
+          number: 0,
         },
       };
 
@@ -455,11 +373,10 @@ describe('Companies API Integration Tests', () => {
         })
       );
 
-      const result = await searchCompanies(mockClient, { query: 'test', limit: 25 });
+      const result = await searchCompanies(mockClient, { query: 'test', size: 10, page: 0 });
 
-      expect(result.items).toHaveLength(25);
-      expect(result.page.nextPageToken).toBe('search-page-2');
-      expect(result.page.hasMore).toBe(true);
+      expect(result.content).toHaveLength(10);
+      expect(result.page.totalPages).toBe(2);
     });
 
     it('should reject query that is too short', async () => {

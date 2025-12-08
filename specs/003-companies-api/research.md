@@ -11,46 +11,43 @@
 **Rationale**: Matches spec FR-001..FR-004 and Pax8 Partner endpoints. Keeps scope read-only.
 
 **Endpoints**:
-- `GET /companies` — list with cursor pagination, filtering, sorting.
+- `GET /companies` — list with page/size pagination, filtering, sorting.
 - `GET /companies/{companyId}` — detail lookup by ID.
-- `GET /companies/search` — relevance-ranked search by name/domain with cursor pagination.
+- `GET /companies/search` — relevance-ranked search by name/domain with page/size pagination.
 
 **Alternatives Considered**:
 - Folding search into list with a `q` param: rejected to keep list filters orthogonal and allow distinct relevance ordering and limits.
 
 ## Pagination
 
-### Decision: Cursor-based pagination (default 50, max 100)
+### Decision: Page-based pagination (default size 10, max 200)
 
-**Rationale**: Avoids page drift for frequently changing company datasets; aligns with spec clarification and reduces client bookkeeping.
+**Rationale**: Matches Pax8 documentation (`page`, `size`) and exposes total counts (`totalElements`, `totalPages`).
 
 **Request shape**:
-- `limit` (default 50, max 100)
-- `pageToken` (optional cursor for next/previous)
+- `page` (0-based, default 0)
+- `size` (default 10, max 200)
+- `sort` (e.g., `name,desc`)
 
 **Response metadata**:
-- `nextPageToken`, optional `prevPageToken`
-- `limit`
-- `hasMore` flag when total is unavailable
+- `page` object with `size`, `totalElements`, `totalPages`, `number`
 
 **Alternatives Considered**:
-- Page-number pagination (default 10, max 200 per constitution): rejected because upstream uses cursors and page numbers would require translation and risk stale results.
+- Cursor pagination: rejected because Pax8 findcompanies uses page/size and returns totals.
 
 ## Filtering and Sorting (List)
 
-### Decision: Support `status`, `region`, `updatedSince`, `sort`
+### Decision: Support filters and sort aligned to Pax8
 
-**Rationale**: Common integrator needs for syncing active customers and recent changes.
+**Rationale**: Match documented query params on findcompanies.
 
 **Details**:
-- `status`: enum (e.g., `active`, `inactive`, `prospect`, `suspended`). Unknown -> 400.
-- `region`: string (market/geo code). Optional.
-- `updatedSince`: ISO 8601 timestamp; filters records updated strictly after value.
-- `sort`: `name` (asc default) or `updatedAt` (desc by default when specified).
+- Filters: `city`, `country`, `stateOrProvince`, `postalCode`, `selfServiceAllowed`, `billOnBehalfOfEnabled`, `orderApprovalRequired`, `status (Active|Inactive|Deleted)`.
+- Sort: `field,direction` where field in `name|city|country|stateOrProvince|postalCode` and direction `asc|desc` (default asc when omitted).
 
 **Validation**:
-- `limit` > 100 -> 400 validation error
-- `updatedSince` invalid format -> 400
+- `size` > 200 -> 400 validation error
+- `page` < 0 -> 400 validation error
 
 **Alternatives Considered**:
 - Including text search in list filters: rejected to keep search endpoint purpose-built for relevance ranking.
@@ -63,7 +60,7 @@
 
 **Details**:
 - `query` (required, 2-256 chars); overlong -> 400
-- `limit` (default 50, max 100), `pageToken`
+- `page`/`size` pagination (default size 10, max 200)
 - Results ordered by relevance; ties broken by name ASC
 
 **Alternatives Considered**:
@@ -71,18 +68,15 @@
 
 ## Response Shapes
 
-### Decision: Typed payloads with reusable pagination metadata
+### Decision: Typed payloads with reusable page metadata
 
-**Rationale**: Consistency across list and search; enables shared iterators.
+**Rationale**: Consistency across list and search; matches Pax8 response.
 
 **Schemas (conceptual)**:
-- `Company`: `companyId`, `legalName`, `displayName`, `status`, `primaryDomains[]`, `primaryContact { name, email }`, `region`, `createdAt`, `updatedAt`, `externalReferences[]` (key/value pairs), `tags[]`.
-- `CompanyListResponse`: `items: Company[]`, `page: { nextPageToken?, prevPageToken?, limit, hasMore? }`.
+- `Company`: `id`, `name`, `address`, `phone`, `website`, `externalId`, `billOnBehalfOfEnabled`, `selfServiceAllowed`, `orderApprovalRequired`, `status`, `updatedDate`.
+- `CompanyListResponse`: `content: Company[]`, `page: { size, totalElements, totalPages, number }`.
 - `CompanySearchResponse`: same shape as list, results ordered by relevance.
 - `Error`: `code`, `message`, optional `details` map.
-
-**Alternatives Considered**:
-- Embedding totals: upstream may not return total counts; prefer `hasMore` flag to avoid inaccurate totals.
 
 ## Error Handling
 

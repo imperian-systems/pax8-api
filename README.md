@@ -139,51 +139,47 @@ This section documents all available API resources and their methods.
 
 ### Companies
 
-Manage customer organizations served through Pax8. This API uses **cursor-based pagination** with opaque tokens (default limit: 50, max: 100).
+Manage customer organizations served through Pax8. This API uses **page-based pagination** with `page` (0-based) and `size` (default 10, max 200).
 
 ```typescript
-// List companies with cursor pagination
+// List companies with page-based pagination
 const result = await client.companies.list({
-  limit: 50,              // Optional: page size (default 50, max 100)
-  pageToken: undefined,   // Optional: cursor token for next/previous page
-  status: 'active',       // Optional: filter by status
-  region: 'US',           // Optional: filter by region
-  updatedSince: '2024-01-01T00:00:00Z', // Optional: filter by update timestamp
-  sort: 'name'            // Optional: 'name' or 'updatedAt' (default: 'name')
+  page: 0,                // Optional: page number (default 0)
+  size: 25,               // Optional: page size (default 10, max 200)
+  status: 'Active',       // Optional: filter by status
+  country: 'US',          // Optional: filter by country
+  city: 'Denver',         // Optional: filter by city
+  sort: 'name,desc'       // Optional: field,direction (default asc)
 });
 
-console.log(result.items);          // Company[]
-console.log(result.page.limit);     // 50
-console.log(result.page.nextPageToken); // Use for next page
-console.log(result.page.hasMore);   // true if more pages available
+console.log(result.content);          // Company[]
+console.log(result.page.size);        // e.g., 25
+console.log(result.page.totalPages);  // Total pages available
 
 // Paginate through results
-let pageToken = result.page.nextPageToken;
-while (pageToken) {
-  const nextPage = await client.companies.list({ pageToken });
-  console.log(nextPage.items);
-  pageToken = nextPage.page.nextPageToken;
+let pageNumber = result.page.number + 1;
+while (pageNumber < result.page.totalPages) {
+  const nextPage = await client.companies.list({ page: pageNumber, size: result.page.size });
+  console.log(nextPage.content);
+  pageNumber = nextPage.page.number + 1;
 }
 
 // Get a specific company by ID
 const company = await client.companies.get('comp-123');
-console.log(company.companyId);
-console.log(company.legalName);
-console.log(company.displayName);
-console.log(company.status);         // 'active' | 'inactive' | 'prospect' | 'suspended'
-console.log(company.primaryDomains); // string[] | undefined
-console.log(company.primaryContact); // { name?: string; email?: string } | undefined
-console.log(company.region);         // string | undefined
+console.log(company.id);
+console.log(company.name);
+console.log(company.status);         // 'Active' | 'Inactive' | 'Deleted'
+console.log(company.address);
 
 // Search companies by name or domain
 const searchResults = await client.companies.search({
   query: 'acme',         // Required: 2-256 characters
-  limit: 25,             // Optional: page size
-  pageToken: undefined   // Optional: cursor token
+  page: 0,               // Optional: page number
+  size: 25               // Optional: page size
 });
 
-for (const company of searchResults.items) {
-  console.log(`${company.displayName} - ${company.status}`);
+for (const company of searchResults.content) {
+  console.log(`${company.name} - ${company.status}`);
 }
 ```
 
@@ -191,47 +187,53 @@ for (const company of searchResults.items) {
 
 ```typescript
 interface ListCompaniesParams {
-  limit?: number;              // 1-100, default 50
-  pageToken?: string;          // Opaque cursor token
-  status?: 'active' | 'inactive' | 'prospect' | 'suspended';
-  region?: string;             // Market/geo code
-  updatedSince?: string;       // ISO 8601 timestamp
-  sort?: 'name' | 'updatedAt'; // Default: 'name'
+  page?: number;                // 0-based page number
+  size?: number;                // 1-200, default 10
+  sort?: 'name' | 'name,desc' | 'city' | 'city,desc' | 'country' | 'country,desc' | 'stateOrProvince' | 'stateOrProvince,desc' | 'postalCode' | 'postalCode,desc';
+  city?: string;
+  country?: string;
+  stateOrProvince?: string;
+  postalCode?: string;
+  selfServiceAllowed?: boolean;
+  billOnBehalfOfEnabled?: boolean;
+  orderApprovalRequired?: boolean;
+  status?: 'Active' | 'Inactive' | 'Deleted';
 }
 
 interface SearchCompaniesParams {
   query: string;          // 2-256 characters
-  limit?: number;         // 1-100, default 50
-  pageToken?: string;     // Opaque cursor token
+  page?: number;          // 0-based page number
+  size?: number;          // 1-200, default 10
 }
 
 interface Company {
-  companyId: string;
-  legalName: string;
-  displayName: string;
-  status: 'active' | 'inactive' | 'prospect' | 'suspended';
-  primaryDomains?: string[];
-  primaryContact?: {
-    name?: string;
-    email?: string;
+  id: string;
+  name: string;
+  address: {
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    stateOrProvince?: string;
+    postalCode?: string;
+    country?: string;
   };
-  region?: string;
-  externalReferences?: Array<{
-    system: string;
-    id: string;
-  }>;
-  tags?: string[];
-  createdAt: string;      // ISO 8601
-  updatedAt: string;      // ISO 8601
+  phone: string;
+  website: string;
+  externalId?: string;
+  billOnBehalfOfEnabled: boolean;
+  selfServiceAllowed: boolean;
+  orderApprovalRequired: boolean;
+  status: 'Active' | 'Inactive' | 'Deleted';
+  updatedDate: string;      // ISO 8601
 }
 
 interface CompanyListResponse {
-  items: Company[];
+  content: Company[];
   page: {
-    nextPageToken?: string;
-    prevPageToken?: string;
-    limit: number;
-    hasMore?: boolean;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    number: number;
   };
 }
 ```

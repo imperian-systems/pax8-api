@@ -8,8 +8,8 @@
 ## Clarifications
 
 ### Session 2025-12-08
-- Q: Which pagination model should the companies API use? → A: Cursor-based pagination with an opaque nextPageToken plus limit (no page numbers).
-- Q: What default and maximum page sizes should the API enforce? → A: Default limit 50; maximum limit 100.
+- Q: Which pagination model should the companies API use? → A: Page/offset pagination using `page` (0-based) and `size`.
+- Q: What default and maximum page sizes should the API enforce? → A: Default size 10; maximum size 200.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -90,12 +90,12 @@ Integrator searches by name or domain to quickly locate a company before taking 
 
 ### Functional Requirements
 
-- **FR-001**: Provide an authenticated companies list endpoint using cursor-based pagination (request `limit`, response `nextPageToken`/`prevPageToken` where applicable) with a default sort applied when none is provided and a default `limit` of 50 (maximum 100).
+- **FR-001**: Provide an authenticated companies list endpoint using page-based pagination (request `page`, `size`) with a default sort applied when none is provided and a default `size` of 10 (maximum 200).
 - **FR-002**: Support filtering the list by key attributes (e.g., status, market/region, updated-since timestamp) and sorting by name and last-updated timestamp.
 - **FR-003**: Provide a company detail endpoint that returns identifiers, legal name, display name, status, primary domain(s), primary contact (name, email), created/updated timestamps, and external references.
 - **FR-004**: Provide a search endpoint that accepts partial name or domain queries, returns relevance-ordered results, and enforces a maximum result window per request.
 - **FR-005**: Return consistent error structures for unauthorized, not-found, validation errors, and rate limiting, including machine-readable codes and human-readable messages.
-- **FR-006**: Include pagination metadata in list and search responses: `nextPageToken` (and `prevPageToken` where applicable), `limit` (default 50, max 100), and a flag indicating more results when total is not available.
+- **FR-006**: Include pagination metadata in list and search responses: `page { size, totalElements, totalPages, number }` using the requested `page`/`size` values.
 - **FR-007**: Enforce request validation limits (e.g., maximum page size, maximum query length) and return validation errors without processing the request.
 
 #### Acceptance Coverage

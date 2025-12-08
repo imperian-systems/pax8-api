@@ -12,48 +12,46 @@ Represents a Pax8 company/tenant record.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| companyId | string | Yes | Unique company identifier |
-| legalName | string | Yes | Legal name of the company |
-| displayName | string | Yes | Display/friendly name |
-| status | `"active" | "inactive" | "prospect" | "suspended"` | Yes | Current lifecycle status |
-| primaryDomains | string[] | Optional | Primary domain(s) associated with the company |
-| primaryContact | { name: string; email: string } | Optional | Primary contact person |
-| region | string | Optional | Market/geo code (e.g., `US`, `EU`) |
-| externalReferences | Array<{ system: string; id: string }> | Optional | External system references |
-| tags | string[] | Optional | Labels for search/filtering |
-| createdAt | string (date-time) | Yes | ISO 8601 creation timestamp |
-| updatedAt | string (date-time) | Yes | ISO 8601 last update timestamp |
+| id | string (uuid) | Yes | Unique company identifier |
+| name | string | Yes | Company name |
+| address | object | Yes | Postal address fields (e.g., city, stateOrProvince, postalCode, country) |
+| phone | string | Yes | Primary phone number |
+| website | string | Yes | Company website URL |
+| externalId | string | No | External reference ID |
+| billOnBehalfOfEnabled | boolean | Yes | Whether Pax8 bills on behalf of the partner |
+| selfServiceAllowed | boolean | Yes | Whether self-service is enabled |
+| orderApprovalRequired | boolean | Yes | Whether self-service orders require approval |
+| status | `"Active" | "Inactive" | "Deleted"` | Yes | Current lifecycle status |
+| updatedDate | string (date-time) | Yes | ISO 8601 last update timestamp |
 
 **Validation Rules**:
-- `companyId`, `legalName`, `displayName`, `status`, `createdAt`, `updatedAt` are required.
+- `id`, `name`, `phone`, `website`, `status`, and `updatedDate` are required.
 - `status` must be one of the enumerated values.
-- `primaryContact.email` must be a valid email if provided.
-- `primaryDomains` entries must be valid domain strings.
 
-### PaginationMetadata
+### PageMetadata
 
 Shared pagination envelope for list and search responses.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| nextPageToken | string | No | Cursor for the next page |
-| prevPageToken | string | No | Cursor for the previous page (when supported) |
-| limit | number | Yes | Page size applied to this response |
-| hasMore | boolean | No | Indicates additional pages when totals unavailable |
+| size | number | Yes | Page size applied to this response |
+| totalElements | number | Yes | Total number of elements available |
+| totalPages | number | Yes | Total number of pages available |
+| number | number | Yes | Current page number (0-based) |
 
 **Validation Rules**:
-- `limit` must be between 1 and 100 (inclusive).
+- `size` must be between 1 and 200 (inclusive); `number` must be >= 0.
 
 ### CompanyListResponse
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| items | Company[] | Yes | Companies on this page |
-| page | PaginationMetadata | Yes | Pagination metadata |
+| content | Company[] | Yes | Companies on this page |
+| page | PageMetadata | Yes | Pagination metadata |
 
 ### CompanySearchResponse
 
-Same shape as `CompanyListResponse`; items ordered by relevance.
+Same shape as `CompanyListResponse`; content ordered by relevance.
 
 ### ErrorResponse
 
@@ -67,42 +65,49 @@ Same shape as `CompanyListResponse`; items ordered by relevance.
 
 ```
 CompanyListResponse          CompanySearchResponse
-┌───────────────┐            ┌───────────────┐
-│ items: Company│            │ items: Company│
-│ page: PageMeta│            │ page: PageMeta│
-└──────┬────────┘            └──────┬────────┘
-       │                             │
-       ▼                             ▼
-   PaginationMetadata           PaginationMetadata
+┌─────────────────┐          ┌─────────────────┐
+│ content: Company│          │ content: Company│
+│ page: PageMeta  │          │ page: PageMeta  │
+└────────┬────────┘          └────────┬────────┘
+     │                             │
+     ▼                             ▼
+   PageMetadata                  PageMetadata
 ```
 
 ## Type Definitions Summary
 
 ```typescript
 interface Company {
-  companyId: string;
-  legalName: string;
-  displayName: string;
-  status: 'active' | 'inactive' | 'prospect' | 'suspended';
-  primaryDomains?: string[];
-  primaryContact?: { name?: string; email?: string };
-  region?: string;
-  externalReferences?: Array<{ system: string; id: string }>;
-  tags?: string[];
-  createdAt: string; // ISO 8601
-  updatedAt: string; // ISO 8601
+  id: string;
+  name: string;
+  address: {
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    stateOrProvince?: string;
+    postalCode?: string;
+    country?: string;
+  };
+  phone: string;
+  website: string;
+  externalId?: string;
+  billOnBehalfOfEnabled: boolean;
+  selfServiceAllowed: boolean;
+  orderApprovalRequired: boolean;
+  status: 'Active' | 'Inactive' | 'Deleted';
+  updatedDate: string; // ISO 8601
 }
 
-interface PaginationMetadata {
-  nextPageToken?: string;
-  prevPageToken?: string;
-  limit: number; // 1-100
-  hasMore?: boolean;
+interface PageMetadata {
+  size: number; // 1-200
+  totalElements: number;
+  totalPages: number;
+  number: number; // 0-based page number
 }
 
 interface CompanyListResponse {
-  items: Company[];
-  page: PaginationMetadata;
+  content: Company[];
+  page: PageMetadata;
 }
 
 type CompanySearchResponse = CompanyListResponse;

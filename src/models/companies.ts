@@ -1,44 +1,43 @@
-export const COMPANY_STATUSES = ['active', 'inactive', 'prospect', 'suspended'] as const;
+export const COMPANY_STATUSES = ['Active', 'Inactive', 'Deleted'] as const;
 export type CompanyStatus = (typeof COMPANY_STATUSES)[number];
 
-export const MIN_PAGE_LIMIT = 1;
-export const DEFAULT_PAGE_LIMIT = 50;
-export const MAX_PAGE_LIMIT = 100;
+export const MIN_PAGE_SIZE = 1;
+export const DEFAULT_PAGE_SIZE = 10;
+export const MAX_PAGE_SIZE = 200;
 
-export interface ExternalReference {
-  system: string;
-  id: string;
-}
-
-export interface PrimaryContact {
-  name?: string;
-  email?: string;
+export interface CompanyAddress {
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  stateOrProvince?: string;
+  postalCode?: string;
+  country?: string;
 }
 
 export interface Company {
-  companyId: string;
-  legalName: string;
-  displayName: string;
+  id: string;
+  name: string;
+  address: CompanyAddress;
+  phone: string;
+  website: string;
+  externalId?: string;
+  billOnBehalfOfEnabled: boolean;
+  selfServiceAllowed: boolean;
+  orderApprovalRequired: boolean;
   status: CompanyStatus;
-  primaryDomains?: string[];
-  primaryContact?: PrimaryContact;
-  region?: string;
-  externalReferences?: ExternalReference[];
-  tags?: string[];
-  createdAt: string;
-  updatedAt: string;
+  updatedDate: string;
 }
 
-export interface PaginationMetadata {
-  nextPageToken?: string;
-  prevPageToken?: string;
-  limit: number;
-  hasMore?: boolean;
+export interface PageMetadata {
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  number: number;
 }
 
 export interface CompanyListResponse {
-  items: Company[];
-  page: PaginationMetadata;
+  content: Company[];
+  page: PageMetadata;
 }
 
 export type CompanySearchResponse = CompanyListResponse;
@@ -57,43 +56,24 @@ const isNumber = (value: unknown): value is number => typeof value === 'number' 
 const isInteger = (value: unknown): value is number => isNumber(value) && Number.isInteger(value);
 
 const isIsoDateString = (value: unknown): value is string => isString(value) && !Number.isNaN(Date.parse(value));
-const isEmail = (value: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-const isDomain = (value: string): boolean => /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(value);
 
 const isOptionalString = (value: unknown): value is string | undefined => value === undefined || isString(value);
-const isOptionalStringArray = (value: unknown, itemCheck: (item: string) => boolean = () => true): value is string[] | undefined =>
-  value === undefined || (Array.isArray(value) && value.every((item) => isString(item) && itemCheck(item)));
 
-const isPrimaryContact = (value: unknown): value is PrimaryContact => {
-  if (value === undefined) {
-    return true;
-  }
-
+const isCompanyAddress = (value: unknown): value is CompanyAddress => {
   if (!isObject(value)) {
     return false;
   }
 
-  const { name, email } = value;
+  const { addressLine1, addressLine2, city, stateOrProvince, postalCode, country } = value;
 
-  if (!isOptionalString(name)) {
-    return false;
-  }
-
-  if (email !== undefined) {
-    if (!isString(email) || !isEmail(email)) {
-      return false;
-    }
-  }
-
-  return true;
-};
-
-const isExternalReference = (value: unknown): value is ExternalReference => {
-  if (!isObject(value)) {
-    return false;
-  }
-
-  return isNonEmptyString(value.system) && isNonEmptyString(value.id);
+  return (
+    isOptionalString(addressLine1) &&
+    isOptionalString(addressLine2) &&
+    isOptionalString(city) &&
+    isOptionalString(stateOrProvince) &&
+    isOptionalString(postalCode) &&
+    isOptionalString(country)
+  );
 };
 
 export const isCompanyStatus = (value: unknown): value is CompanyStatus =>
@@ -105,20 +85,36 @@ export const isCompany = (value: unknown): value is Company => {
   }
 
   const {
-    companyId,
-    legalName,
-    displayName,
+    id,
+    name,
+    address,
+    phone,
+    website,
+    externalId,
+    billOnBehalfOfEnabled,
+    selfServiceAllowed,
+    orderApprovalRequired,
     status,
-    primaryDomains,
-    primaryContact,
-    region,
-    externalReferences,
-    tags,
-    createdAt,
-    updatedAt,
+    updatedDate,
   } = value;
 
-  if (!isNonEmptyString(companyId) || !isNonEmptyString(legalName) || !isNonEmptyString(displayName)) {
+  if (!isNonEmptyString(id) || !isNonEmptyString(name)) {
+    return false;
+  }
+
+  if (!isCompanyAddress(address)) {
+    return false;
+  }
+
+  if (!isNonEmptyString(phone) || !isNonEmptyString(website)) {
+    return false;
+  }
+
+  if (externalId !== undefined && !isNonEmptyString(externalId)) {
+    return false;
+  }
+
+  if (!isBoolean(billOnBehalfOfEnabled) || !isBoolean(selfServiceAllowed) || !isBoolean(orderApprovalRequired)) {
     return false;
   }
 
@@ -126,55 +122,33 @@ export const isCompany = (value: unknown): value is Company => {
     return false;
   }
 
-  if (!isIsoDateString(createdAt) || !isIsoDateString(updatedAt)) {
-    return false;
-  }
-
-  if (!isPrimaryContact(primaryContact)) {
-    return false;
-  }
-
-  if (!isOptionalString(region)) {
-    return false;
-  }
-
-  if (!isOptionalStringArray(primaryDomains, isDomain)) {
-    return false;
-  }
-
-  if (externalReferences !== undefined) {
-    if (!Array.isArray(externalReferences) || !externalReferences.every(isExternalReference)) {
-      return false;
-    }
-  }
-
-  if (!isOptionalStringArray(tags)) {
+  if (!isIsoDateString(updatedDate)) {
     return false;
   }
 
   return true;
 };
 
-export const isPaginationMetadata = (value: unknown): value is PaginationMetadata => {
+export const isPageMetadata = (value: unknown): value is PageMetadata => {
   if (!isObject(value)) {
     return false;
   }
 
-  const { nextPageToken, prevPageToken, limit, hasMore } = value;
+  const { size, totalElements, totalPages, number } = value;
 
-  if (!isInteger(limit) || limit < MIN_PAGE_LIMIT || limit > MAX_PAGE_LIMIT) {
+  if (!isInteger(size) || size < MIN_PAGE_SIZE || size > MAX_PAGE_SIZE) {
     return false;
   }
 
-  if (nextPageToken !== undefined && !isString(nextPageToken)) {
+  if (!isInteger(totalElements) || totalElements < 0) {
     return false;
   }
 
-  if (prevPageToken !== undefined && !isString(prevPageToken)) {
+  if (!isInteger(totalPages) || totalPages < 0) {
     return false;
   }
 
-  if (hasMore !== undefined && !isBoolean(hasMore)) {
+  if (!isInteger(number) || number < 0) {
     return false;
   }
 
@@ -186,13 +160,13 @@ export const isCompanyListResponse = (value: unknown): value is CompanyListRespo
     return false;
   }
 
-  const { items, page } = value;
+  const { content, page } = value;
 
-  if (!Array.isArray(items) || !items.every(isCompany)) {
+  if (!Array.isArray(content) || !content.every(isCompany)) {
     return false;
   }
 
-  if (!isPaginationMetadata(page)) {
+  if (!isPageMetadata(page)) {
     return false;
   }
 
@@ -228,11 +202,11 @@ export const assertCompany: (value: unknown, message?: string) => asserts value 
   }
 };
 
-export const assertPaginationMetadata: (value: unknown, message?: string) => asserts value is PaginationMetadata = (
+export const assertPageMetadata: (value: unknown, message?: string) => asserts value is PageMetadata = (
   value: unknown,
   message = 'Invalid pagination metadata',
-): asserts value is PaginationMetadata => {
-  if (!isPaginationMetadata(value)) {
+): asserts value is PageMetadata => {
+  if (!isPageMetadata(value)) {
     throw new TypeError(message);
   }
 };

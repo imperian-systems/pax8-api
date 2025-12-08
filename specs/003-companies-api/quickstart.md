@@ -5,11 +5,11 @@
 
 ## Overview
 
-Adds Companies API methods to the Pax8 client: list, search, and detail retrieval with cursor-based pagination (default 50, max 100) and consistent typed responses.
+Adds Companies API methods to the Pax8 client: list, search, and detail retrieval with page-based pagination (default size 10, max 200) and consistent typed responses.
 
 ## Basic Usage
 
-### 1) List companies (cursor-based)
+### 1) List companies (page-based)
 
 ```typescript
 import { Pax8Client } from '@imperian-systems/pax8-api';
@@ -19,14 +19,16 @@ const client = new Pax8Client({
   clientSecret: 'your-client-secret'
 });
 
-const { items, page } = await client.companies.list({
-  limit: 50,
-  status: 'active',
-  updatedSince: '2025-11-01T00:00:00Z'
+const { content, page } = await client.companies.list({
+  page: 0,
+  size: 25,
+  status: 'Active',
+  country: 'US',
+  sort: 'name,desc'
 });
 
-if (page.nextPageToken) {
-  const next = await client.companies.list({ pageToken: page.nextPageToken });
+if (page.number + 1 < page.totalPages) {
+  const next = await client.companies.list({ page: page.number + 1, size: page.size });
   // iterate...
 }
 ```
@@ -35,7 +37,7 @@ if (page.nextPageToken) {
 
 ```typescript
 const company = await client.companies.get('comp-12345');
-console.log(company.displayName, company.primaryDomains);
+console.log(company.name, company.status);
 ```
 
 ### 3) Search companies by name/domain
@@ -43,11 +45,12 @@ console.log(company.displayName, company.primaryDomains);
 ```typescript
 const results = await client.companies.search({
   query: 'acme',
-  limit: 25
+  page: 0,
+  size: 25
 });
 
-for (const company of results.items) {
-  console.log(company.displayName, company.status);
+for (const company of results.content) {
+  console.log(company.name, company.status);
 }
 ```
 
@@ -67,34 +70,6 @@ try {
 }
 ```
 
-## Pagination Helpers
-
-Use cursor-based pagination to traverse large result sets:
-
-```typescript
-import { hasMorePages } from '@imperian-systems/pax8-api';
-
-// Manual pagination
-let pageToken: string | undefined;
-const allCompanies: Company[] = [];
-
-do {
-  const result = await client.companies.list({ 
-    limit: 50,
-    pageToken 
-  });
-  
-  allCompanies.push(...result.items);
-  pageToken = result.page.nextPageToken;
-} while (pageToken);
-
-// Check if more pages exist
-const result = await client.companies.list();
-if (hasMorePages(result.page)) {
-  console.log('More pages available');
-}
-```
-
 ## Standalone Functions
 
 The Companies API methods are also available as standalone functions if you prefer:
@@ -105,9 +80,9 @@ import { Pax8Client, listCompanies, getCompany, searchCompanies } from '@imperia
 const client = new Pax8Client({ clientId, clientSecret });
 
 // Using standalone functions
-const result = await listCompanies(client, { limit: 50 });
+const result = await listCompanies(client, { page: 0, size: 25 });
 const company = await getCompany(client, 'comp-123');
-const searchResults = await searchCompanies(client, { query: 'acme' });
+const searchResults = await searchCompanies(client, { query: 'acme', size: 25 });
 ```
 
 ## Files Created
@@ -118,7 +93,6 @@ src/
 │   ├── companies.ts            # CompaniesApi class and standalone functions
 │   └── index.ts                # API exports aggregator
 ├── models/companies.ts         # Company types, validation, and runtime guards
-├── pagination/cursor.ts        # Cursor helpers for pagination
 └── index.ts                    # Public API exports
 
 tests/

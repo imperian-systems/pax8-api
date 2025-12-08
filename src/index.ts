@@ -29,31 +29,30 @@ export {
 // Company models and types
 export type {
   Company,
+  CompanyAddress,
   CompanyListResponse,
   CompanySearchResponse,
   CompanyStatus,
   ErrorResponse,
-  ExternalReference,
-  PaginationMetadata,
-  PrimaryContact,
+  PageMetadata as CompaniesPageMetadata,
 } from './models/companies';
 
 export {
   COMPANY_STATUSES,
-  DEFAULT_PAGE_LIMIT,
-  MAX_PAGE_LIMIT,
-  MIN_PAGE_LIMIT,
+  DEFAULT_PAGE_SIZE as COMPANIES_DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE as COMPANIES_MAX_PAGE_SIZE,
+  MIN_PAGE_SIZE as COMPANIES_MIN_PAGE_SIZE,
   assertCompany,
   assertCompanyListResponse,
   assertCompanySearchResponse,
   assertErrorResponse,
-  assertPaginationMetadata,
+  assertPageMetadata as assertCompaniesPageMetadata,
   isCompany,
   isCompanyListResponse,
   isCompanySearchResponse,
   isCompanyStatus,
   isErrorResponse,
-  isPaginationMetadata,
+  isPageMetadata as isCompaniesPageMetadata,
 } from './models/companies';
 
 // Contacts API
@@ -139,6 +138,4 @@ export {
   PROVISIONING_VALUE_TYPES,
 } from './models/products';
 
-// Pagination utilities
-export type { CursorParams, NormalizedCursorParams } from './pagination/cursor';
-export { appendCursorParams, hasMorePages, normalizeCursorParams, normalizeLimit } from './pagination/cursor';
+// Pagination utilities (none exported for companies; contacts use page/size helpers internally)

@@ -21,28 +21,26 @@ describe('Companies API Contract Tests', () => {
   describe('GET /companies - listCompanies', () => {
     it('should return 200 with valid company list response structure', async () => {
       const mockResponse: CompanyListResponse = {
-        items: [
+        content: [
           {
-            companyId: 'comp-123',
-            legalName: 'Test Company LLC',
-            displayName: 'Test Company',
-            status: 'active',
-            primaryDomains: ['test.com'],
-            primaryContact: {
-              name: 'John Doe',
-              email: 'john@test.com',
-            },
-            region: 'US',
-            externalReferences: [{ system: 'crm', id: 'ext-123' }],
-            tags: ['partner', 'premium'],
-            createdAt: '2024-01-01T00:00:00Z',
-            updatedAt: '2024-01-02T00:00:00Z',
+            id: 'comp-123',
+            name: 'Test Company LLC',
+            address: { city: 'Denver', country: 'US' },
+            phone: '+1-555-1234',
+            website: 'https://test.com',
+            externalId: 'ext-123',
+            billOnBehalfOfEnabled: true,
+            selfServiceAllowed: false,
+            orderApprovalRequired: true,
+            status: 'Active',
+            updatedDate: '2024-01-02T00:00:00Z',
           },
         ],
         page: {
-          nextPageToken: 'token-abc',
-          limit: 50,
-          hasMore: true,
+          size: 10,
+          totalElements: 1,
+          totalPages: 1,
+          number: 0,
         },
       };
 
@@ -56,21 +54,15 @@ describe('Companies API Contract Tests', () => {
       const result = await listCompanies(mockClient);
 
       expect(result).toEqual(mockResponse);
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0]).toHaveProperty('companyId');
-      expect(result.items[0]).toHaveProperty('legalName');
-      expect(result.items[0]).toHaveProperty('displayName');
-      expect(result.items[0]).toHaveProperty('status');
-      expect(result.items[0]).toHaveProperty('createdAt');
-      expect(result.items[0]).toHaveProperty('updatedAt');
-      expect(result.page).toHaveProperty('limit');
+      expect(result.content).toHaveLength(1);
+      expect(result.page.size).toBe(10);
     });
 
-    it('should return 400 for invalid limit parameter', async () => {
+    it('should return 400 for invalid size parameter', async () => {
       const mockError: ErrorResponse = {
         code: 'validation_error',
-        message: 'Limit must be between 1 and 100',
-        details: { field: 'limit', value: 200 },
+        message: 'size must be between 1 and 200',
+        details: { field: 'size', value: 500 },
       };
 
       vi.mocked(mockClient.request).mockResolvedValueOnce(
@@ -80,7 +72,7 @@ describe('Companies API Contract Tests', () => {
         })
       );
 
-      await expect(listCompanies(mockClient, { limit: 200 })).rejects.toThrow();
+      await expect(listCompanies(mockClient, { size: 500 })).rejects.toThrow();
     });
 
     it('should return 401 for unauthorized request', async () => {
@@ -101,8 +93,8 @@ describe('Companies API Contract Tests', () => {
 
     it('should handle filters (status, region, updatedSince)', async () => {
       const mockResponse: CompanyListResponse = {
-        items: [],
-        page: { limit: 50 },
+        content: [],
+        page: { size: 10, totalElements: 0, totalPages: 0, number: 0 },
       };
 
       vi.mocked(mockClient.request).mockResolvedValueOnce(
@@ -113,34 +105,12 @@ describe('Companies API Contract Tests', () => {
       );
 
       await listCompanies(mockClient, {
-        status: 'active',
-        region: 'US',
-        updatedSince: '2024-01-01T00:00:00Z',
-        sort: 'updatedAt',
-      });
-
-      expect(mockClient.request).toHaveBeenCalled();
-    });
-
-    it('should handle cursor pagination with pageToken', async () => {
-      const mockResponse: CompanyListResponse = {
-        items: [],
-        page: {
-          prevPageToken: 'prev-token',
-          limit: 25,
-        },
-      };
-
-      vi.mocked(mockClient.request).mockResolvedValueOnce(
-        new Response(JSON.stringify(mockResponse), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        })
-      );
-
-      await listCompanies(mockClient, {
-        limit: 25,
-        pageToken: 'next-token-xyz',
+        status: 'Active',
+        city: 'Denver',
+        country: 'US',
+        stateOrProvince: 'CO',
+        postalCode: '80202',
+        sort: 'name,desc',
       });
 
       expect(mockClient.request).toHaveBeenCalled();
@@ -214,18 +184,25 @@ describe('Companies API Contract Tests', () => {
   describe('GET /companies/search - searchCompanies', () => {
     it('should return 200 with valid search results structure', async () => {
       const mockResponse: CompanyListResponse = {
-        items: [
+        content: [
           {
-            companyId: 'comp-789',
-            legalName: 'Search Result Company',
-            displayName: 'Search Result',
-            status: 'active',
-            createdAt: '2024-01-01T00:00:00Z',
-            updatedAt: '2024-01-01T00:00:00Z',
+            id: 'comp-789',
+            name: 'Search Result Company',
+            address: {},
+            phone: '+1-555-0000',
+            website: 'https://example.com',
+            billOnBehalfOfEnabled: true,
+            selfServiceAllowed: true,
+            orderApprovalRequired: false,
+            status: 'Active',
+            updatedDate: '2024-01-01T00:00:00Z',
           },
         ],
         page: {
-          limit: 50,
+          size: 10,
+          totalElements: 1,
+          totalPages: 1,
+          number: 0,
         },
       };
 
@@ -239,7 +216,7 @@ describe('Companies API Contract Tests', () => {
       const result = await searchCompanies(mockClient, { query: 'Search' });
 
       expect(result).toEqual(mockResponse);
-      expect(result.items).toBeDefined();
+      expect(result.content).toBeDefined();
       expect(result.page).toBeDefined();
     });
 
@@ -294,13 +271,14 @@ describe('Companies API Contract Tests', () => {
       await expect(searchCompanies(mockClient, { query: 'test' })).rejects.toThrow();
     });
 
-    it('should handle cursor pagination in search', async () => {
+    it('should handle page-based pagination in search', async () => {
       const mockResponse: CompanyListResponse = {
-        items: [],
+        content: [],
         page: {
-          nextPageToken: 'search-next-token',
-          limit: 25,
-          hasMore: true,
+          size: 25,
+          totalElements: 50,
+          totalPages: 2,
+          number: 1,
         },
       };
 
@@ -313,8 +291,8 @@ describe('Companies API Contract Tests', () => {
 
       await searchCompanies(mockClient, {
         query: 'test',
-        limit: 25,
-        pageToken: 'current-page-token',
+        size: 25,
+        page: 1,
       });
 
       expect(mockClient.request).toHaveBeenCalled();
