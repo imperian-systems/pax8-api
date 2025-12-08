@@ -98,6 +98,47 @@ export {
   isUpdateContactRequest,
 } from './models/contacts';
 
+// Products API
+export {
+  ProductsApi,
+  getDependencies,
+  getPricing,
+  getProduct,
+  getProvisioningDetails,
+  listProducts,
+  type ProductsApiClient,
+} from './api';
+
+// Product models and types
+export type {
+  BillingTerm,
+  ChargeType,
+  Commitment,
+  Dependencies,
+  ListProductsOptions,
+  Pricing,
+  PricingOptions,
+  PricingResponse,
+  PricingType,
+  Product,
+  ProductDependency,
+  ProductDetail,
+  ProductListResponse,
+  ProductSortField,
+  ProvisioningDetail,
+  ProvisioningDetailsResponse,
+  ProvisioningValueType,
+  Rate,
+} from './models/products';
+
+export {
+  BILLING_TERMS,
+  CHARGE_TYPES,
+  PRICING_TYPES,
+  PRODUCT_SORT_FIELDS,
+  PROVISIONING_VALUE_TYPES,
+} from './models/products';
+
 // Pagination utilities
 export type { CursorParams, NormalizedCursorParams } from './pagination/cursor';
 export { appendCursorParams, hasMorePages, normalizeCursorParams, normalizeLimit } from './pagination/cursor';
