@@ -63,13 +63,13 @@
 
 ### Implementation for User Story 2
 
-- [ ] T014 [US2] Implement TokenManager class skeleton in src/auth/token-manager.ts
-- [ ] T015 [US2] Implement token acquisition (doRefresh) with fetch to token endpoint in src/auth/token-manager.ts
-- [ ] T016 [US2] Implement token storage and expiry calculation in src/auth/token-manager.ts
-- [ ] T017 [US2] Implement ensureValidToken() for lazy token acquisition in src/auth/token-manager.ts
-- [ ] T018 [US2] Add retry logic integration for failed token requests in src/auth/token-manager.ts
-- [ ] T019 [US2] Implement request() method in Pax8Client that calls ensureValidToken() in src/client/pax8-client.ts
-- [ ] T020 [US2] Handle 401 errors from token endpoint with Pax8AuthenticationError in src/auth/token-manager.ts
+- [X] T014 [US2] Implement TokenManager class skeleton in src/auth/token-manager.ts
+- [X] T015 [US2] Implement token acquisition (doRefresh) with fetch to token endpoint in src/auth/token-manager.ts
+- [X] T016 [US2] Implement token storage and expiry calculation in src/auth/token-manager.ts
+- [X] T017 [US2] Implement ensureValidToken() for lazy token acquisition in src/auth/token-manager.ts
+- [X] T018 [US2] Add retry logic integration for failed token requests in src/auth/token-manager.ts
+- [X] T019 [US2] Implement request() method in Pax8Client that calls ensureValidToken() in src/client/pax8-client.ts
+- [X] T020 [US2] Handle 401 errors from token endpoint with Pax8AuthenticationError in src/auth/token-manager.ts
 
 **Checkpoint**: Client automatically acquires token on first request. Token is stored for reuse.
 
