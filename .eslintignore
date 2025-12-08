@@ -9,3 +9,4 @@ specs/
 *.log
 *.tmp
 *.tsbuildinfo
+vitest.config.ts

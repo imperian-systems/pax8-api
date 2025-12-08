@@ -1,5 +1,5 @@
-import { TokenManager } from '../auth/token-manager';
 import { Pax8ClientConfig, ResolvedPax8ClientConfig, validateConfig } from './config';
+import { TokenManager } from '../auth/token-manager';
 
 /**
  * Main entry point for interacting with the Pax8 API.

@@ -219,13 +219,16 @@ export const isErrorResponse = (value: unknown): value is ErrorResponse => {
   return true;
 };
 
-export const assertCompany = (value: unknown, message = 'Invalid company payload'): asserts value is Company => {
+export const assertCompany: (value: unknown, message?: string) => asserts value is Company = (
+  value: unknown,
+  message = 'Invalid company payload',
+): asserts value is Company => {
   if (!isCompany(value)) {
     throw new TypeError(message);
   }
 };
 
-export const assertPaginationMetadata = (
+export const assertPaginationMetadata: (value: unknown, message?: string) => asserts value is PaginationMetadata = (
   value: unknown,
   message = 'Invalid pagination metadata',
 ): asserts value is PaginationMetadata => {
@@ -234,7 +237,7 @@ export const assertPaginationMetadata = (
   }
 };
 
-export const assertCompanyListResponse = (
+export const assertCompanyListResponse: (value: unknown, message?: string) => asserts value is CompanyListResponse = (
   value: unknown,
   message = 'Invalid company list response',
 ): asserts value is CompanyListResponse => {
@@ -243,7 +246,7 @@ export const assertCompanyListResponse = (
   }
 };
 
-export const assertCompanySearchResponse = (
+export const assertCompanySearchResponse: (value: unknown, message?: string) => asserts value is CompanySearchResponse = (
   value: unknown,
   message = 'Invalid company search response',
 ): asserts value is CompanySearchResponse => {
@@ -252,7 +255,10 @@ export const assertCompanySearchResponse = (
   }
 };
 
-export const assertErrorResponse = (value: unknown, message = 'Invalid error response'): asserts value is ErrorResponse => {
+export const assertErrorResponse: (value: unknown, message?: string) => asserts value is ErrorResponse = (
+  value: unknown,
+  message = 'Invalid error response',
+): asserts value is ErrorResponse => {
   if (!isErrorResponse(value)) {
     throw new TypeError(message);
   }
