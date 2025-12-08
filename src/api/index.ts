@@ -1,4 +1,5 @@
 export {
+  CompaniesApi,
   getCompany,
   listCompanies,
   searchCompanies,

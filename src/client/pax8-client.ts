@@ -1,5 +1,6 @@
-import { TokenManager } from '../auth/token-manager';
 import { Pax8ClientConfig, ResolvedPax8ClientConfig, validateConfig } from './config';
+import { CompaniesApi } from '../api/companies';
+import { TokenManager } from '../auth/token-manager';
 
 /**
  * Main entry point for interacting with the Pax8 API.
@@ -12,6 +13,9 @@ export class Pax8Client {
 
   private readonly tokenManager: TokenManager;
 
+  /** Companies API methods */
+  public readonly companies: CompaniesApi;
+
   /**
    * Create a new client instance.
    *
@@ -21,6 +25,7 @@ export class Pax8Client {
   constructor(config: Pax8ClientConfig) {
     this.config = validateConfig(config);
     this.tokenManager = new TokenManager(this.config);
+    this.companies = new CompaniesApi(this);
   }
 
   /** Current client configuration with defaults applied. */
