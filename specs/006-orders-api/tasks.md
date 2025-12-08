@@ -5,13 +5,13 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 [P] Confirm orders OpenAPI contract is available at `specs/006-orders-api/contracts/orders.openapi.yaml` for contract tests
+- [x] T001 [P] Confirm orders OpenAPI contract is available at `specs/006-orders-api/contracts/orders.openapi.yaml` for contract tests
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T002 [P] Create orders domain types in `src/models/orders.ts` (Order, OrderLineItem, ProvisioningDetail, CreateOrderRequest, CreateLineItem, ListOrdersOptions, OrderListResponse)
+- [x] T002 [P] Create orders domain types in `src/models/orders.ts` (Order, OrderLineItem, ProvisioningDetail, CreateOrderRequest, CreateLineItem, ListOrdersOptions, OrderListResponse)
 
 **Checkpoint**: Foundation ready for user stories
 
@@ -23,13 +23,13 @@
 **Independent Test**: Call `orders.list({ page, size, companyId })` and verify paginated content and metadata.
 
 ### Tests (write first)
-- [ ] T003 [P] [US1] Add contract test for list orders in `tests/contract/api/orders-contract.test.ts` using OpenAPI contract
-- [ ] T004 [P] [US1] Add integration test for list orders with pagination and companyId filter in `tests/integration/api/orders-flow.test.ts`
+- [x] T003 [P] [US1] Add contract test for list orders in `tests/contract/api/orders-contract.test.ts` using OpenAPI contract
+- [x] T004 [P] [US1] Add integration test for list orders with pagination and companyId filter in `tests/integration/api/orders-flow.test.ts`
 
 ### Implementation
-- [ ] T005 [P] [US1] Implement `orders.list` in `src/api/orders.ts` calling GET `/orders` with `page`, `size`, `companyId`, mapping `OrderListResponse`
-- [ ] T006 [US1] Wire Orders API into client: export from `src/api/index.ts`, instantiate in `src/client/pax8-client.ts`, expose `client.orders`
-- [ ] T007 [US1] Export orders types from `src/index.ts` (ListOrdersOptions, Order, OrderListResponse, OrderLineItem, ProvisioningDetail, CreateOrderRequest, CreateLineItem)
+- [x] T005 [P] [US1] Implement `orders.list` in `src/api/orders.ts` calling GET `/orders` with `page`, `size`, `companyId`, mapping `OrderListResponse`
+- [x] T006 [US1] Wire Orders API into client: export from `src/api/index.ts`, instantiate in `src/client/pax8-client.ts`, expose `client.orders`
+- [x] T007 [US1] Export orders types from `src/index.ts` (ListOrdersOptions, Order, OrderListResponse, OrderLineItem, ProvisioningDetail, CreateOrderRequest, CreateLineItem)
 
 **Checkpoint**: User Story 1 independently testable (list orders)
 
@@ -41,11 +41,11 @@
 **Independent Test**: Call `orders.get(orderId)` and verify returned order matches schema.
 
 ### Tests (write first)
-- [ ] T008 [P] [US2] Add contract test for get order in `tests/contract/api/orders-contract.test.ts`
-- [ ] T009 [P] [US2] Add integration test for order detail in `tests/integration/api/orders-flow.test.ts`
+- [x] T008 [P] [US2] Add contract test for get order in `tests/contract/api/orders-contract.test.ts`
+- [x] T009 [P] [US2] Add integration test for order detail in `tests/integration/api/orders-flow.test.ts`
 
 ### Implementation
-- [ ] T010 [US2] Implement `orders.get` in `src/api/orders.ts` calling GET `/orders/{orderId}` and mapping `Order`
+- [x] T010 [US2] Implement `orders.get` in `src/api/orders.ts` calling GET `/orders/{orderId}` and mapping `Order`
 
 **Checkpoint**: User Story 2 independently testable (order detail)
 
@@ -57,12 +57,12 @@
 **Independent Test**: Call `orders.create(request, { isMock? })`; verify created order returned; invalid inputs return 422.
 
 ### Tests (write first)
-- [ ] T011 [P] [US3] Add contract test for create order (happy path and required fields) in `tests/contract/api/orders-contract.test.ts`
-- [ ] T012 [P] [US3] Add integration test for create order including `commitmentTermId` requirement and mock mode in `tests/integration/api/orders-flow.test.ts`
+- [x] T011 [P] [US3] Add contract test for create order (happy path and required fields) in `tests/contract/api/orders-contract.test.ts`
+- [x] T012 [P] [US3] Add integration test for create order including `commitmentTermId` requirement and mock mode in `tests/integration/api/orders-flow.test.ts`
 
 ### Implementation
-- [ ] T013 [US3] Implement `orders.create` in `src/api/orders.ts` supporting POST `/orders` with body `CreateOrderRequest` and optional `isMock` query
-- [ ] T014 [US3] Validate request composition in client (lineItemNumber present, billingTerm provided, commitmentTermId when required) and map response `Order` in `src/api/orders.ts`
+- [x] T013 [US3] Implement `orders.create` in `src/api/orders.ts` supporting POST `/orders` with body `CreateOrderRequest` and optional `isMock` query
+- [x] T014 [US3] Validate request composition in client (lineItemNumber present, billingTerm provided, commitmentTermId when required) and map response `Order` in `src/api/orders.ts`
 
 **Checkpoint**: User Story 3 independently testable (order creation)
 
@@ -70,8 +70,8 @@
 
 ## Phase N: Polish & Cross-Cutting Concerns
 
-- [ ] T015 [P] Update orders documentation snippets in `specs/006-orders-api/quickstart.md` and ensure README Orders section matches final API signatures
-- [ ] T016 Run full test suite `npm test` and lint `npm run lint` to validate Orders additions
+- [x] T015 [P] Update orders documentation snippets in `specs/006-orders-api/quickstart.md` and ensure README Orders section matches final API signatures
+- [x] T016 Run full test suite `npm test` and lint `npm run lint` to validate Orders additions
 
 ---
 

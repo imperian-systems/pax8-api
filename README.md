@@ -525,40 +525,75 @@ interface ProductListResponse {
 
 ### Orders
 
-Manage product purchase records.
+Manage product purchase records with line items, provisioning details, and order tracking.
 
 ```typescript
-// List orders with optional filters
-client.orders.list(options?: ListOrdersOptions): Promise<Page<Order>>
+// List orders with pagination and optional companyId filter
+client.orders.list(options?: ListOrdersOptions): Promise<OrderListResponse>
 
 // Get a specific order by ID
-client.orders.get(id: string): Promise<Order>
+client.orders.get(orderId: string): Promise<Order>
 
-// Create a new order
-client.orders.create(data: CreateOrderRequest): Promise<Order>
+// Create a new order with line items
+client.orders.create(request: CreateOrderRequest, options?: { isMock?: boolean }): Promise<Order>
 ```
 
 #### Example
 
 ```typescript
-// List recent orders
-const orders = await client.orders.list({ 
+// List orders for a company
+const orders = await client.orders.list({
+  companyId: 'company-id',
   page: 0,
-  size: 20,
-  sort: 'createdDate,desc'
+  size: 20
 });
 
-// Create a new order
-const order = await client.orders.create({
+console.log(orders.content.length);
+console.log(orders.page.totalElements);
+
+// Get order details
+const order = await client.orders.get('order-id');
+console.log(order.companyId);
+console.log(order.lineItems[0]?.productId);
+
+// Create an order with billing term and provisioning details
+const created = await client.orders.create({
   companyId: 'company-id',
+  orderedBy: 'Pax8 Partner',
+  orderedByUserEmail: 'agent@example.com',
   lineItems: [
     {
       productId: 'product-id',
-      quantity: 5
+      quantity: 5,
+      billingTerm: 'Monthly',
+      lineItemNumber: 1,
+      provisioningDetails: [
+        { key: 'tenantDomain', values: ['contoso.onmicrosoft.com'] }
+      ]
     }
   ]
 });
+
+console.log(created.id);
+console.log(created.lineItems[0]?.subscriptionId); // may be null until provisioned
+
+// Validate order without creating (mock mode)
+await client.orders.create(
+  {
+    companyId: 'company-id',
+    lineItems: [
+      { productId: 'product-id', quantity: 1, billingTerm: 'Annual', lineItemNumber: 1 }
+    ]
+  },
+  { isMock: true }
+);
 ```
+
+**Notes:**
+- Pagination is page-based (`page`, `size` up to 200) and supports optional `companyId` filter
+- `billingTerm` is required per line item; include `commitmentTermId` when the product requires commitment
+- `provisioningDetails` use `values` (array) for inputs; these are write-only and may not be echoed in responses
+- `subscriptionId` on line items may be null until the order provisions subscriptions
 
 ### Subscriptions
 
