@@ -1,0 +1,286 @@
+openapi: 3.0.1
+info:
+  title: Pax8 Companies API
+  description: List, search, and retrieve companies with cursor-based pagination.
+  version: 1.0.0
+
+servers:
+  - url: https://api.pax8.com/v1
+
+security:
+  - bearerAuth: []
+
+paths:
+  /companies:
+    get:
+      operationId: listCompanies
+      summary: List companies
+      description: Returns a cursor-paginated list of companies with optional filters and sorting.
+      tags:
+        - Companies
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/PageToken'
+        - $ref: '#/components/parameters/Status'
+        - $ref: '#/components/parameters/Region'
+        - $ref: '#/components/parameters/UpdatedSince'
+        - $ref: '#/components/parameters/Sort'
+      responses:
+        '200':
+          description: Companies page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyListResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /companies/{companyId}:
+    get:
+      operationId: getCompany
+      summary: Get company by ID
+      tags:
+        - Companies
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique company identifier
+      responses:
+        '200':
+          description: Company found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /companies/search:
+    get:
+      operationId: searchCompanies
+      summary: Search companies by name or domain
+      tags:
+        - Companies
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/PageToken'
+        - $ref: '#/components/parameters/Query'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyListResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+      description: Page size (default 50, max 100)
+    PageToken:
+      name: pageToken
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Cursor token for the next/previous page
+    Status:
+      name: status
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [active, inactive, prospect, suspended]
+      description: Filter by company status
+    Region:
+      name: region
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter by market/geo region code
+    UpdatedSince:
+      name: updatedSince
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+      description: Return companies updated after this timestamp
+    Sort:
+      name: sort
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [name, updatedAt]
+        default: name
+      description: Sort by `name` (asc) or `updatedAt` (desc when specified)
+    Query:
+      name: query
+      in: query
+      required: true
+      schema:
+        type: string
+        minLength: 2
+        maxLength: 256
+      description: Partial company name or domain
+  schemas:
+    Company:
+      type: object
+      required:
+        - companyId
+        - legalName
+        - displayName
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        companyId:
+          type: string
+        legalName:
+          type: string
+        displayName:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, prospect, suspended]
+        primaryDomains:
+          type: array
+          items:
+            type: string
+        primaryContact:
+          type: object
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+              format: email
+        region:
+          type: string
+        externalReferences:
+          type: array
+          items:
+            type: object
+            properties:
+              system:
+                type: string
+              id:
+                type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    PaginationMetadata:
+      type: object
+      required:
+        - limit
+      properties:
+        nextPageToken:
+          type: string
+        prevPageToken:
+          type: string
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        hasMore:
+          type: boolean
+    CompanyListResponse:
+      type: object
+      required:
+        - items
+        - page
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Company'
+        page:
+          $ref: '#/components/schemas/PaginationMetadata'
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: validation_error
+        message:
+          type: string
+          example: "Limit must be between 1 and 100"
+        details:
+          type: object
+          additionalProperties: true
