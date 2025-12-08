@@ -19,8 +19,8 @@
 
 **Purpose**: Create README file with structure and badges
 
-- [ ] T001 Create README.md at repository root with title and badges in /README.md
-- [ ] T002 Add table of contents with anchor links in /README.md
+- [X] T001 Create README.md at repository root with title and badges in /README.md
+- [X] T002 Add table of contents with anchor links in /README.md
 
 ---
 
@@ -36,9 +36,9 @@
 
 **Independent Test**: Copy-paste installation + quick start code runs successfully
 
-- [ ] T003 [US1] Write Requirements section (Node.js 22+) in /README.md
-- [ ] T004 [US1] Write Installation section (npm/yarn/pnpm) in /README.md
-- [ ] T005 [US1] Write Quick Start section with copy-paste example in /README.md
+- [X] T003 [US1] Write Requirements section (Node.js 22+) in /README.md
+- [X] T004 [US1] Write Installation section (npm/yarn/pnpm) in /README.md
+- [X] T005 [US1] Write Quick Start section with copy-paste example in /README.md
 
 **Checkpoint**: Developer can install package and see working code example
 
@@ -50,8 +50,8 @@
 
 **Independent Test**: Developer knows where to get credentials and how to pass them
 
-- [ ] T006 [P] [US3] Write Authentication section explaining OAuth 2.0 flow in /README.md
-- [ ] T007 [US3] Write Configuration section with all options table in /README.md
+- [X] T006 [P] [US3] Write Authentication section explaining OAuth 2.0 flow in /README.md
+- [X] T007 [US3] Write Configuration section with all options table in /README.md
 
 **Checkpoint**: Developer understands credential setup and all config options
 
@@ -63,15 +63,15 @@
 
 **Independent Test**: Developer can locate method for any resource within 30 seconds
 
-- [ ] T008 [P] [US2] Write API Reference intro and Companies subsection in /README.md
-- [ ] T009 [P] [US2] Write Contacts subsection in /README.md
-- [ ] T010 [P] [US2] Write Products subsection in /README.md
-- [ ] T011 [P] [US2] Write Orders subsection in /README.md
-- [ ] T012 [P] [US2] Write Subscriptions subsection in /README.md
-- [ ] T013 [P] [US2] Write Invoices subsection in /README.md
-- [ ] T014 [P] [US2] Write Usage Summaries subsection in /README.md
-- [ ] T015 [P] [US2] Write Quotes subsection in /README.md
-- [ ] T016 [P] [US2] Write Webhooks subsection in /README.md
+- [X] T008 [P] [US2] Write API Reference intro and Companies subsection in /README.md
+- [X] T009 [P] [US2] Write Contacts subsection in /README.md
+- [X] T010 [P] [US2] Write Products subsection in /README.md
+- [X] T011 [P] [US2] Write Orders subsection in /README.md
+- [X] T012 [P] [US2] Write Subscriptions subsection in /README.md
+- [X] T013 [P] [US2] Write Invoices subsection in /README.md
+- [X] T014 [P] [US2] Write Usage Summaries subsection in /README.md
+- [X] T015 [P] [US2] Write Quotes subsection in /README.md
+- [X] T016 [P] [US2] Write Webhooks subsection in /README.md
 
 **Checkpoint**: All 9 API resource groups documented with method signatures
 
@@ -87,7 +87,7 @@
 
 **Independent Test**: Developer understands both manual and async iterator patterns
 
-- [ ] T017 [US4] Write Pagination section with manual and async iterator examples in /README.md
+- [X] T017 [US4] Write Pagination section with manual and async iterator examples in /README.md
 
 **Checkpoint**: Pagination patterns documented with working examples
 
@@ -99,8 +99,8 @@
 
 **Independent Test**: Developer can write try/catch for any error scenario
 
-- [ ] T018 [US5] Write Error Handling section with error class hierarchy in /README.md
-- [ ] T019 [US5] Add example catch blocks for each error type in /README.md
+- [X] T018 [US5] Write Error Handling section with error class hierarchy in /README.md
+- [X] T019 [US5] Add example catch blocks for each error type in /README.md
 
 **Checkpoint**: All error classes documented with handling examples
 
@@ -116,7 +116,7 @@
 
 **Independent Test**: Developer knows how to import types and use generics
 
-- [ ] T020 [US6] Write TypeScript section with type imports and examples in /README.md
+- [X] T020 [US6] Write TypeScript section with type imports and examples in /README.md
 
 **Checkpoint**: TypeScript usage patterns documented
 
@@ -126,12 +126,12 @@
 
 **Purpose**: Final touches and validation
 
-- [ ] T021 [P] Write Rate Limiting section in /README.md
-- [ ] T022 [P] Write Links section (Pax8 docs, status page) in /README.md
-- [ ] T023 [P] Write License section in /README.md
-- [ ] T024 Update table of contents to match all sections in /README.md
-- [ ] T025 Validate all code examples are syntactically correct TypeScript
-- [ ] T026 Verify all anchor links in table of contents work
+- [X] T021 [P] Write Rate Limiting section in /README.md
+- [X] T022 [P] Write Links section (Pax8 docs, status page) in /README.md
+- [X] T023 [P] Write License section in /README.md
+- [X] T024 Update table of contents to match all sections in /README.md
+- [X] T025 Validate all code examples are syntactically correct TypeScript
+- [X] T026 Verify all anchor links in table of contents work
 
 ---
 
