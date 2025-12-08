@@ -26,10 +26,10 @@ npm test && npm run lint
 TypeScript 5.x with strict mode: Follow standard conventions
 
 ## Recent Changes
+- 004-contacts-api: Added TypeScript 5.x (strict) targeting Node.js 22+ + None (zero runtime dependencies; native fetch)
 - 003-companies-api: Added TypeScript 5.x (strict) targeting Node.js 22+ + None (zero runtime dependencies; native fetch)
 - 002-pax8-client-auth: Added TypeScript 5.x with strict mode + None (zero runtime dependencies per constitution)
 
-- 001-readme-docs: Added TypeScript 5.x with strict mode + None (documentation only; documents native fetch on Node.js 22+)
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
