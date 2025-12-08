@@ -87,6 +87,10 @@
 - [ ] T022 [US3] Implement concurrent request handling with promise mutex pattern in src/auth/token-manager.ts
 - [ ] T023 [US3] Update ensureValidToken() to check autoRefresh config and expiry buffer in src/auth/token-manager.ts
 - [ ] T024 [US3] Handle token refresh failures with retry and clear error messaging in src/auth/token-manager.ts
+ - [X] T021 [US3] Implement isTokenExpiringSoon() with 5-minute buffer check in src/auth/token-manager.ts
+ - [X] T022 [US3] Implement concurrent request handling with promise mutex pattern in src/auth/token-manager.ts
+ - [X] T023 [US3] Update ensureValidToken() to check autoRefresh config and expiry buffer in src/auth/token-manager.ts
+ - [X] T024 [US3] Handle token refresh failures with retry and clear error messaging in src/auth/token-manager.ts
 
 **Checkpoint**: Long-running applications automatically get fresh tokens before expiry.
 

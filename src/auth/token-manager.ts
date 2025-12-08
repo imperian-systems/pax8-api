@@ -5,6 +5,7 @@ import { Pax8Error } from '../errors/pax8-error';
 import { withRetry } from '../http/retry';
 
 const MAX_RETRY_DELAY_MS = 30000;
+const EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 
 const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -48,25 +49,37 @@ export class TokenManager {
   }
 
   public async ensureValidToken(): Promise<AccessToken> {
-    if (this.token && !this.isExpired(this.token)) {
-      return this.token;
+    if (this.refreshPromise) {
+      return this.refreshPromise;
     }
 
-    if (!this.refreshPromise) {
-      this.refreshPromise = this.doRefresh();
+    const currentToken = this.token;
+
+    const shouldRefresh =
+      !currentToken || this.isExpired(currentToken) || (this.config.autoRefresh && this.isTokenExpiringSoon(currentToken));
+
+    if (!shouldRefresh && currentToken) {
+      return currentToken;
     }
 
-    try {
-      const token = await this.refreshPromise;
-      this.token = token;
-      return token;
-    } finally {
-      this.refreshPromise = null;
-    }
+    this.refreshPromise = this.doRefresh()
+      .then((token) => {
+        this.token = token;
+        return token;
+      })
+      .finally(() => {
+        this.refreshPromise = null;
+      });
+
+    return this.refreshPromise;
   }
 
   private isExpired(token: AccessToken): boolean {
     return token.expiresAt <= Date.now();
+  }
+
+  private isTokenExpiringSoon(token: AccessToken): boolean {
+    return token.expiresAt <= Date.now() + EXPIRY_BUFFER_MS;
   }
 
   private async doRefresh(): Promise<AccessToken> {
@@ -150,12 +163,27 @@ export class TokenManager {
       }
     };
 
-    return withRetry(execute, {
-      attempts: this.config.retryAttempts,
-      baseDelayMs: this.config.retryDelay,
-      maxDelayMs: MAX_RETRY_DELAY_MS,
-      shouldRetry: (error) => this.shouldRetryTokenRequest(error),
-    });
+    try {
+      return await withRetry(execute, {
+        attempts: this.config.retryAttempts,
+        baseDelayMs: this.config.retryDelay,
+        maxDelayMs: MAX_RETRY_DELAY_MS,
+        shouldRetry: (error) => this.shouldRetryTokenRequest(error),
+      });
+    } catch (error) {
+      if (error instanceof Pax8AuthenticationError) {
+        throw error;
+      }
+
+      const attemptNote = this.config.retryAttempts > 1 ? ` after ${this.config.retryAttempts} attempts` : '';
+      const detail = error instanceof Error && error.message ? `: ${error.message}` : '';
+
+      throw new Pax8Error(`Token refresh failed${attemptNote}${detail}`, {
+        status: (error as Pax8Error)?.status,
+        instance: '/oauth/token',
+        cause: error instanceof Error ? error : undefined,
+      });
+    }
   }
 
   private toAccessToken(response: TokenResponse): AccessToken {
