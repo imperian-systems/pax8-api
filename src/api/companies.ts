@@ -1,3 +1,4 @@
+import { handleErrorResponse, validatePage, validateSize, validateNonEmptyString } from '../http/api-utils.js';
 import {
   COMPANY_STATUSES,
   Company,
@@ -83,27 +84,7 @@ export class CompaniesApi {
 const MIN_QUERY_LENGTH = 2;
 const MAX_QUERY_LENGTH = 256;
 
-const handleErrorResponse = async (response: Response): Promise<never> => {
-  const contentType = response.headers.get('content-type');
-  let errorData: unknown;
 
-  if (contentType?.includes('application/json')) {
-    try {
-      errorData = await response.json();
-    } catch {
-      errorData = { code: 'unknown_error', message: response.statusText || 'Unknown error' };
-    }
-  } else {
-    errorData = { code: 'unknown_error', message: response.statusText || 'Unknown error' };
-  }
-
-  const errorMessage =
-    typeof errorData === 'object' && errorData !== null && 'message' in errorData && typeof errorData.message === 'string'
-      ? errorData.message
-      : response.statusText || 'Unknown error';
-
-  throw new Error(errorMessage);
-};
 
 export const listCompanies = async (
   client: CompaniesApiClient,
@@ -111,7 +92,7 @@ export const listCompanies = async (
 ): Promise<CompanyListResponse> => {
   // Validate pagination
   const page = validatePage(params.page);
-  const size = validateSize(params.size);
+  const size = validateSize(params.size, DEFAULT_PAGE_SIZE, MIN_PAGE_SIZE, MAX_PAGE_SIZE);
 
   // Validate optional parameters
   if (params.status !== undefined && !isCompanyStatus(params.status)) {
@@ -219,9 +200,7 @@ export const listCompanies = async (
 };
 
 export const getCompany = async (client: CompaniesApiClient, companyId: string): Promise<Company> => {
-  if (!companyId || typeof companyId !== 'string' || companyId.trim().length === 0) {
-    throw new TypeError('companyId is required and must be a non-empty string');
-  }
+  validateNonEmptyString(companyId, 'companyId');
 
   const path = `/companies/${encodeURIComponent(companyId)}`;
   const response = await client.request(path, { method: 'GET' });
@@ -255,7 +234,7 @@ export const searchCompanies = async (
   }
 
   const page = validatePage(params.page);
-  const size = validateSize(params.size);
+  const size = validateSize(params.size, DEFAULT_PAGE_SIZE, MIN_PAGE_SIZE, MAX_PAGE_SIZE);
 
   // Build query parameters
   const searchParams = new URLSearchParams();
@@ -280,33 +259,7 @@ const COMPANY_STATUS_VALUES = [...COMPANY_STATUSES];
 
 const SORT_FIELDS: CompaniesSortField[] = ['name', 'city', 'country', 'stateOrProvince', 'postalCode'];
 
-const validatePage = (page?: number): number => {
-  if (page === undefined) {
-    return 0;
-  }
 
-  if (typeof page !== 'number' || !Number.isInteger(page) || page < 0) {
-    throw new TypeError('page must be a non-negative integer');
-  }
-
-  return page;
-};
-
-const validateSize = (size?: number): number => {
-  if (size === undefined) {
-    return DEFAULT_PAGE_SIZE;
-  }
-
-  if (typeof size !== 'number' || !Number.isInteger(size)) {
-    throw new TypeError('size must be an integer');
-  }
-
-  if (size < MIN_PAGE_SIZE || size > MAX_PAGE_SIZE) {
-    throw new TypeError(`size must be between ${MIN_PAGE_SIZE} and ${MAX_PAGE_SIZE}`);
-  }
-
-  return size;
-};
 
 const validateSort = (sort: string): void => {
   const [field, direction] = sort.split(',');

@@ -1,9 +1,11 @@
+import { handleErrorResponse, validatePage, validateSize, validateNonEmptyString } from '../http/api-utils.js';
 import type {
   Order,
   OrderListResponse,
   ListOrdersOptions,
   CreateOrderRequest,
 } from '../models/orders.js';
+import { MIN_PAGE_SIZE, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '../models/orders.js';
 
 export interface OrdersApiClient {
   request: (path: string, init?: RequestInit) => Promise<Response>;
@@ -114,27 +116,7 @@ export class OrdersApi {
   }
 }
 
-const handleErrorResponse = async (response: Response): Promise<never> => {
-  const contentType = response.headers.get('content-type');
-  let errorData: unknown;
 
-  if (contentType?.includes('application/json')) {
-    try {
-      errorData = await response.json();
-    } catch {
-      errorData = { code: 'unknown_error', message: response.statusText || 'Unknown error' };
-    }
-  } else {
-    errorData = { code: 'unknown_error', message: response.statusText || 'Unknown error' };
-  }
-
-  const errorMessage =
-    typeof errorData === 'object' && errorData !== null && 'message' in errorData && typeof errorData.message === 'string'
-      ? errorData.message
-      : response.statusText || 'Unknown error';
-
-  throw new Error(errorMessage);
-};
 
 /**
  * List orders with page-based pagination.
@@ -144,30 +126,9 @@ const handleErrorResponse = async (response: Response): Promise<never> => {
  * @returns Promise resolving to a paginated list of orders
  */
 export const listOrders = async (client: OrdersApiClient, options?: ListOrdersOptions): Promise<OrderListResponse> => {
-  const MIN_PAGE_SIZE = 1;
-  const DEFAULT_PAGE_SIZE = 10;
-  const MAX_PAGE_SIZE = 200;
-
-  // Validate and normalize page parameter
-  let page = 0;
-  if (options?.page !== undefined) {
-    if (typeof options.page !== 'number' || !Number.isInteger(options.page) || options.page < 0) {
-      throw new TypeError('page must be a non-negative integer');
-    }
-    page = options.page;
-  }
-
-  // Validate and normalize size parameter
-  let size = DEFAULT_PAGE_SIZE;
-  if (options?.size !== undefined) {
-    if (typeof options.size !== 'number' || !Number.isInteger(options.size)) {
-      throw new TypeError('size must be an integer');
-    }
-    if (options.size < MIN_PAGE_SIZE || options.size > MAX_PAGE_SIZE) {
-      throw new TypeError(`size must be between ${MIN_PAGE_SIZE} and ${MAX_PAGE_SIZE}`);
-    }
-    size = options.size;
-  }
+  // Validate and normalize pagination parameters
+  const page = validatePage(options?.page);
+  const size = validateSize(options?.size, DEFAULT_PAGE_SIZE, MIN_PAGE_SIZE, MAX_PAGE_SIZE);
 
   // Build query parameters
   const searchParams = new URLSearchParams();
@@ -197,9 +158,7 @@ export const listOrders = async (client: OrdersApiClient, options?: ListOrdersOp
  * @returns Promise resolving to the order details
  */
 export const getOrder = async (client: OrdersApiClient, orderId: string): Promise<Order> => {
-  if (typeof orderId !== 'string' || orderId.trim().length === 0) {
-    throw new TypeError('orderId must be a non-empty string');
-  }
+  validateNonEmptyString(orderId, 'orderId');
 
   const path = `/orders/${orderId}`;
   const response = await client.request(path, { method: 'GET' });
@@ -226,9 +185,7 @@ export const createOrder = async (
   options?: { isMock?: boolean },
 ): Promise<Order> => {
   // Validate required fields
-  if (!request.companyId || typeof request.companyId !== 'string' || request.companyId.trim().length === 0) {
-    throw new TypeError('companyId is required and must be a non-empty string');
-  }
+  validateNonEmptyString(request.companyId, 'companyId');
 
   if (!Array.isArray(request.lineItems) || request.lineItems.length === 0) {
     throw new TypeError('lineItems is required and must be a non-empty array');

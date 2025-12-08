@@ -1,3 +1,4 @@
+import { handleErrorResponse, validatePage, validateSize, validateNonEmptyString } from '../http/api-utils.js';
 import {
   Contact,
   ContactListResponse,
@@ -80,27 +81,7 @@ export class ContactsApi {
   }
 }
 
-const handleErrorResponse = async (response: Response): Promise<never> => {
-  const contentType = response.headers.get('content-type');
-  let errorData: unknown;
 
-  if (contentType?.includes('application/json')) {
-    try {
-      errorData = await response.json();
-    } catch {
-      errorData = { code: 'unknown_error', message: response.statusText || 'Unknown error' };
-    }
-  } else {
-    errorData = { code: 'unknown_error', message: response.statusText || 'Unknown error' };
-  }
-
-  const errorMessage =
-    typeof errorData === 'object' && errorData !== null && 'message' in errorData && typeof errorData.message === 'string'
-      ? errorData.message
-      : response.statusText || 'Unknown error';
-
-  throw new Error(errorMessage);
-};
 
 /**
  * List contacts for a company with page-based pagination.
@@ -113,30 +94,11 @@ export const listContacts = async (
   client: ContactsApiClient,
   params: ListContactsParams,
 ): Promise<ContactListResponse> => {
-  if (!params?.companyId || typeof params.companyId !== 'string' || params.companyId.trim().length === 0) {
-    throw new TypeError('companyId is required and must be a non-empty string');
-  }
+  validateNonEmptyString(params?.companyId, 'companyId');
 
-  // Validate and normalize page parameter
-  let page = 0;
-  if (params.page !== undefined) {
-    if (typeof params.page !== 'number' || !Number.isInteger(params.page) || params.page < 0) {
-      throw new TypeError('page must be a non-negative integer');
-    }
-    page = params.page;
-  }
-
-  // Validate and normalize size parameter
-  let size = DEFAULT_PAGE_SIZE;
-  if (params.size !== undefined) {
-    if (typeof params.size !== 'number' || !Number.isInteger(params.size)) {
-      throw new TypeError('size must be an integer');
-    }
-    if (params.size < MIN_PAGE_SIZE || params.size > MAX_PAGE_SIZE) {
-      throw new TypeError(`size must be between ${MIN_PAGE_SIZE} and ${MAX_PAGE_SIZE}`);
-    }
-    size = params.size;
-  }
+  // Validate and normalize pagination parameters
+  const page = validatePage(params.page);
+  const size = validateSize(params.size, DEFAULT_PAGE_SIZE, MIN_PAGE_SIZE, MAX_PAGE_SIZE);
 
   // Build query parameters
   const searchParams = new URLSearchParams();
@@ -165,13 +127,8 @@ export const listContacts = async (
  * @returns Promise resolving to the contact details
  */
 export const getContact = async (client: ContactsApiClient, companyId: string, contactId: string): Promise<Contact> => {
-  if (!companyId || typeof companyId !== 'string' || companyId.trim().length === 0) {
-    throw new TypeError('companyId is required and must be a non-empty string');
-  }
-
-  if (!contactId || typeof contactId !== 'string' || contactId.trim().length === 0) {
-    throw new TypeError('contactId is required and must be a non-empty string');
-  }
+  validateNonEmptyString(companyId, 'companyId');
+  validateNonEmptyString(contactId, 'contactId');
 
   const path = `/companies/${encodeURIComponent(companyId)}/contacts/${encodeURIComponent(contactId)}`;
   const response = await client.request(path, { method: 'GET' });
@@ -199,9 +156,7 @@ export const createContact = async (
   companyId: string,
   request: CreateContactRequest,
 ): Promise<Contact> => {
-  if (!companyId || typeof companyId !== 'string' || companyId.trim().length === 0) {
-    throw new TypeError('companyId is required and must be a non-empty string');
-  }
+  validateNonEmptyString(companyId, 'companyId');
 
   if (!isCreateContactRequest(request)) {
     throw new TypeError('Invalid create contact request');
@@ -241,13 +196,8 @@ export const updateContact = async (
   contactId: string,
   request: UpdateContactRequest,
 ): Promise<Contact> => {
-  if (!companyId || typeof companyId !== 'string' || companyId.trim().length === 0) {
-    throw new TypeError('companyId is required and must be a non-empty string');
-  }
-
-  if (!contactId || typeof contactId !== 'string' || contactId.trim().length === 0) {
-    throw new TypeError('contactId is required and must be a non-empty string');
-  }
+  validateNonEmptyString(companyId, 'companyId');
+  validateNonEmptyString(contactId, 'contactId');
 
   if (!isUpdateContactRequest(request)) {
     throw new TypeError('Invalid update contact request');
@@ -285,13 +235,8 @@ export const deleteContact = async (
   companyId: string,
   contactId: string,
 ): Promise<void> => {
-  if (!companyId || typeof companyId !== 'string' || companyId.trim().length === 0) {
-    throw new TypeError('companyId is required and must be a non-empty string');
-  }
-
-  if (!contactId || typeof contactId !== 'string' || contactId.trim().length === 0) {
-    throw new TypeError('contactId is required and must be a non-empty string');
-  }
+  validateNonEmptyString(companyId, 'companyId');
+  validateNonEmptyString(contactId, 'contactId');
 
   const path = `/companies/${encodeURIComponent(companyId)}/contacts/${encodeURIComponent(contactId)}`;
   const response = await client.request(path, { method: 'DELETE' });
