@@ -28,3 +28,11 @@ export {
   listProducts,
   type ProductsApiClient,
 } from './products';
+
+export {
+  OrdersApi,
+  createOrder,
+  getOrder,
+  listOrders,
+  type OrdersApiClient,
+} from './orders';

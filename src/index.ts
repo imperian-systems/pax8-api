@@ -138,4 +138,38 @@ export {
   PROVISIONING_VALUE_TYPES,
 } from './models/products';
 
+// Orders API
+export {
+  OrdersApi,
+  createOrder,
+  getOrder,
+  listOrders,
+  type OrdersApiClient,
+} from './api';
+
+// Order models and types
+export type {
+  CreateLineItem,
+  CreateOrderRequest,
+  ListOrdersOptions,
+  Order,
+  OrderedBy,
+  OrderLineItem,
+  OrderListResponse,
+  ProvisioningDetail as OrderProvisioningDetail,
+} from './models/orders';
+
+export {
+  ORDERED_BY_VALUES,
+  DEFAULT_PAGE_SIZE as ORDERS_DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE as ORDERS_MAX_PAGE_SIZE,
+  MIN_PAGE_SIZE as ORDERS_MIN_PAGE_SIZE,
+  assertOrder,
+  assertOrderListResponse,
+  isOrder,
+  isOrderedBy,
+  isOrderLineItem,
+  isOrderListResponse,
+} from './models/orders';
+
 // Pagination utilities (none exported for companies; contacts use page/size helpers internally)
