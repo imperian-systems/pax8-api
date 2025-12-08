@@ -62,13 +62,14 @@ const client = new Pax8Client({
   clientSecret: 'your-client-secret'
 });
 
-// List companies
-const companies = await client.companies.list();
-console.log(companies.content);
+// List companies with cursor-based pagination
+const result = await client.companies.list({ limit: 50, status: 'active' });
+console.log(result.items);          // Company[]
+console.log(result.page.nextPageToken); // Cursor for next page
 
 // Get a specific company
-const company = await client.companies.get('company-id');
-console.log(company.name);
+const company = await client.companies.get('comp-123');
+console.log(company.displayName);
 ```
 
 ## Configuration
@@ -138,61 +139,101 @@ This section documents all available API resources and their methods.
 
 ### Companies
 
-Manage customer organizations served through Pax8.
+Manage customer organizations served through Pax8. This API uses **cursor-based pagination** with opaque tokens (default limit: 50, max: 100).
 
 ```typescript
-// List companies with optional filters
-client.companies.list(options?: ListCompaniesOptions): Promise<Page<Company>>
+// List companies with cursor pagination
+const result = await client.companies.list({
+  limit: 50,              // Optional: page size (default 50, max 100)
+  pageToken: undefined,   // Optional: cursor token for next/previous page
+  status: 'active',       // Optional: filter by status
+  region: 'US',           // Optional: filter by region
+  updatedSince: '2024-01-01T00:00:00Z', // Optional: filter by update timestamp
+  sort: 'name'            // Optional: 'name' or 'updatedAt' (default: 'name')
+});
+
+console.log(result.items);          // Company[]
+console.log(result.page.limit);     // 50
+console.log(result.page.nextPageToken); // Use for next page
+console.log(result.page.hasMore);   // true if more pages available
+
+// Paginate through results
+let pageToken = result.page.nextPageToken;
+while (pageToken) {
+  const nextPage = await client.companies.list({ pageToken });
+  console.log(nextPage.items);
+  pageToken = nextPage.page.nextPageToken;
+}
 
 // Get a specific company by ID
-client.companies.get(id: string): Promise<Company>
+const company = await client.companies.get('comp-123');
+console.log(company.companyId);
+console.log(company.legalName);
+console.log(company.displayName);
+console.log(company.status);         // 'active' | 'inactive' | 'prospect' | 'suspended'
+console.log(company.primaryDomains); // string[] | undefined
+console.log(company.primaryContact); // { name?: string; email?: string } | undefined
+console.log(company.region);         // string | undefined
 
-// Create a new company
-client.companies.create(data: CreateCompanyRequest): Promise<Company>
+// Search companies by name or domain
+const searchResults = await client.companies.search({
+  query: 'acme',         // Required: 2-256 characters
+  limit: 25,             // Optional: page size
+  pageToken: undefined   // Optional: cursor token
+});
 
-// Update an existing company
-client.companies.update(id: string, data: UpdateCompanyRequest): Promise<Company>
-```
-
-#### List Options
-
-```typescript
-interface ListCompaniesOptions {
-  page?: number;           // Page number (0-indexed, default: 0)
-  size?: number;           // Items per page (default: 10, max: 200)
-  sort?: string;           // Sort field and direction, e.g., 'name,desc'
-  city?: string;           // Filter by city
-  stateOrProvince?: string; // Filter by state or province
-  postalCode?: string;     // Filter by postal code
-  country?: string;        // Filter by country
+for (const company of searchResults.items) {
+  console.log(`${company.displayName} - ${company.status}`);
 }
 ```
 
-#### Example
+#### Types
 
 ```typescript
-// List first page of companies
-const page1 = await client.companies.list({ page: 0, size: 50 });
+interface ListCompaniesParams {
+  limit?: number;              // 1-100, default 50
+  pageToken?: string;          // Opaque cursor token
+  status?: 'active' | 'inactive' | 'prospect' | 'suspended';
+  region?: string;             // Market/geo code
+  updatedSince?: string;       // ISO 8601 timestamp
+  sort?: 'name' | 'updatedAt'; // Default: 'name'
+}
 
-// Filter by location
-const companiesInCA = await client.companies.list({ 
-  stateOrProvince: 'CA',
-  size: 100
-});
+interface SearchCompaniesParams {
+  query: string;          // 2-256 characters
+  limit?: number;         // 1-100, default 50
+  pageToken?: string;     // Opaque cursor token
+}
 
-// Create a new company
-const newCompany = await client.companies.create({
-  name: 'Acme Corporation',
-  address: {
-    street: '123 Main St',
-    city: 'San Francisco',
-    stateOrProvince: 'CA',
-    postalCode: '94105',
-    country: 'US'
-  },
-  phone: '+1-555-0100',
-  website: 'https://acme.example.com'
-});
+interface Company {
+  companyId: string;
+  legalName: string;
+  displayName: string;
+  status: 'active' | 'inactive' | 'prospect' | 'suspended';
+  primaryDomains?: string[];
+  primaryContact?: {
+    name?: string;
+    email?: string;
+  };
+  region?: string;
+  externalReferences?: Array<{
+    system: string;
+    id: string;
+  }>;
+  tags?: string[];
+  createdAt: string;      // ISO 8601
+  updatedAt: string;      // ISO 8601
+}
+
+interface CompanyListResponse {
+  items: Company[];
+  page: {
+    nextPageToken?: string;
+    prevPageToken?: string;
+    limit: number;
+    hasMore?: boolean;
+  };
+}
 ```
 
 ### Contacts
@@ -553,14 +594,59 @@ const webhooks = await client.webhooks.list();
 
 ## Pagination
 
-The Pax8 API uses page-based pagination. This package provides two ways to handle pagination:
+The Companies API uses **cursor-based pagination** with opaque tokens. Other Pax8 APIs may use page-based pagination. This section covers both patterns.
 
-### Manual Pagination
+### Cursor-Based Pagination (Companies API)
 
-Explicitly request pages using `page` and `size` parameters:
+The Companies API uses cursor-based pagination for stable iteration through large result sets:
 
 ```typescript
-// Get first page
+import { listCompanies, searchCompanies } from '@imperian-systems/pax8-api';
+
+// List companies with cursor pagination
+const firstPage = await client.companies.list({ 
+  limit: 50,           // Default 50, max 100
+  status: 'active' 
+});
+
+console.log(firstPage.items);              // Company[]
+console.log(firstPage.page.limit);         // 50
+console.log(firstPage.page.nextPageToken); // Opaque cursor token
+console.log(firstPage.page.hasMore);       // true if more results
+
+// Get next page using cursor token
+if (firstPage.page.nextPageToken) {
+  const secondPage = await client.companies.list({
+    pageToken: firstPage.page.nextPageToken,
+    limit: 50
+  });
+}
+
+// Iterate through all pages
+let allCompanies: Company[] = [];
+let pageToken: string | undefined;
+
+do {
+  const page = await client.companies.list({ 
+    limit: 100,
+    pageToken,
+    status: 'active'
+  });
+  
+  allCompanies.push(...page.items);
+  pageToken = page.page.nextPageToken;
+} while (pageToken);
+
+console.log(`Total companies: ${allCompanies.length}`);
+```
+
+### Page-Based Pagination (Other APIs)
+
+Other Pax8 APIs may use traditional page-based pagination:
+
+```typescript
+// Note: This is an example for other APIs that may be added in the future
+// The Companies API uses cursor-based pagination shown above
 const page1 = await client.companies.list({ page: 0, size: 50 });
 console.log(`Page 1: ${page1.content.length} companies`);
 console.log(`Total: ${page1.page.totalElements} companies across ${page1.page.totalPages} pages`);
@@ -620,10 +706,14 @@ if (companies.length > 0) {
 
 ### Pagination Tips
 
-- Default page size is `10`, maximum is `200`
-- For bulk operations, use larger page sizes (e.g., `100` or `200`) to minimize API calls
+- **Companies API**: Uses cursor-based pagination (default limit 50, max 100)
+  - Use `nextPageToken` to navigate forward
+  - Use `prevPageToken` when available to navigate backward
+  - Check `hasMore` flag to determine if more results exist
+- **Other APIs**: May use page-based pagination (default page size 10, max 200)
+- For bulk operations, use larger page sizes (e.g., `100`) to minimize API calls
 - The async iterator automatically handles rate limiting and retries
-- Use `sort` parameter to ensure consistent ordering across pages: `sort: 'name,asc'`
+- Use `sort` parameter to ensure consistent ordering across pages
 
 ## Error Handling
 
