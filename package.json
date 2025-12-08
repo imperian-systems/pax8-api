@@ -1,0 +1,61 @@
+{
+  "name": "@imperian-systems/pax8-api",
+  "version": "0.1.0",
+  "description": "TypeScript client for the Pax8 API with OAuth 2.0 client credentials and zero runtime dependencies.",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
+    "test": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "clean": "rimraf dist"
+  },
+  "keywords": [
+    "pax8",
+    "api",
+    "typescript",
+    "oauth2",
+    "client"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imperian-systems/pax8-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/imperian-systems/pax8-api/issues"
+  },
+  "homepage": "https://github.com/imperian-systems/pax8-api#readme",
+  "author": "Imperian Systems",
+  "packageManager": "npm@10",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "eslint-import-resolver-typescript": "^3.6.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.0",
+    "prettier": "^3.2.2",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.0",
+    "vitest": "^1.2.0"
+  }
+}

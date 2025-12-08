@@ -15,11 +15,11 @@
 
 **Purpose**: Project initialization and TypeScript configuration
 
-- [ ] T001 Initialize npm package with package.json at repository root
-- [ ] T002 [P] Configure TypeScript with tsconfig.json (strict mode, ESM/CJS dual output)
-- [ ] T003 [P] Configure Vitest for testing in vitest.config.ts
-- [ ] T004 [P] Configure ESLint and Prettier for code quality
-- [ ] T005 Create directory structure: src/client/, src/auth/, src/errors/, src/http/
+ - [X] T001 Initialize npm package with package.json at repository root
+ - [X] T002 [P] Configure TypeScript with tsconfig.json (strict mode, ESM/CJS dual output)
+ - [X] T003 [P] Configure Vitest for testing in vitest.config.ts
+ - [X] T004 [P] Configure ESLint and Prettier for code quality
+ - [X] T005 Create directory structure: src/client/, src/auth/, src/errors/, src/http/
 
 ---
 

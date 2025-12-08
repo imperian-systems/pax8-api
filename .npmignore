@@ -1,0 +1,36 @@
+# Keep built outputs (dist is included by default)
+
+# Exclude sources and internal assets
+src/
+specs/
+tests/
+coverage/
+.github/
+.vscode/
+.specify/
+
+# Node and tooling artifacts
+node_modules/
+.nyc_output/
+*.log
+*.tmp
+*.temp
+*.tsbuildinfo
+
+# Environment and secrets
+.env
+.env.*
+.env.local
+.env.*.local
+
+# Build and config files not needed in publish
+Dockerfile*
+tsconfig*.json
+vitest.config.*
+eslint.config.*
+.eslintrc*
+.prettierrc*
+.prettierignore
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
