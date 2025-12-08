@@ -46,10 +46,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Create Pax8ClientConfig interface and defaults in src/client/config.ts
-- [ ] T011 [P] [US1] Create configuration validation utility in src/client/config.ts
-- [ ] T012 [US1] Implement Pax8Client constructor with config validation in src/client/pax8-client.ts
-- [ ] T013 [US1] Add JSDoc comments to Pax8Client class and config types
+ - [X] T010 [P] [US1] Create Pax8ClientConfig interface and defaults in src/client/config.ts
+ - [X] T011 [P] [US1] Create configuration validation utility in src/client/config.ts
+ - [X] T012 [US1] Implement Pax8Client constructor with config validation in src/client/pax8-client.ts
+ - [X] T013 [US1] Add JSDoc comments to Pax8Client class and config types
 
 **Checkpoint**: Client can be instantiated with credentials and optional config. No network calls yet.
 
