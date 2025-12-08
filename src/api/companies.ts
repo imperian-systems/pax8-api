@@ -6,6 +6,7 @@ import {
   assertCompanyListResponse,
   assertCompany,
   isCompanyStatus,
+  assertCompanySearchResponse,
 } from '../models/companies';
 import { CursorParams, normalizeCursorParams } from '../pagination/cursor';
 
@@ -24,6 +25,44 @@ export interface ListCompaniesParams extends CursorParams {
 
 export interface SearchCompaniesParams extends CursorParams {
   query: string;
+}
+
+/**
+ * Companies API namespace for the Pax8Client.
+ * Provides methods for listing, retrieving, and searching companies.
+ */
+export class CompaniesApi {
+  constructor(private readonly client: CompaniesApiClient) {}
+
+  /**
+   * List companies with optional filters and cursor-based pagination.
+   *
+   * @param params - Optional filters and pagination parameters
+   * @returns Promise resolving to a paginated list of companies
+   */
+  async list(params: ListCompaniesParams = {}): Promise<CompanyListResponse> {
+    return listCompanies(this.client, params);
+  }
+
+  /**
+   * Get a specific company by ID.
+   *
+   * @param companyId - The unique identifier of the company
+   * @returns Promise resolving to the company details
+   */
+  async get(companyId: string): Promise<Company> {
+    return getCompany(this.client, companyId);
+  }
+
+  /**
+   * Search companies by name or domain.
+   *
+   * @param params - Search query and pagination parameters
+   * @returns Promise resolving to search results with pagination
+   */
+  async search(params: SearchCompaniesParams): Promise<CompanySearchResponse> {
+    return searchCompanies(this.client, params);
+  }
 }
 
 const MIN_QUERY_LENGTH = 2;
@@ -164,7 +203,7 @@ export const searchCompanies = async (
   }
 
   const data: unknown = await response.json();
-  assertCompanyListResponse(data);
+  assertCompanySearchResponse(data);
 
   return data;
 };

@@ -16,6 +16,7 @@ export type {
 
 // Companies API
 export {
+  CompaniesApi,
   getCompany,
   listCompanies,
   searchCompanies,

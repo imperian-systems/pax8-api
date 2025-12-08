@@ -55,7 +55,7 @@ pnpm add @imperian-systems/pax8-api
 Get started with your first API call in minutes:
 
 ```typescript
-import { Pax8Client, listCompanies, getCompany } from '@imperian-systems/pax8-api';
+import { Pax8Client } from '@imperian-systems/pax8-api';
 
 const client = new Pax8Client({
   clientId: 'your-client-id',
@@ -63,12 +63,12 @@ const client = new Pax8Client({
 });
 
 // List companies with cursor-based pagination
-const result = await listCompanies(client, { limit: 50, status: 'active' });
+const result = await client.companies.list({ limit: 50, status: 'active' });
 console.log(result.items);          // Company[]
 console.log(result.page.nextPageToken); // Cursor for next page
 
 // Get a specific company
-const company = await getCompany(client, 'comp-123');
+const company = await client.companies.get('comp-123');
 console.log(company.displayName);
 ```
 
@@ -143,7 +143,7 @@ Manage customer organizations served through Pax8. This API uses **cursor-based 
 
 ```typescript
 // List companies with cursor pagination
-const result = await client.listCompanies({
+const result = await client.companies.list({
   limit: 50,              // Optional: page size (default 50, max 100)
   pageToken: undefined,   // Optional: cursor token for next/previous page
   status: 'active',       // Optional: filter by status
@@ -160,13 +160,13 @@ console.log(result.page.hasMore);   // true if more pages available
 // Paginate through results
 let pageToken = result.page.nextPageToken;
 while (pageToken) {
-  const nextPage = await client.listCompanies({ pageToken });
+  const nextPage = await client.companies.list({ pageToken });
   console.log(nextPage.items);
   pageToken = nextPage.page.nextPageToken;
 }
 
 // Get a specific company by ID
-const company = await client.getCompany('comp-123');
+const company = await client.companies.get('comp-123');
 console.log(company.companyId);
 console.log(company.legalName);
 console.log(company.displayName);
@@ -176,7 +176,7 @@ console.log(company.primaryContact); // { name?: string; email?: string } | unde
 console.log(company.region);         // string | undefined
 
 // Search companies by name or domain
-const searchResults = await client.searchCompanies({
+const searchResults = await client.companies.search({
   query: 'acme',         // Required: 2-256 characters
   limit: 25,             // Optional: page size
   pageToken: undefined   // Optional: cursor token
@@ -604,7 +604,7 @@ The Companies API uses cursor-based pagination for stable iteration through larg
 import { listCompanies, searchCompanies } from '@imperian-systems/pax8-api';
 
 // List companies with cursor pagination
-const firstPage = await listCompanies(client, { 
+const firstPage = await client.companies.list({ 
   limit: 50,           // Default 50, max 100
   status: 'active' 
 });
@@ -616,7 +616,7 @@ console.log(firstPage.page.hasMore);       // true if more results
 
 // Get next page using cursor token
 if (firstPage.page.nextPageToken) {
-  const secondPage = await listCompanies(client, {
+  const secondPage = await client.companies.list({
     pageToken: firstPage.page.nextPageToken,
     limit: 50
   });
@@ -627,7 +627,7 @@ let allCompanies: Company[] = [];
 let pageToken: string | undefined;
 
 do {
-  const page = await listCompanies(client, { 
+  const page = await client.companies.list({ 
     limit: 100,
     pageToken,
     status: 'active'
@@ -645,7 +645,8 @@ console.log(`Total companies: ${allCompanies.length}`);
 Other Pax8 APIs may use traditional page-based pagination:
 
 ```typescript
-// Get first page
+// Note: This is an example for other APIs that may be added in the future
+// The Companies API uses cursor-based pagination shown above
 const page1 = await client.companies.list({ page: 0, size: 50 });
 console.log(`Page 1: ${page1.content.length} companies`);
 console.log(`Total: ${page1.page.totalElements} companies across ${page1.page.totalPages} pages`);

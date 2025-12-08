@@ -12,21 +12,21 @@ Adds Companies API methods to the Pax8 client: list, search, and detail retrieva
 ### 1) List companies (cursor-based)
 
 ```typescript
-import { Pax8Client, listCompanies } from '@imperian-systems/pax8-api';
+import { Pax8Client } from '@imperian-systems/pax8-api';
 
 const client = new Pax8Client({
   clientId: 'your-client-id',
   clientSecret: 'your-client-secret'
 });
 
-const { items, page } = await listCompanies(client, {
+const { items, page } = await client.companies.list({
   limit: 50,
   status: 'active',
   updatedSince: '2025-11-01T00:00:00Z'
 });
 
 if (page.nextPageToken) {
-  const next = await listCompanies(client, { pageToken: page.nextPageToken });
+  const next = await client.companies.list({ pageToken: page.nextPageToken });
   // iterate...
 }
 ```
@@ -34,18 +34,14 @@ if (page.nextPageToken) {
 ### 2) Get a company by ID
 
 ```typescript
-import { getCompany } from '@imperian-systems/pax8-api';
-
-const company = await getCompany(client, 'comp-12345');
+const company = await client.companies.get('comp-12345');
 console.log(company.displayName, company.primaryDomains);
 ```
 
 ### 3) Search companies by name/domain
 
 ```typescript
-import { searchCompanies } from '@imperian-systems/pax8-api';
-
-const results = await searchCompanies(client, {
+const results = await client.companies.search({
   query: 'acme',
   limit: 25
 });
@@ -61,7 +57,7 @@ for (const company of results.items) {
 import { Pax8Error } from '@imperian-systems/pax8-api';
 
 try {
-  await getCompany(client, 'unknown');
+  await client.companies.get('unknown');
 } catch (error) {
   if (error instanceof Pax8Error) {
     console.error(error.code, error.message);
@@ -76,14 +72,14 @@ try {
 Use cursor-based pagination to traverse large result sets:
 
 ```typescript
-import { listCompanies, hasMorePages } from '@imperian-systems/pax8-api';
+import { hasMorePages } from '@imperian-systems/pax8-api';
 
 // Manual pagination
 let pageToken: string | undefined;
 const allCompanies: Company[] = [];
 
 do {
-  const result = await listCompanies(client, { 
+  const result = await client.companies.list({ 
     limit: 50,
     pageToken 
   });
@@ -93,10 +89,25 @@ do {
 } while (pageToken);
 
 // Check if more pages exist
-const result = await listCompanies(client);
+const result = await client.companies.list();
 if (hasMorePages(result.page)) {
   console.log('More pages available');
 }
+```
+
+## Standalone Functions
+
+The Companies API methods are also available as standalone functions if you prefer:
+
+```typescript
+import { Pax8Client, listCompanies, getCompany, searchCompanies } from '@imperian-systems/pax8-api';
+
+const client = new Pax8Client({ clientId, clientSecret });
+
+// Using standalone functions
+const result = await listCompanies(client, { limit: 50 });
+const company = await getCompany(client, 'comp-123');
+const searchResults = await searchCompanies(client, { query: 'acme' });
 ```
 
 ## Files Created
@@ -104,7 +115,7 @@ if (hasMorePages(result.page)) {
 ```
 src/
 ├── api/
-│   ├── companies.ts            # Companies API client methods (listCompanies, getCompany, searchCompanies)
+│   ├── companies.ts            # CompaniesApi class and standalone functions
 │   └── index.ts                # API exports aggregator
 ├── models/companies.ts         # Company types, validation, and runtime guards
 ├── pagination/cursor.ts        # Cursor helpers for pagination
