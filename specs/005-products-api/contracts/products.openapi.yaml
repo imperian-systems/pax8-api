@@ -1,0 +1,644 @@
+openapi: 3.0.3
+info:
+  title: Pax8 Products API - Client Contract
+  description: |
+    OpenAPI contract for the Products API client implementation.
+    Defines endpoints for listing products, retrieving product details,
+    provisioning information, dependencies, and pricing.
+  version: 1.0.0
+  contact:
+    name: Pax8 API Client
+servers:
+  - url: https://api.pax8.com/v1
+    description: Pax8 Production API
+
+paths:
+  /products:
+    get:
+      operationId: listProducts
+      summary: List all available products
+      description: |
+        Retrieves a paginated list of products from the Pax8 catalog.
+        Supports filtering by vendor and product name, sorting, and pagination.
+      tags:
+        - Products
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/VendorNameParam'
+        - $ref: '#/components/parameters/SearchParam'
+      responses:
+        '200':
+          description: Successfully retrieved products list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /products/{productId}:
+    get:
+      operationId: getProduct
+      summary: Get product by ID
+      description: Retrieves detailed information about a specific product.
+      tags:
+        - Products
+      parameters:
+        - $ref: '#/components/parameters/ProductIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /products/{productId}/provisioning-details:
+    get:
+      operationId: getProvisioningDetails
+      summary: Get product provisioning details
+      description: |
+        Retrieves provisioning configuration details for a product,
+        including required fields and optional settings for subscription creation.
+      tags:
+        - Products
+      parameters:
+        - $ref: '#/components/parameters/ProductIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved provisioning details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProvisioningDetail'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /products/{productId}/dependencies:
+    get:
+      operationId: getProductDependencies
+      summary: Get product dependencies
+      description: |
+        Retrieves the list of prerequisite products that must be provisioned
+        before this product can be ordered.
+      tags:
+        - Products
+      parameters:
+        - $ref: '#/components/parameters/ProductIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved product dependencies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dependencies'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /products/{productId}/pricing:
+    get:
+      operationId: getProductPricing
+      summary: Get product pricing
+      description: |
+        Retrieves pricing information for a product, optionally scoped to a specific company.
+        Returns rates for different commitment terms and billing frequencies.
+      tags:
+        - Products
+      parameters:
+        - $ref: '#/components/parameters/ProductIdParam'
+        - $ref: '#/components/parameters/CompanyIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved product pricing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pricing'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  parameters:
+    ProductIdParam:
+      name: productId
+      in: path
+      required: true
+      description: Unique identifier for the product (UUID format)
+      schema:
+        type: string
+        format: uuid
+      example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+
+    CompanyIdParam:
+      name: companyId
+      in: query
+      required: false
+      description: Company ID to scope pricing (for company-specific rates)
+      schema:
+        type: string
+        format: uuid
+      example: "f9e8d7c6-b5a4-3210-fedc-ba9876543210"
+
+    PageParam:
+      name: page
+      in: query
+      required: false
+      description: Page number for pagination (0-indexed)
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      example: 0
+
+    SizeParam:
+      name: size
+      in: query
+      required: false
+      description: Number of items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 10
+      example: 10
+
+    SortParam:
+      name: sort
+      in: query
+      required: false
+      description: Sort field and direction
+      schema:
+        type: string
+        enum:
+          - name,asc
+          - name,desc
+          - vendor,asc
+          - vendor,desc
+      example: "name,asc"
+
+    VendorNameParam:
+      name: vendorName
+      in: query
+      required: false
+      description: Filter products by vendor name (exact match)
+      schema:
+        type: string
+      example: "Microsoft"
+
+    SearchParam:
+      name: search
+      in: query
+      required: false
+      description: Search term to filter products by name
+      schema:
+        type: string
+      example: "Office 365"
+
+  schemas:
+    Product:
+      type: object
+      description: Summary product information returned in list responses
+      required:
+        - id
+        - name
+        - vendorName
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique product identifier
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        name:
+          type: string
+          description: Product display name
+          example: "Microsoft 365 Business Basic"
+        vendorName:
+          type: string
+          description: Name of the product vendor
+          example: "Microsoft"
+
+    ProductDetail:
+      type: object
+      description: Full product details including extended attributes
+      required:
+        - id
+        - name
+        - vendorName
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique product identifier
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        name:
+          type: string
+          description: Product display name
+          example: "Microsoft 365 Business Basic"
+        vendorName:
+          type: string
+          description: Name of the product vendor
+          example: "Microsoft"
+        sku:
+          type: string
+          description: Stock keeping unit identifier
+          example: "MS365BB"
+        vendorProductId:
+          type: string
+          description: Vendor's internal product identifier
+          example: "CFQ7TTC0LH18"
+        shortDescription:
+          type: string
+          description: Brief product description
+          example: "Cloud-based productivity suite for small businesses"
+        longDescription:
+          type: string
+          description: Detailed product description
+          example: "Microsoft 365 Business Basic includes web and mobile versions of Office apps..."
+        provisioningInstructions:
+          type: string
+          nullable: true
+          description: Instructions for provisioning the product
+          example: "Requires verified domain ownership before activation"
+
+    ProvisioningDetail:
+      type: object
+      description: Product provisioning configuration requirements
+      properties:
+        productId:
+          type: string
+          format: uuid
+          description: Associated product identifier
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        provisioningFields:
+          type: array
+          description: List of fields required for provisioning
+          items:
+            $ref: '#/components/schemas/ProvisioningField'
+        commitmentTermRequired:
+          type: boolean
+          description: Whether a commitment term selection is required
+          default: false
+        defaultCommitmentTerm:
+          type: string
+          nullable: true
+          description: Default commitment term if not specified
+          example: "Annual"
+
+    ProvisioningField:
+      type: object
+      description: Individual provisioning field definition
+      required:
+        - name
+        - type
+        - required
+      properties:
+        name:
+          type: string
+          description: Field identifier name
+          example: "domainName"
+        type:
+          type: string
+          description: Data type of the field
+          enum:
+            - string
+            - number
+            - boolean
+            - select
+          example: "string"
+        required:
+          type: boolean
+          description: Whether the field is mandatory
+          example: true
+        label:
+          type: string
+          description: Human-readable field label
+          example: "Domain Name"
+        description:
+          type: string
+          description: Field description and instructions
+          example: "The primary domain for this Microsoft 365 tenant"
+        options:
+          type: array
+          description: Available options for select-type fields
+          items:
+            type: string
+          example: ["Option A", "Option B"]
+
+    ProductDependency:
+      type: object
+      description: A prerequisite product required before ordering
+      required:
+        - productId
+        - name
+        - dependencyType
+      properties:
+        productId:
+          type: string
+          format: uuid
+          description: Dependent product identifier
+          example: "b2c3d4e5-f6a7-8901-bcde-f23456789012"
+        name:
+          type: string
+          description: Dependent product name
+          example: "Azure Active Directory"
+        dependencyType:
+          type: string
+          description: Type of dependency relationship
+          enum:
+            - required
+            - optional
+            - recommended
+          example: "required"
+        description:
+          type: string
+          description: Explanation of the dependency
+          example: "Required for user authentication and identity management"
+
+    Dependencies:
+      type: object
+      description: Container for product dependencies
+      properties:
+        productId:
+          type: string
+          format: uuid
+          description: Source product identifier
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        dependencies:
+          type: array
+          description: List of product dependencies
+          items:
+            $ref: '#/components/schemas/ProductDependency'
+        hasDependencies:
+          type: boolean
+          description: Whether the product has any dependencies
+          example: true
+
+    Pricing:
+      type: object
+      description: Product pricing information
+      required:
+        - productId
+        - rates
+      properties:
+        productId:
+          type: string
+          format: uuid
+          description: Associated product identifier
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        companyId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Company ID if pricing is company-specific
+          example: "f9e8d7c6-b5a4-3210-fedc-ba9876543210"
+        currencyCode:
+          type: string
+          description: ISO 4217 currency code
+          example: "USD"
+        rates:
+          type: array
+          description: Available pricing rates
+          items:
+            $ref: '#/components/schemas/Rate'
+        commitmentTerms:
+          type: array
+          description: Available commitment term options
+          items:
+            $ref: '#/components/schemas/Commitment'
+
+    Rate:
+      type: object
+      description: Individual pricing rate
+      required:
+        - billingTerm
+        - partnerBuyPrice
+      properties:
+        billingTerm:
+          type: string
+          description: Billing frequency
+          enum:
+            - Monthly
+            - Annual
+            - Triennial
+          example: "Monthly"
+        partnerBuyPrice:
+          type: number
+          format: double
+          description: Partner cost price
+          example: 6.00
+        suggestedRetailPrice:
+          type: number
+          format: double
+          nullable: true
+          description: Suggested retail price for customers
+          example: 6.00
+        flatPrice:
+          type: number
+          format: double
+          nullable: true
+          description: Flat rate price if applicable
+          example: null
+        effectiveDate:
+          type: string
+          format: date
+          description: Date when this rate becomes effective
+          example: "2024-01-01"
+
+    Commitment:
+      type: object
+      description: Commitment term option
+      required:
+        - term
+        - billingFrequency
+      properties:
+        term:
+          type: string
+          description: Commitment duration
+          enum:
+            - Monthly
+            - Annual
+            - Triennial
+          example: "Annual"
+        billingFrequency:
+          type: string
+          description: How often billing occurs
+          enum:
+            - Monthly
+            - Annual
+            - Triennial
+          example: "Monthly"
+        autoRenew:
+          type: boolean
+          description: Whether the commitment auto-renews
+          default: true
+
+    ProductListResponse:
+      type: object
+      description: Paginated list of products
+      required:
+        - content
+        - page
+      properties:
+        content:
+          type: array
+          description: Products in the current page
+          items:
+            $ref: '#/components/schemas/Product'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+
+    PageInfo:
+      type: object
+      description: Pagination metadata
+      required:
+        - number
+        - size
+        - totalElements
+        - totalPages
+      properties:
+        number:
+          type: integer
+          description: Current page number (0-indexed)
+          example: 0
+        size:
+          type: integer
+          description: Number of items per page
+          example: 10
+        totalElements:
+          type: integer
+          description: Total number of items across all pages
+          example: 150
+        totalPages:
+          type: integer
+          description: Total number of pages
+          example: 15
+
+    Error:
+      type: object
+      description: Standard error response
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: integer
+          description: HTTP status code
+          example: 404
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Product not found"
+        code:
+          type: string
+          description: Machine-readable error code
+          example: "PRODUCT_NOT_FOUND"
+        details:
+          type: object
+          description: Additional error context
+          additionalProperties: true
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required or token expired
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 401
+            message: "Invalid or expired authentication token"
+            code: "UNAUTHORIZED"
+
+    NotFoundError:
+      description: Requested resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 404
+            message: "Product not found"
+            code: "PRODUCT_NOT_FOUND"
+
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 422
+            message: "Invalid request parameters"
+            code: "VALIDATION_ERROR"
+            details:
+              size: "Must be between 1 and 200"
+
+    RateLimitError:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 429
+            message: "Rate limit exceeded"
+            code: "RATE_LIMIT_EXCEEDED"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 500
+            message: "An unexpected error occurred"
+            code: "INTERNAL_ERROR"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: OAuth 2.0 Bearer token from Pax8 authentication
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Products
+    description: Operations for browsing and querying the Pax8 product catalog
