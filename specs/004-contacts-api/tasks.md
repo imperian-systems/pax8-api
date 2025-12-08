@@ -5,15 +5,15 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Confirm toolchain and verify dependencies via `package.json` (Node 22, `npm install`) at repo root
+- [x] T001 Confirm toolchain and verify dependencies via `package.json` (Node 22, `npm install`) at repo root
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T002 Create contact domain models (Contact, ContactType, CreateContactRequest, UpdateContactRequest, ContactListResponse, PageMetadata) in `src/models/contacts.ts`
-- [ ] T003 [P] Export contact models through `src/models/index.ts`
-- [ ] T004 [P] Prepare contacts API module scaffold and exports in `src/api/index.ts` for upcoming methods
+- [x] T002 Create contact domain models (Contact, ContactType, CreateContactRequest, UpdateContactRequest, ContactListResponse, PageMetadata) in `src/models/contacts.ts`
+- [x] T003 [P] Export contact models through `src/models/index.ts`
+- [x] T004 [P] Prepare contacts API module scaffold and exports in `src/api/index.ts` for upcoming methods
 
 **Checkpoint**: Foundation ready — models, types, and exports scaffolded.
 
@@ -27,15 +27,15 @@
 
 ### Tests for User Story 1 (TDD)
 
-- [ ] T005 [P] [US1] Add contract coverage for `GET /companies/{companyId}/contacts` list endpoint in `tests/contract/api/contacts-contract.test.ts` (200, 401, 404)
-- [ ] T006 [P] [US1] Add integration tests for list pagination (default page=1/size=10, custom page/size up to 200), empty results, and unauthorized cases in `tests/integration/api/contacts-flow.test.ts`
+- [x] T005 [P] [US1] Add contract coverage for `GET /companies/{companyId}/contacts` list endpoint in `tests/contract/api/contacts-contract.test.ts` (200, 401, 404)
+- [x] T006 [P] [US1] Add integration tests for list pagination (default page=1/size=10, custom page/size up to 200), empty results, and unauthorized cases in `tests/integration/api/contacts-flow.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T007 [P] [US1] Implement `list` method with page-based pagination (default 10, max 200) in `src/api/contacts.ts`
-- [ ] T008 [US1] Wire pagination metadata (`page`, `size`, `totalElements`, `totalPages`) and validation limits in `src/api/contacts.ts`
-- [ ] T009 [US1] Create ContactsApi class and wire into Pax8Client as `client.contacts` in `src/client/pax8-client.ts`
-- [ ] T010 [US1] Export list types and ContactsApi through `src/api/index.ts` and `src/index.ts`
+- [x] T007 [P] [US1] Implement `list` method with page-based pagination (default 10, max 200) in `src/api/contacts.ts`
+- [x] T008 [US1] Wire pagination metadata (`page`, `size`, `totalElements`, `totalPages`) and validation limits in `src/api/contacts.ts`
+- [x] T009 [US1] Create ContactsApi class and wire into Pax8Client as `client.contacts` in `src/client/pax8-client.ts`
+- [x] T010 [US1] Export list types and ContactsApi through `src/api/index.ts` and `src/index.ts`
 
 **Checkpoint**: User Story 1 independently testable (list works with pagination, empty results, errors).
 
@@ -49,13 +49,13 @@
 
 ### Tests for User Story 2 (TDD)
 
-- [ ] T011 [P] [US2] Add contract coverage for `GET /companies/{companyId}/contacts/{contactId}` (200, 404, 401) in `tests/contract/api/contacts-contract.test.ts`
-- [ ] T012 [P] [US2] Add integration tests for contact detail success and not-found paths in `tests/integration/api/contacts-flow.test.ts`
+- [x] T011 [P] [US2] Add contract coverage for `GET /companies/{companyId}/contacts/{contactId}` (200, 404, 401) in `tests/contract/api/contacts-contract.test.ts`
+- [x] T012 [P] [US2] Add integration tests for contact detail success and not-found paths in `tests/integration/api/contacts-flow.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T013 [P] [US2] Implement `get` method with runtime validation using contact models in `src/api/contacts.ts`
-- [ ] T014 [US2] Export `get` method through `src/api/index.ts` and `src/index.ts`
+- [x] T013 [P] [US2] Implement `get` method with runtime validation using contact models in `src/api/contacts.ts`
+- [x] T014 [US2] Export `get` method through `src/api/index.ts` and `src/index.ts`
 
 **Checkpoint**: User Story 2 independently testable (detail + 404 behavior).
 
@@ -69,14 +69,14 @@
 
 ### Tests for User Story 3 (TDD)
 
-- [ ] T015 [P] [US3] Add contract coverage for `POST /companies/{companyId}/contacts` (201, 400 validation, 401, 404) in `tests/contract/api/contacts-contract.test.ts`
-- [ ] T016 [P] [US3] Add integration tests for contact creation, validation errors, and primary contact demotion in `tests/integration/api/contacts-flow.test.ts`
+- [x] T015 [P] [US3] Add contract coverage for `POST /companies/{companyId}/contacts` (201, 400 validation, 401, 404) in `tests/contract/api/contacts-contract.test.ts`
+- [x] T016 [P] [US3] Add integration tests for contact creation, validation errors, and primary contact demotion in `tests/integration/api/contacts-flow.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T017 [P] [US3] Implement `create` method with CreateContactRequest validation in `src/api/contacts.ts`
-- [ ] T018 [US3] Handle types array structure with primary flag per type in `src/api/contacts.ts`
-- [ ] T019 [US3] Export `create` method through `src/api/index.ts` and `src/index.ts`
+- [x] T017 [P] [US3] Implement `create` method with CreateContactRequest validation in `src/api/contacts.ts`
+- [x] T018 [US3] Handle types array structure with primary flag per type in `src/api/contacts.ts`
+- [x] T019 [US3] Export `create` method through `src/api/index.ts` and `src/index.ts`
 
 **Checkpoint**: User Story 3 independently testable (create with validation + primary demotion).
 
@@ -90,14 +90,14 @@
 
 ### Tests for User Story 4 (TDD)
 
-- [ ] T020 [P] [US4] Add contract coverage for `PUT /companies/{companyId}/contacts/{contactId}` (200, 400, 404, 401) in `tests/contract/api/contacts-contract.test.ts`
-- [ ] T021 [P] [US4] Add integration tests for partial updates, types array modifications, and not-found paths in `tests/integration/api/contacts-flow.test.ts`
+- [x] T020 [P] [US4] Add contract coverage for `PUT /companies/{companyId}/contacts/{contactId}` (200, 400, 404, 401) in `tests/contract/api/contacts-contract.test.ts`
+- [x] T021 [P] [US4] Add integration tests for partial updates, types array modifications, and not-found paths in `tests/integration/api/contacts-flow.test.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T022 [P] [US4] Implement `update` method with UpdateContactRequest validation in `src/api/contacts.ts`
-- [ ] T023 [US4] Handle types array updates with primary flag management in `src/api/contacts.ts`
-- [ ] T024 [US4] Export `update` method through `src/api/index.ts` and `src/index.ts`
+- [x] T022 [P] [US4] Implement `update` method with UpdateContactRequest validation in `src/api/contacts.ts`
+- [x] T023 [US4] Handle types array updates with primary flag management in `src/api/contacts.ts`
+- [x] T024 [US4] Export `update` method through `src/api/index.ts` and `src/index.ts`
 
 **Checkpoint**: User Story 4 independently testable (update with partial data + types management).
 
@@ -111,13 +111,13 @@
 
 ### Tests for User Story 5 (TDD)
 
-- [ ] T025 [P] [US5] Add contract coverage for `DELETE /companies/{companyId}/contacts/{contactId}` (204, 404, 401) in `tests/contract/api/contacts-contract.test.ts`
-- [ ] T026 [P] [US5] Add integration tests for contact deletion success and not-found paths in `tests/integration/api/contacts-flow.test.ts`
+- [x] T025 [P] [US5] Add contract coverage for `DELETE /companies/{companyId}/contacts/{contactId}` (204, 404, 401) in `tests/contract/api/contacts-contract.test.ts`
+- [x] T026 [P] [US5] Add integration tests for contact deletion success and not-found paths in `tests/integration/api/contacts-flow.test.ts`
 
 ### Implementation for User Story 5
 
-- [ ] T027 [P] [US5] Implement `delete` method in `src/api/contacts.ts`
-- [ ] T028 [US5] Export `delete` method through `src/api/index.ts` and `src/index.ts`
+- [x] T027 [P] [US5] Implement `delete` method in `src/api/contacts.ts`
+- [x] T028 [US5] Export `delete` method through `src/api/index.ts` and `src/index.ts`
 
 **Checkpoint**: User Story 5 independently testable (delete + 404 handling).
 
@@ -125,9 +125,9 @@
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T029 [P] Verify Contacts API usage examples in `specs/004-contacts-api/quickstart.md`
-- [ ] T030 [P] Update `README.md` with Contacts API examples following existing Companies API format
-- [ ] T031 Run full validation suite (`npm test && npm run lint && npm run build`) defined in `package.json`
+- [x] T029 [P] Verify Contacts API usage examples in `specs/004-contacts-api/quickstart.md`
+- [x] T030 [P] Update `README.md` with Contacts API examples following existing Companies API format
+- [x] T031 Run full validation suite (`npm test && npm run lint && npm run build`) defined in `package.json`
 
 ---
 

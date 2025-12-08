@@ -238,43 +238,156 @@ interface CompanyListResponse {
 
 ### Contacts
 
-Manage people associated with companies.
+Manage people associated with companies. This API uses **page-based pagination** (default size: 10, max: 200).
 
 ```typescript
-// List contacts with optional filters
-client.contacts.list(options?: ListContactsOptions): Promise<Page<Contact>>
-
-// Get a specific contact by ID
-client.contacts.get(id: string): Promise<Contact>
-
-// Create a new contact
-client.contacts.create(data: CreateContactRequest): Promise<Contact>
-
-// Update an existing contact
-client.contacts.update(id: string, data: UpdateContactRequest): Promise<Contact>
-
-// Delete a contact
-client.contacts.delete(id: string): Promise<void>
-```
-
-#### Example
-
-```typescript
-// List contacts for a company
-const contacts = await client.contacts.list({ 
-  companyId: 'company-id',
-  size: 50
+// List contacts for a company with page-based pagination
+const result = await client.contacts.list({
+  companyId: 'comp-123',
+  page: 0,              // Optional: page number (default 0)
+  size: 50              // Optional: page size (default 10, max 200)
 });
 
+console.log(result.content);           // Contact[]
+console.log(result.page.size);         // 50
+console.log(result.page.totalElements); // Total contacts
+console.log(result.page.totalPages);   // Total pages
+console.log(result.page.number);       // Current page (0-indexed)
+
+// Paginate through all contacts
+let currentPage = 0;
+const allContacts: Contact[] = [];
+
+while (currentPage < result.page.totalPages) {
+  const page = await client.contacts.list({
+    companyId: 'comp-123',
+    page: currentPage,
+    size: 100
+  });
+  
+  allContacts.push(...page.content);
+  currentPage++;
+}
+
+// Get a specific contact by ID
+const contact = await client.contacts.get('comp-123', 'contact-456');
+console.log(contact.firstName, contact.lastName);
+console.log(contact.email, contact.phone);
+
+// Check contact types (Admin, Billing, Technical)
+for (const type of contact.types ?? []) {
+  console.log(`${type.type}: primary=${type.primary}`);
+}
+
 // Create a new contact
-const newContact = await client.contacts.create({
-  companyId: 'company-id',
+const newContact = await client.contacts.create('comp-123', {
   firstName: 'John',
   lastName: 'Doe',
   email: 'john.doe@example.com',
-  phoneNumber: '+1-555-0123',
-  primaryContact: true
+  phone: '+1-555-0123',
+  types: [
+    { type: 'Admin', primary: true },
+    { type: 'Billing', primary: false }
+  ]
 });
+
+console.log(`Created contact: ${newContact.id}`);
+
+// Update an existing contact (partial update)
+const updated = await client.contacts.update('comp-123', 'contact-456', {
+  phone: '+1-555-9999',
+  types: [
+    { type: 'Admin', primary: true },
+    { type: 'Technical', primary: true }
+  ]
+});
+
+// Delete a contact
+await client.contacts.delete('comp-123', 'contact-456');
+console.log('Contact deleted');
+```
+
+#### Types
+
+```typescript
+interface ListContactsParams {
+  companyId: string;        // Required: company to list contacts for
+  page?: number;            // Optional: 0-indexed page number (default 0)
+  size?: number;            // Optional: page size (default 10, max 200)
+}
+
+interface CreateContactRequest {
+  firstName: string;        // Required
+  lastName: string;         // Required
+  email: string;            // Required: valid email format
+  phone?: string;           // Optional
+  types?: ContactType[];    // Optional: contact type assignments
+}
+
+interface UpdateContactRequest {
+  firstName?: string;       // Optional: all fields are optional for partial updates
+  lastName?: string;
+  email?: string;           // Must be valid email format if provided
+  phone?: string;
+  types?: ContactType[];    // Replaces entire types array if provided
+}
+
+interface ContactType {
+  type: 'Admin' | 'Billing' | 'Technical';
+  primary: boolean;         // Whether this is primary contact for this type
+}
+
+interface Contact {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  types?: ContactType[];
+  createdDate: string;      // ISO 8601
+}
+
+interface ContactListResponse {
+  content: Contact[];
+  page: {
+    size: number;           // Page size used
+    totalElements: number;  // Total contacts across all pages
+    totalPages: number;     // Total pages
+    number: number;         // Current page (0-indexed)
+  };
+}
+```
+
+#### Contact Type System
+
+Contacts support a type-based primary system for Admin, Billing, and Technical roles:
+
+- A contact can have multiple types (e.g., both Admin and Billing)
+- Each type can be marked as primary or non-primary
+- A contact can be primary for multiple types simultaneously
+- When setting a contact as primary for a type, the previous primary for that type is automatically demoted
+
+```typescript
+// Create a contact that is primary for both Admin and Billing
+const contact = await client.contacts.create('comp-123', {
+  firstName: 'Jane',
+  lastName: 'Smith',
+  email: 'jane@example.com',
+  types: [
+    { type: 'Admin', primary: true },
+    { type: 'Billing', primary: true },
+    { type: 'Technical', primary: false }
+  ]
+});
+
+// Setting another contact as primary Admin will auto-demote Jane's Admin primary status
+const newAdmin = await client.contacts.create('comp-123', {
+  firstName: 'Bob',
+  lastName: 'Johnson',
+  email: 'bob@example.com',
+  types: [{ type: 'Admin', primary: true }]
+});
+// Jane is still primary for Billing, but Bob is now primary for Admin
 ```
 
 ### Products
@@ -869,6 +982,11 @@ Import types for use in your application:
 import type { 
   Company,
   Contact,
+  ContactType,
+  ContactTypeEnum,
+  CreateContactRequest,
+  UpdateContactRequest,
+  ListContactsParams,
   Product,
   Order,
   Subscription,
@@ -883,6 +1001,14 @@ import type {
 async function getCompanyOrders(companyId: string): Promise<Order[]> {
   const page = await client.orders.list({ companyId, size: 100 });
   return page.content;
+}
+
+// Type-safe contact filtering
+async function getPrimaryAdminContact(companyId: string): Promise<Contact | undefined> {
+  const { content } = await client.contacts.list({ companyId, size: 200 });
+  return content.find(c => 
+    c.types?.some(t => t.type === 'Admin' && t.primary)
+  );
 }
 
 // Type-safe filtering

@@ -1,5 +1,6 @@
 import { Pax8ClientConfig, ResolvedPax8ClientConfig, validateConfig } from './config';
 import { CompaniesApi } from '../api/companies';
+import { ContactsApi } from '../api/contacts';
 import { TokenManager } from '../auth/token-manager';
 
 /**
@@ -16,6 +17,9 @@ export class Pax8Client {
   /** Companies API methods */
   public readonly companies: CompaniesApi;
 
+  /** Contacts API methods */
+  public readonly contacts: ContactsApi;
+
   /**
    * Create a new client instance.
    *
@@ -26,6 +30,7 @@ export class Pax8Client {
     this.config = validateConfig(config);
     this.tokenManager = new TokenManager(this.config);
     this.companies = new CompaniesApi(this);
+    this.contacts = new ContactsApi(this);
   }
 
   /** Current client configuration with defaults applied. */
