@@ -3,6 +3,7 @@ import { CompaniesApi } from '../api/companies';
 import { ContactsApi } from '../api/contacts';
 import { OrdersApi } from '../api/orders';
 import { ProductsApi } from '../api/products';
+import { SubscriptionsApi } from '../api/subscriptions';
 import { TokenManager } from '../auth/token-manager';
 
 /**
@@ -28,6 +29,9 @@ export class Pax8Client {
   /** Orders API methods */
   public readonly orders: OrdersApi;
 
+  /** Subscriptions API methods */
+  public readonly subscriptions: SubscriptionsApi;
+
   /**
    * Create a new client instance.
    *
@@ -41,6 +45,7 @@ export class Pax8Client {
     this.contacts = new ContactsApi(this);
     this.products = new ProductsApi(this);
     this.orders = new OrdersApi(this);
+    this.subscriptions = new SubscriptionsApi(this);
   }
 
   /** Current client configuration with defaults applied. */

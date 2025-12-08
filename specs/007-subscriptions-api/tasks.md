@@ -7,8 +7,8 @@
 
 **Purpose**: Ensure working environment and baseline checks before feature work.
 
-- [ ] T001 Install dependencies per `package.json` at repository root (run npm install).
-- [ ] T002 Run baseline quality gates via `package.json` scripts (`npm run lint`, `npm test`) to confirm a clean starting state.
+- [x] T001 Install dependencies per `package.json` at repository root (run npm install).
+- [x] T002 Run baseline quality gates via `package.json` scripts (`npm run lint`, `npm test`) to confirm a clean starting state.
 
 ---
 
@@ -16,11 +16,11 @@
 
 **Purpose**: Core scaffolding and exports required before user story work.
 
-- [ ] T003 [P] Add subscription models and request/response types to `src/models/subscriptions.ts` per contract/spec.
-- [ ] T004 Update `src/index.ts` exports to include subscription types (`Subscription`, `SubscriptionStatus`, `BillingTerm`, `UpdateSubscriptionRequest`, `CancelOptions`, `SubscriptionHistory`, `ListSubscriptionsOptions`, `SubscriptionListResponse`).
-- [ ] T005 Create `src/api/subscriptions.ts` class scaffold (constructor wiring with client config, placeholders for list/get/update/cancel/getHistory) using existing HTTP utilities.
-- [ ] T006 Update `src/api/index.ts` to export `SubscriptionsApi`.
-- [ ] T007 Wire `SubscriptionsApi` into `Pax8Client` in `src/client/pax8-client.ts` (instantiate and expose `subscriptions`).
+- [x] T003 [P] Add subscription models and request/response types to `src/models/subscriptions.ts` per contract/spec.
+- [x] T004 Update `src/index.ts` exports to include subscription types (`Subscription`, `SubscriptionStatus`, `BillingTerm`, `UpdateSubscriptionRequest`, `CancelOptions`, `SubscriptionHistory`, `ListSubscriptionsOptions`, `SubscriptionListResponse`).
+- [x] T005 Create `src/api/subscriptions.ts` class scaffold (constructor wiring with client config, placeholders for list/get/update/cancel/getHistory) using existing HTTP utilities.
+- [x] T006 Update `src/api/index.ts` to export `SubscriptionsApi`.
+- [x] T007 Wire `SubscriptionsApi` into `Pax8Client` in `src/client/pax8-client.ts` (instantiate and expose `subscriptions`).
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel.
 
@@ -32,12 +32,12 @@
 **Independent Test**: Call list with page/size and optional filters (companyId, productId, status); verify content and pagination metadata.
 
 ### Tests for User Story 1 (TDD)
-- [ ] T008 [P] [US1] Add contract tests for list subscriptions in `tests/contract/api/subscriptions-contract.test.ts` (200 response, pagination metadata, filters, 422 on size>200).
-- [ ] T009 [P] [US1] Add integration flow tests for subscription listing in `tests/integration/api/subscriptions-flow.test.ts` (default page, filtered results, empty set).
+- [x] T008 [P] [US1] Add contract tests for list subscriptions in `tests/contract/api/subscriptions-contract.test.ts` (200 response, pagination metadata, filters, 422 on size>200).
+- [x] T009 [P] [US1] Add integration flow tests for subscription listing in `tests/integration/api/subscriptions-flow.test.ts` (default page, filtered results, empty set).
 
 ### Implementation for User Story 1
-- [ ] T010 [P] [US1] Implement `list` method with query params and pagination handling in `src/api/subscriptions.ts`.
-- [ ] T011 [US1] Ensure list-related public exports and types are surfaced in `src/index.ts` and `src/api/index.ts` (list options/response typings).
+- [x] T010 [P] [US1] Implement `list` method with query params and pagination handling in `src/api/subscriptions.ts`.
+- [x] T011 [US1] Ensure list-related public exports and types are surfaced in `src/index.ts` and `src/api/index.ts` (list options/response typings).
 
 **Checkpoint**: User Story 1 independently testable (MVP).
 
@@ -49,11 +49,11 @@
 **Independent Test**: Request subscription by ID; verify fields present; confirm 404 path.
 
 ### Tests for User Story 2 (TDD)
-- [ ] T012 [P] [US2] Add contract tests for get subscription in `tests/contract/api/subscriptions-contract.test.ts` (200, 404).
-- [ ] T013 [P] [US2] Add integration tests for get subscription in `tests/integration/api/subscriptions-flow.test.ts` (happy path, 404).
+- [x] T012 [P] [US2] Add contract tests for get subscription in `tests/contract/api/subscriptions-contract.test.ts` (200, 404).
+- [x] T013 [P] [US2] Add integration tests for get subscription in `tests/integration/api/subscriptions-flow.test.ts` (happy path, 404).
 
 ### Implementation for User Story 2
-- [ ] T014 [US2] Implement `get` method in `src/api/subscriptions.ts` for `/subscriptions/{id}` with error handling.
+- [x] T014 [US2] Implement `get` method in `src/api/subscriptions.ts` for `/subscriptions/{id}` with error handling.
 
 **Checkpoint**: User Story 2 independently testable.
 
@@ -65,11 +65,11 @@
 **Independent Test**: Submit valid quantity update; verify updated subscription; validate errors for invalid quantity or status.
 
 ### Tests for User Story 3 (TDD)
-- [ ] T015 [P] [US3] Add contract tests for update subscription in `tests/contract/api/subscriptions-contract.test.ts` (200 success, 422 invalid quantity, 404 unknown ID).
-- [ ] T016 [P] [US3] Add integration tests for quantity update in `tests/integration/api/subscriptions-flow.test.ts` (successful update, invalid status/quantity paths).
+- [x] T015 [P] [US3] Add contract tests for update subscription in `tests/contract/api/subscriptions-contract.test.ts` (200 success, 422 invalid quantity, 404 unknown ID).
+- [x] T016 [P] [US3] Add integration tests for quantity update in `tests/integration/api/subscriptions-flow.test.ts` (successful update, invalid status/quantity paths).
 
 ### Implementation for User Story 3
-- [ ] T017 [US3] Implement `update` method in `src/api/subscriptions.ts` (PUT `/subscriptions/{id}`) enforcing quantity validation and returning updated subscription.
+- [x] T017 [US3] Implement `update` method in `src/api/subscriptions.ts` (PUT `/subscriptions/{id}`) enforcing quantity validation and returning updated subscription.
 
 **Checkpoint**: User Story 3 independently testable.
 
@@ -81,11 +81,11 @@
 **Independent Test**: Submit cancellation (with/without billingDate); verify 204 and status update.
 
 ### Tests for User Story 4 (TDD)
-- [ ] T018 [P] [US4] Add contract tests for cancel subscription in `tests/contract/api/subscriptions-contract.test.ts` (204 success, optional billingDate, validation errors for bad dates, 404).
-- [ ] T019 [P] [US4] Add integration tests for cancel flow in `tests/integration/api/subscriptions-flow.test.ts` (immediate cancel, scheduled cancel).
+- [x] T018 [P] [US4] Add contract tests for cancel subscription in `tests/contract/api/subscriptions-contract.test.ts` (204 success, optional billingDate, validation errors for bad dates, 404).
+- [x] T019 [P] [US4] Add integration tests for cancel flow in `tests/integration/api/subscriptions-flow.test.ts` (immediate cancel, scheduled cancel).
 
 ### Implementation for User Story 4
-- [ ] T020 [US4] Implement `cancel` method in `src/api/subscriptions.ts` (POST `/subscriptions/{id}/cancel`) returning void.
+- [x] T020 [US4] Implement `cancel` method in `src/api/subscriptions.ts` (POST `/subscriptions/{id}/cancel`) returning void.
 
 **Checkpoint**: User Story 4 independently testable.
 
@@ -97,11 +97,11 @@
 **Independent Test**: Request history by ID; verify array of history records with action/timestamp/quantity deltas; confirm 404 path.
 
 ### Tests for User Story 5 (TDD)
-- [ ] T021 [P] [US5] Add contract tests for subscription history in `tests/contract/api/subscriptions-contract.test.ts` (200 array payload, 404 unknown ID).
-- [ ] T022 [P] [US5] Add integration tests for subscription history in `tests/integration/api/subscriptions-flow.test.ts` (ordered history, empty history case).
+- [x] T021 [P] [US5] Add contract tests for subscription history in `tests/contract/api/subscriptions-contract.test.ts` (200 array payload, 404 unknown ID).
+- [x] T022 [P] [US5] Add integration tests for subscription history in `tests/integration/api/subscriptions-flow.test.ts` (ordered history, empty history case).
 
 ### Implementation for User Story 5
-- [ ] T023 [US5] Implement `getHistory` method in `src/api/subscriptions.ts` (GET `/subscriptions/{id}/history`) returning `SubscriptionHistory[]`.
+- [x] T023 [US5] Implement `getHistory` method in `src/api/subscriptions.ts` (GET `/subscriptions/{id}/history`) returning `SubscriptionHistory[]`.
 
 **Checkpoint**: User Story 5 independently testable.
 
@@ -109,10 +109,10 @@
 
 ## Final Phase: Polish & Cross-Cutting Concerns
 
-- [ ] T024 [P] Update `README.md` Subscriptions section with finalized signatures/examples and error notes.
-- [ ] T025 [P] Sync `specs/007-subscriptions-api/quickstart.md` with implemented behaviors and examples.
-- [ ] T026 Run full `npm test` and `npm run lint` ensuring new contract/integration suites pass.
-- [ ] T027 [P] Add JSDoc references to OpenAPI sections for all subscription methods in `src/api/subscriptions.ts`.
+- [x] T024 [P] Update `README.md` Subscriptions section with finalized signatures/examples and error notes.
+- [x] T025 [P] Sync `specs/007-subscriptions-api/quickstart.md` with implemented behaviors and examples.
+- [x] T026 Run full `npm test` and `npm run lint` ensuring new contract/integration suites pass.
+- [x] T027 [P] Add JSDoc references to OpenAPI sections for all subscription methods in `src/api/subscriptions.ts`.
 
 ---
 

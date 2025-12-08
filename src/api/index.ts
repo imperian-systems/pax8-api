@@ -36,3 +36,13 @@ export {
   listOrders,
   type OrdersApiClient,
 } from './orders';
+
+export {
+  SubscriptionsApi,
+  cancelSubscription,
+  getSubscription,
+  getSubscriptionHistory,
+  listSubscriptions,
+  updateSubscription,
+  type SubscriptionsApiClient,
+} from './subscriptions';

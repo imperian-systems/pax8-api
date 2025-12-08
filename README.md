@@ -597,70 +597,119 @@ await client.orders.create(
 
 ### Subscriptions
 
-Manage active service agreements.
+Manage active service agreements. The Subscriptions API uses **page-based pagination** with `page` (0-based) and `size` (default 10, max 200).
+
+#### Methods
 
 ```typescript
 // List subscriptions with optional filters
-client.subscriptions.list(options?: ListSubscriptionsOptions): Promise<Page<Subscription>>
+const result = await client.subscriptions.list({
+  page: 0,                // Optional: page number (default 0)
+  size: 25,               // Optional: page size (default 10, max 200)
+  companyId: 'comp-123',  // Optional: filter by company
+  productId: 'prod-456',  // Optional: filter by product
+  status: 'Active',       // Optional: filter by status
+  sort: 'productId,asc'   // Optional: sort order
+});
+
+console.log(result.content);          // Subscription[]
+console.log(result.page.totalElements); // Total subscriptions matching filters
+console.log(result.page.totalPages);    // Total pages available
 
 // Get a specific subscription by ID
-client.subscriptions.get(id: string): Promise<Subscription>
+const subscription = await client.subscriptions.get('sub-123');
+console.log(subscription.quantity);
+console.log(subscription.status);
+console.log(subscription.billingTerm);
 
-// Update a subscription
-client.subscriptions.update(id: string, data: UpdateSubscriptionRequest): Promise<Subscription>
+// Update subscription quantity (only quantity modifications supported)
+const updated = await client.subscriptions.update('sub-123', {
+  quantity: 15
+});
+console.log(updated.quantity); // 15
 
-// Cancel a subscription
-client.subscriptions.cancel(id: string, options?: CancelOptions): Promise<void>
+// Cancel a subscription immediately
+await client.subscriptions.cancel('sub-123');
 
-// Get subscription history
-client.subscriptions.getHistory(id: string): Promise<SubscriptionHistory[]>
+// Schedule cancellation on a future billing date
+await client.subscriptions.cancel('sub-123', {
+  billingDate: '2025-12-31'  // ISO 8601 date string
+});
+
+// Get subscription change history
+const history = await client.subscriptions.getHistory('sub-123');
+for (const entry of history) {
+  console.log(`${entry.action} on ${entry.date}`);
+  if (entry.previousQuantity !== null && entry.newQuantity !== null) {
+    console.log(`  Quantity: ${entry.previousQuantity} → ${entry.newQuantity}`);
+  }
+}
 ```
 
-#### List Options
+#### Types
 
 ```typescript
 interface ListSubscriptionsOptions {
-  page?: number;
-  size?: number;
-  sort?: string;
-  companyId?: string;      // Filter by company
-  productId?: string;      // Filter by product
-  status?: SubscriptionStatus; // Filter by status
+  page?: number;            // Optional: 0-indexed page number (default 0)
+  size?: number;            // Optional: page size (default 10, max 200)
+  sort?: string;            // Optional: sort field and direction (e.g., 'productId,asc')
+  companyId?: string;       // Optional: filter by company UUID
+  productId?: string;       // Optional: filter by product UUID
+  status?: SubscriptionStatus; // Optional: filter by status
 }
 
 type SubscriptionStatus = 
-  | 'Active' 
-  | 'Cancelled' 
-  | 'PendingManual' 
-  | 'PendingAutomated'
-  | 'PendingCancel'
-  | 'WaitingForDetails'
-  | 'Trial'
-  | 'Converted'
-  | 'PendingActivation'
-  | 'Activated';
+  | 'Active'                // Active subscription
+  | 'Cancelled'             // Cancelled subscription
+  | 'PendingManual'         // Pending manual provisioning
+  | 'PendingAutomated'      // Pending automated provisioning
+  | 'PendingCancel'         // Scheduled for cancellation
+  | 'WaitingForDetails'     // Awaiting provisioning details
+  | 'Trial'                 // Trial subscription
+  | 'Converted'             // Converted from trial
+  | 'PendingActivation'     // Pending activation
+  | 'Activated';            // Recently activated
+
+interface Subscription {
+  id: string;
+  companyId: string;
+  productId: string;
+  quantity: number;
+  status: SubscriptionStatus;
+  price: number;
+  billingTerm: BillingTerm; // 'Monthly' | 'Annual' | '2-Year' | '3-Year' | 'One-Time' | 'Trial' | 'Activation'
+  billingStart: string;     // ISO 8601
+  startDate: string;        // ISO 8601
+  endDate: string | null;   // ISO 8601, nullable
+  createdDate: string;      // ISO 8601
+  commitmentTermId?: string | null;
+  commitmentTermMonths?: number | null;
+  commitmentEndDate?: string | null; // ISO 8601, nullable
+}
+
+interface UpdateSubscriptionRequest {
+  quantity: number;         // Required: new quantity (must be positive)
+}
+
+interface CancelOptions {
+  billingDate?: string;     // Optional: ISO 8601 date for future-effective cancellation
+}
+
+interface SubscriptionHistory {
+  id: string;
+  subscriptionId: string;
+  action: string;           // e.g., 'QuantityUpdate', 'StatusChange', 'Created'
+  date: string;             // ISO 8601
+  userId?: string | null;
+  previousQuantity?: number | null;
+  newQuantity?: number | null;
+}
 ```
 
-#### Example
+#### Error Responses
 
-```typescript
-// List active subscriptions for a company
-const subscriptions = await client.subscriptions.list({ 
-  companyId: 'company-id',
-  status: 'Active',
-  size: 50
-});
-
-// Update subscription quantity
-const updated = await client.subscriptions.update('subscription-id', {
-  quantity: 10
-});
-
-// Cancel a subscription
-await client.subscriptions.cancel('subscription-id', {
-  billingDate: '2025-12-31'
-});
-```
+- **404 Not Found**: Subscription ID does not exist
+- **422 Unprocessable Entity**: Invalid quantity (must be positive) or invalid billingDate format
 
 ### Invoices
 
