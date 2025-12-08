@@ -1,6 +1,7 @@
 import { Pax8ClientConfig, ResolvedPax8ClientConfig, validateConfig } from './config';
 import { CompaniesApi } from '../api/companies';
 import { ContactsApi } from '../api/contacts';
+import { InvoicesApi } from '../api/invoices';
 import { OrdersApi } from '../api/orders';
 import { ProductsApi } from '../api/products';
 import { SubscriptionsApi } from '../api/subscriptions';
@@ -23,6 +24,9 @@ export class Pax8Client {
   /** Contacts API methods */
   public readonly contacts: ContactsApi;
 
+  /** Invoices API methods */
+  public readonly invoices: InvoicesApi;
+
   /** Products API methods */
   public readonly products: ProductsApi;
 
@@ -43,6 +47,7 @@ export class Pax8Client {
     this.tokenManager = new TokenManager(this.config);
     this.companies = new CompaniesApi(this);
     this.contacts = new ContactsApi(this);
+    this.invoices = new InvoicesApi(this);
     this.products = new ProductsApi(this);
     this.orders = new OrdersApi(this);
     this.subscriptions = new SubscriptionsApi(this);

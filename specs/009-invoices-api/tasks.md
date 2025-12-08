@@ -5,18 +5,18 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Review feature scope and acceptance in `specs/009-invoices-api/spec.md`
-- [ ] T002 Validate contract draft alignment with README surface in `specs/009-invoices-api/contracts/invoices.openapi.yaml`
+- [x] T001 Review feature scope and acceptance in `specs/009-invoices-api/spec.md`
+- [x] T002 Validate contract draft alignment with README surface in `specs/009-invoices-api/contracts/invoices.openapi.yaml`
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T003 Create invoices domain models and enums in `src/models/invoices.ts`
-- [ ] T004 Export invoices models in public barrel `src/index.ts`
-- [ ] T005 Create invoices API class scaffold with method stubs in `src/api/invoices.ts`
-- [ ] T006 Add invoices API export to `src/api/index.ts`
-- [ ] T007 Wire invoices API property on `Pax8Client` in `src/client/pax8-client.ts`
+- [x] T003 Create invoices domain models and enums in `src/models/invoices.ts`
+- [x] T004 Export invoices models in public barrel `src/index.ts`
+- [x] T005 Create invoices API class scaffold with method stubs in `src/api/invoices.ts`
+- [x] T006 Add invoices API export to `src/api/index.ts`
+- [x] T007 Wire invoices API property on `Pax8Client` in `src/client/pax8-client.ts`
 
 ---
 
@@ -26,11 +26,11 @@
 **Independent Test**: Call `client.invoices.list({ companyId, page, size })` and verify page metadata and filtered content.
 
 ### Tests (write first)
-- [ ] T008 [US1] Add contract tests for `listInvoices` (page, size, companyId, validation errors) in `tests/contract/api/invoices-contract.test.ts`
-- [ ] T009 [US1] Add integration flow test for invoice listing pagination/filtering in `tests/integration/api/invoices-flow.test.ts`
+- [x] T008 [US1] Add contract tests for `listInvoices` (page, size, companyId, validation errors) in `tests/contract/api/invoices-contract.test.ts`
+- [x] T009 [US1] Add integration flow test for invoice listing pagination/filtering in `tests/integration/api/invoices-flow.test.ts`
 
 ### Implementation
-- [ ] T010 [US1] Implement `list` method and request typing in `src/api/invoices.ts` using page-based pagination and optional `companyId`
+- [x] T010 [US1] Implement `list` method and request typing in `src/api/invoices.ts` using page-based pagination and optional `companyId`
 
 **Checkpoint**: Invoice listing returns paginated data with correct metadata and filtering.
 
@@ -42,11 +42,11 @@
 **Independent Test**: Request `client.invoices.get(id)`; verify full invoice shape and not-found handling.
 
 ### Tests (write first)
-- [ ] T011 [US2] Extend contract tests for `getInvoice` success/not-found cases in `tests/contract/api/invoices-contract.test.ts`
-- [ ] T012 [US2] Extend integration test for invoice detail and 404 path in `tests/integration/api/invoices-flow.test.ts`
+- [x] T011 [US2] Extend contract tests for `getInvoice` success/not-found cases in `tests/contract/api/invoices-contract.test.ts`
+- [x] T012 [US2] Extend integration test for invoice detail and 404 path in `tests/integration/api/invoices-flow.test.ts`
 
 ### Implementation
-- [ ] T013 [US2] Implement `get` method and error mapping in `src/api/invoices.ts`
+- [x] T013 [US2] Implement `get` method and error mapping in `src/api/invoices.ts`
 
 **Checkpoint**: Invoice detail retrieval works with clear errors for unknown IDs.
 
@@ -58,11 +58,11 @@
 **Independent Test**: Call `client.invoices.listItems(invoiceId, { page, size })`; verify items and page metadata.
 
 ### Tests (write first)
-- [ ] T014 [US3] Add contract tests for `listInvoiceItems` (pagination, validation) in `tests/contract/api/invoices-contract.test.ts`
-- [ ] T015 [US3] Add integration test for invoice items pagination in `tests/integration/api/invoices-flow.test.ts`
+- [x] T014 [US3] Add contract tests for `listInvoiceItems` (pagination, validation) in `tests/contract/api/invoices-contract.test.ts`
+- [x] T015 [US3] Add integration test for invoice items pagination in `tests/integration/api/invoices-flow.test.ts`
 
 ### Implementation
-- [ ] T016 [US3] Implement `listItems` method and response typing in `src/api/invoices.ts`
+- [x] T016 [US3] Implement `listItems` method and response typing in `src/api/invoices.ts`
 
 **Checkpoint**: Invoice items listing returns correct items and pagination metadata.
 
@@ -74,11 +74,11 @@
 **Independent Test**: Call `client.invoices.listDraftItems(companyId, { page, size })`; verify draft items and pagination.
 
 ### Tests (write first)
-- [ ] T017 [US4] Add contract tests for `listDraftInvoiceItems` path/company validation in `tests/contract/api/invoices-contract.test.ts`
-- [ ] T018 [US4] Add integration test for draft items pagination and empty results in `tests/integration/api/invoices-flow.test.ts`
+- [x] T017 [US4] Add contract tests for `listDraftInvoiceItems` path/company validation in `tests/contract/api/invoices-contract.test.ts`
+- [x] T018 [US4] Add integration test for draft items pagination and empty results in `tests/integration/api/invoices-flow.test.ts`
 
 ### Implementation
-- [ ] T019 [US4] Implement `listDraftItems` method and request typing in `src/api/invoices.ts`
+- [x] T019 [US4] Implement `listDraftItems` method and request typing in `src/api/invoices.ts`
 
 **Checkpoint**: Draft invoice items listing works with proper pagination and company scoping.
 
@@ -86,9 +86,9 @@
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T020 [P] Update invoices quickstart examples after implementation in `specs/009-invoices-api/quickstart.md`
-- [ ] T021 [P] Verify README Invoices section matches implemented behavior in `README.md`
-- [ ] T022 Run full lint + contract/integration test suite via scripts in `package.json`
+- [x] T020 [P] Update invoices quickstart examples after implementation in `specs/009-invoices-api/quickstart.md`
+- [x] T021 [P] Verify README Invoices section matches implemented behavior in `README.md`
+- [x] T022 Run full lint + contract/integration test suite via scripts in `package.json`
 
 ---
 
