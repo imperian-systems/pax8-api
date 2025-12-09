@@ -46,3 +46,12 @@ export {
   updateSubscription,
   type SubscriptionsApiClient,
 } from './subscriptions';
+
+export {
+  InvoicesApi,
+  getInvoice,
+  listDraftInvoiceItems,
+  listInvoiceItems,
+  listInvoices,
+  type InvoicesApiClient,
+} from './invoices';

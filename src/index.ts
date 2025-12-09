@@ -202,4 +202,45 @@ export {
   SUBSCRIPTION_STATUSES,
 } from './models/subscriptions';
 
+// Invoices API
+export {
+  InvoicesApi,
+  listInvoices,
+  getInvoice,
+  listInvoiceItems,
+  listDraftInvoiceItems,
+  type InvoicesApiClient,
+} from './api';
+
+// Invoice models and types
+export type {
+  ChargeType as InvoiceChargeType,
+  Invoice,
+  InvoiceItem,
+  InvoiceItemListResponse,
+  InvoiceListResponse,
+  InvoiceStatus,
+  PageMetadata as InvoicesPageMetadata,
+} from './models/invoices';
+
+export {
+  CHARGE_TYPES as INVOICE_CHARGE_TYPES,
+  DEFAULT_PAGE_SIZE as INVOICES_DEFAULT_PAGE_SIZE,
+  INVOICE_STATUSES,
+  MAX_PAGE_SIZE as INVOICES_MAX_PAGE_SIZE,
+  MIN_PAGE_SIZE as INVOICES_MIN_PAGE_SIZE,
+  assertInvoice,
+  assertInvoiceItem,
+  assertInvoiceItemListResponse,
+  assertInvoiceListResponse,
+  assertPageMetadata as assertInvoicesPageMetadata,
+  isChargeType as isInvoiceChargeType,
+  isInvoice,
+  isInvoiceItem,
+  isInvoiceItemListResponse,
+  isInvoiceListResponse,
+  isInvoiceStatus,
+  isPageMetadata as isInvoicesPageMetadata,
+} from './models/invoices';
+
 // Pagination utilities (none exported for companies; contacts use page/size helpers internally)
