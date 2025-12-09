@@ -62,3 +62,23 @@ export { UsageSummariesApi, getUsageSummary, listUsageLines, type UsageSummaries
 export { QuotesApi, type QuotesApiClient } from './quotes';
 
 export { QuotePreferencesApi, type QuotePreferencesApiClient } from './quote-preferences';
+
+export {
+  WebhooksApi,
+  addWebhookTopic,
+  createWebhook,
+  deleteWebhook,
+  getTopicDefinitions,
+  getWebhook,
+  getWebhookLog,
+  listWebhookLogs,
+  listWebhooks,
+  removeWebhookTopic,
+  replaceWebhookTopics,
+  retryWebhookDelivery,
+  testWebhookTopic,
+  updateWebhookConfiguration,
+  updateWebhookStatus,
+  updateWebhookTopicConfiguration,
+  type WebhooksApiClient,
+} from './webhooks';

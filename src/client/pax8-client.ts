@@ -8,6 +8,7 @@ import { SubscriptionsApi } from '../api/subscriptions';
 import { UsageSummariesApi } from '../api/usage-summaries';
 import { QuotesApi } from '../api/quotes';
 import { QuotePreferencesApi } from '../api/quote-preferences';
+import { WebhooksApi } from '../api/webhooks';
 import { TokenManager } from '../auth/token-manager';
 
 /**
@@ -48,6 +49,9 @@ export class Pax8Client {
   /** Quote Preferences API methods */
   public readonly quotePreferences: QuotePreferencesApi;
 
+  /** Webhooks API methods (v2 endpoints) */
+  public readonly webhooks: WebhooksApi;
+
   /**
    * Create a new client instance.
    *
@@ -66,6 +70,7 @@ export class Pax8Client {
     this.usageSummaries = new UsageSummariesApi(this);
     this.quotes = new QuotesApi(this);
     this.quotePreferences = new QuotePreferencesApi(this);
+    this.webhooks = new WebhooksApi(this);
   }
 
   /** Current client configuration with defaults applied. */
