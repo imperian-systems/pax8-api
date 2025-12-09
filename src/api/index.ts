@@ -43,6 +43,7 @@ export {
   getSubscription,
   getSubscriptionHistory,
   listSubscriptions,
+  listUsageSummaries,
   updateSubscription,
   type SubscriptionsApiClient,
 } from './subscriptions';
@@ -55,3 +56,5 @@ export {
   listInvoices,
   type InvoicesApiClient,
 } from './invoices';
+
+export { UsageSummariesApi, getUsageSummary, listUsageLines, type UsageSummariesApiClient } from './usage-summaries';
