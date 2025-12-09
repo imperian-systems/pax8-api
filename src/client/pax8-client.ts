@@ -5,6 +5,7 @@ import { InvoicesApi } from '../api/invoices';
 import { OrdersApi } from '../api/orders';
 import { ProductsApi } from '../api/products';
 import { SubscriptionsApi } from '../api/subscriptions';
+import { UsageSummariesApi } from '../api/usage-summaries';
 import { TokenManager } from '../auth/token-manager';
 
 /**
@@ -36,6 +37,9 @@ export class Pax8Client {
   /** Subscriptions API methods */
   public readonly subscriptions: SubscriptionsApi;
 
+  /** Usage Summaries API methods */
+  public readonly usageSummaries: UsageSummariesApi;
+
   /**
    * Create a new client instance.
    *
@@ -51,6 +55,7 @@ export class Pax8Client {
     this.products = new ProductsApi(this);
     this.orders = new OrdersApi(this);
     this.subscriptions = new SubscriptionsApi(this);
+    this.usageSummaries = new UsageSummariesApi(this);
   }
 
   /** Current client configuration with defaults applied. */

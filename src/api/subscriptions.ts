@@ -8,6 +8,8 @@ import type {
   SubscriptionHistory,
 } from '../models/subscriptions.js';
 import { MIN_PAGE_SIZE, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '../models/subscriptions.js';
+import type { UsageSummaryListResponse, ListUsageSummariesOptions } from '../models/usage-summaries.js';
+import { assertUsageSummaryListResponse } from '../models/usage-summaries.js';
 
 export interface SubscriptionsApiClient {
   request: (path: string, init?: RequestInit) => Promise<Response>;
@@ -158,6 +160,43 @@ export class SubscriptionsApi {
    */
   async getHistory(subscriptionId: string): Promise<SubscriptionHistory[]> {
     return getSubscriptionHistory(this.client, subscriptionId);
+  }
+
+  /**
+   * List usage summaries for a subscription.
+   *
+   * Retrieves paginated usage summaries showing usage-based billing data.
+   * Usage summaries aggregate usage data by resource group and product within
+   * a billing period.
+   *
+   * OpenAPI: GET /subscriptions/{subscriptionId}/usage-summaries
+   * @see https://docs.pax8.com/api/v1#tag/Usage-Summaries/operation/listUsageSummaries
+   *
+   * @param subscriptionId - The unique identifier of the subscription (UUID format)
+   * @param options - Optional pagination and sorting parameters
+   * @returns Promise resolving to a paginated list of usage summaries
+   * @throws {Pax8Error} When subscription is not found (404)
+   *
+   * @example
+   * ```typescript
+   * // List usage summaries for a subscription
+   * const summaries = await client.subscriptions.listUsageSummaries('subscription-id');
+   * console.log(summaries.content[0].resourceGroup);
+   * console.log(summaries.content[0].currentCharges);
+   *
+   * // With pagination and sorting
+   * const page2 = await client.subscriptions.listUsageSummaries('subscription-id', {
+   *   page: 1,
+   *   size: 50,
+   *   sort: 'resourceGroup,asc'
+   * });
+   * ```
+   */
+  async listUsageSummaries(
+    subscriptionId: string,
+    options?: ListUsageSummariesOptions,
+  ): Promise<UsageSummaryListResponse> {
+    return listUsageSummaries(this.client, subscriptionId, options);
   }
 }
 
@@ -314,4 +353,64 @@ export const getSubscriptionHistory = async (
 
   const data: unknown = await response.json();
   return data as SubscriptionHistory[];
+};
+
+/**
+ * List usage summaries for a subscription.
+ *
+ * Retrieves paginated usage summaries showing usage-based billing data for a subscription.
+ * Usage summaries aggregate usage data by resource group and product.
+ *
+ * OpenAPI: GET /subscriptions/{subscriptionId}/usage-summaries
+ * @see https://docs.pax8.com/api/v1#tag/Usage-Summaries/operation/listUsageSummaries
+ *
+ * @param client - API client with request method
+ * @param subscriptionId - The unique identifier of the subscription (UUID format)
+ * @param options - Optional pagination and sorting parameters
+ * @returns Promise resolving to a paginated list of usage summaries
+ *
+ * @example
+ * ```typescript
+ * // List all usage summaries for a subscription
+ * const summaries = await client.subscriptions.listUsageSummaries('subscription-id');
+ *
+ * // With pagination and sorting
+ * const page2 = await client.subscriptions.listUsageSummaries('subscription-id', {
+ *   page: 1,
+ *   size: 50,
+ *   sort: 'resourceGroup,asc'
+ * });
+ * ```
+ */
+export const listUsageSummaries = async (
+  client: SubscriptionsApiClient,
+  subscriptionId: string,
+  options?: ListUsageSummariesOptions,
+): Promise<UsageSummaryListResponse> => {
+  validateNonEmptyString(subscriptionId, 'subscriptionId');
+
+  const page = options?.page ?? 0;
+  const size = options?.size ?? DEFAULT_PAGE_SIZE;
+
+  validatePage(page);
+  validateSize(size, DEFAULT_PAGE_SIZE, MIN_PAGE_SIZE, MAX_PAGE_SIZE);
+
+  const searchParams = new URLSearchParams();
+  searchParams.set('page', page.toString());
+  searchParams.set('size', size.toString());
+
+  if (options?.sort) {
+    searchParams.set('sort', options.sort);
+  }
+
+  const path = `/subscriptions/${subscriptionId}/usage-summaries?${searchParams.toString()}`;
+  const response = await client.request(path, { method: 'GET' });
+
+  if (!response.ok) {
+    await handleErrorResponse(response);
+  }
+
+  const data: unknown = await response.json();
+  assertUsageSummaryListResponse(data);
+  return data;
 };

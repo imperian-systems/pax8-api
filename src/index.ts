@@ -177,6 +177,7 @@ export {
   SubscriptionsApi,
   getSubscription,
   listSubscriptions,
+  listUsageSummaries,
   updateSubscription,
   cancelSubscription,
   getSubscriptionHistory,
@@ -242,5 +243,35 @@ export {
   isInvoiceStatus,
   isPageMetadata as isInvoicesPageMetadata,
 } from './models/invoices';
+
+// Usage Summaries API
+export { UsageSummariesApi, getUsageSummary, listUsageLines, type UsageSummariesApiClient } from './api';
+
+// Usage Summary models and types
+export type {
+  ListUsageLinesOptions,
+  ListUsageSummariesOptions,
+  PageMetadata as UsageSummariesPageMetadata,
+  UsageLine,
+  UsageLineListResponse,
+  UsageSummary,
+  UsageSummaryListResponse,
+} from './models/usage-summaries';
+
+export {
+  DEFAULT_PAGE_SIZE as USAGE_SUMMARIES_DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE as USAGE_SUMMARIES_MAX_PAGE_SIZE,
+  MIN_PAGE_SIZE as USAGE_SUMMARIES_MIN_PAGE_SIZE,
+  assertPageMetadata as assertUsageSummariesPageMetadata,
+  assertUsageLine,
+  assertUsageLineListResponse,
+  assertUsageSummary,
+  assertUsageSummaryListResponse,
+  isPageMetadata as isUsageSummariesPageMetadata,
+  isUsageLine,
+  isUsageLineListResponse,
+  isUsageSummary,
+  isUsageSummaryListResponse,
+} from './models/usage-summaries';
 
 // Pagination utilities (none exported for companies; contacts use page/size helpers internally)
