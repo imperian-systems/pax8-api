@@ -835,55 +835,124 @@ const quotes = await client.quotes.list({
 
 ### Webhooks
 
-Manage event notification subscriptions.
+Manage event notification webhooks for real-time updates. The Webhooks API uses **API v2** endpoints (`/api/v2`) distinct from v1 endpoints.
 
 ```typescript
-// List webhook subscriptions
-client.webhooks.list(options?: ListWebhooksOptions): Promise<Page<Webhook>>
+// List webhooks with filters and pagination
+client.webhooks.list(options?: ListWebhooksOptions): Promise<WebhookPagedResult>
 
 // Get a specific webhook by ID
-client.webhooks.get(id: string): Promise<Webhook>
+client.webhooks.get(webhookId: string): Promise<Webhook>
 
-// Create a webhook subscription
-client.webhooks.create(data: CreateWebhookRequest): Promise<Webhook>
+// Create a new webhook
+client.webhooks.create(webhook: CreateWebhook): Promise<Webhook>
 
-// Update a webhook subscription
-client.webhooks.update(id: string, data: UpdateWebhookRequest): Promise<Webhook>
+// Update webhook configuration
+client.webhooks.updateConfiguration(webhookId: string, config: UpdateWebhookConfiguration): Promise<Webhook>
 
-// Delete a webhook subscription
-client.webhooks.delete(id: string): Promise<void>
+// Update webhook status (enable/disable)
+client.webhooks.updateStatus(webhookId: string, status: UpdateWebhookStatus): Promise<Webhook>
 
-// Test a webhook
-client.webhooks.test(id: string): Promise<void>
+// Delete a webhook
+client.webhooks.delete(webhookId: string): Promise<void>
+
+// Topic management
+client.webhooks.addTopic(webhookId: string, topic: AddWebhookTopic): Promise<Webhook>
+client.webhooks.replaceTopics(webhookId: string, topics: ReplaceWebhookTopics): Promise<Webhook>
+client.webhooks.removeTopic(webhookId: string, topicId: string): Promise<void>
+client.webhooks.updateTopicConfiguration(webhookId: string, topicId: string, config: UpdateWebhookTopicConfiguration): Promise<Webhook>
+
+// Get available topic definitions
+client.webhooks.getTopicDefinitions(options?: ListTopicDefinitionsOptions): Promise<TopicDefinitionPagedResult>
+
+// Test webhook delivery
+client.webhooks.testTopic(webhookId: string, topic: string): Promise<WebhookTest>
+
+// Webhook logs
+client.webhooks.listLogs(webhookId: string, options: ListWebhookLogsOptions): Promise<WebhookLogPagedResult>
+client.webhooks.getLog(webhookId: string, logId: string): Promise<WebhookLog>
+
+// Retry failed delivery
+client.webhooks.retryDelivery(webhookId: string, logId: string): Promise<void>
 ```
-
-#### Available Event Types
-
-- `company.created`
-- `company.updated`
-- `order.created`
-- `subscription.created`
-- `subscription.updated`
-- `subscription.cancelled`
-- `invoice.created`
-- `invoice.paid`
 
 #### Example
 
 ```typescript
-// Create a webhook for order events
+// Create a webhook for order notifications
 const webhook = await client.webhooks.create({
-  url: 'https://your-app.example.com/webhooks/pax8',
-  events: ['order.created', 'subscription.created'],
-  secret: 'your-webhook-secret'
+  displayName: 'Order Notifications',
+  url: 'https://example.com/webhooks/pax8',
+  authorization: 'Bearer my-secret-token',
+  active: true,
+  contactEmail: 'alerts@example.com',
+  errorThreshold: 5,
+  webhookTopics: [
+    {
+      topic: 'order.created',
+      filters: [
+        {
+          action: 'created',
+          conditions: [
+            { field: 'companyId', operator: 'EQUALS', value: ['company-uuid'] }
+          ]
+        }
+      ]
+    }
+  ]
+});
+
+console.log(webhook.id);
+
+// List webhooks with filters
+const webhooks = await client.webhooks.list({
+  active: true,
+  topic: 'subscription.updated',
+  page: 0,
+  size: 20
+});
+
+// Add a topic to an existing webhook
+const updated = await client.webhooks.addTopic(webhook.id, {
+  topic: 'subscription.cancelled',
+  filters: [{ action: 'cancelled', conditions: [] }]
 });
 
 // Test webhook delivery
-await client.webhooks.test(webhook.id);
+const testResult = await client.webhooks.testTopic(webhook.id, 'order.created');
+console.log(testResult.url);
+console.log(testResult.samplePayload);
 
-// List all webhooks
-const webhooks = await client.webhooks.list();
+// View webhook logs
+const logs = await client.webhooks.listLogs(webhook.id, {
+  query: {},
+  status: 'FAILED',
+  page: 0,
+  size: 10
+});
+
+// Retry failed delivery
+if (logs.content.length > 0) {
+  await client.webhooks.retryDelivery(webhook.id, logs.content[0].id);
+}
+
+// Get available topic definitions
+const topicDefs = await client.webhooks.getTopicDefinitions({
+  search: 'order',
+  page: 0,
+  size: 20
+});
+
+console.log(topicDefs.content.map(t => t.topic));
 ```
+
+**Notes:**
+- Webhooks API uses v2 endpoints (`/api/v2/webhooks`)
+- `errorThreshold` maximum is 20 (controls retry attempts before email notification)
+- Topics cannot be duplicated on a single webhook
+- Webhook testing sends sample events regardless of subscription
+- Failed deliveries can be retried via log ID (returns HTTP 202 Accepted)
+
 
 ## Pagination
 

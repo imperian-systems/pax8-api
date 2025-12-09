@@ -58,3 +58,24 @@ export {
 } from './invoices';
 
 export { UsageSummariesApi, getUsageSummary, listUsageLines, type UsageSummariesApiClient } from './usage-summaries';
+
+export {
+  WebhooksApi,
+  addWebhookTopic,
+  createWebhook,
+  deleteWebhook,
+  getTopicDefinitions,
+  getWebhook,
+  getWebhookLog,
+  listWebhookLogs,
+  listWebhooks,
+  removeWebhookTopic,
+  replaceWebhookTopics,
+  retryWebhookDelivery,
+  testWebhookTopic,
+  updateWebhookConfiguration,
+  updateWebhookStatus,
+  updateWebhookTopicConfiguration,
+  type WebhooksApiClient,
+} from './webhooks';
+

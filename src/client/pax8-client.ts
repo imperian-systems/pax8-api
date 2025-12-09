@@ -6,6 +6,7 @@ import { OrdersApi } from '../api/orders';
 import { ProductsApi } from '../api/products';
 import { SubscriptionsApi } from '../api/subscriptions';
 import { UsageSummariesApi } from '../api/usage-summaries';
+import { WebhooksApi } from '../api/webhooks';
 import { TokenManager } from '../auth/token-manager';
 
 /**
@@ -40,6 +41,9 @@ export class Pax8Client {
   /** Usage Summaries API methods */
   public readonly usageSummaries: UsageSummariesApi;
 
+  /** Webhooks API methods (v2 endpoints) */
+  public readonly webhooks: WebhooksApi;
+
   /**
    * Create a new client instance.
    *
@@ -56,6 +60,7 @@ export class Pax8Client {
     this.orders = new OrdersApi(this);
     this.subscriptions = new SubscriptionsApi(this);
     this.usageSummaries = new UsageSummariesApi(this);
+    this.webhooks = new WebhooksApi(this);
   }
 
   /** Current client configuration with defaults applied. */
