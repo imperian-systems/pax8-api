@@ -1,0 +1,1225 @@
+openapi: 3.0.3
+info:
+  title: Pax8 Webhooks API - Client Contract
+  description: |
+    OpenAPI contract for the Webhooks API client implementation.
+    Covers webhook management (CRUD), topic definitions, topic management,
+    webhook testing, and webhook logs with retry capabilities.
+  version: 1.0.0
+  contact:
+    name: Pax8 API Client
+servers:
+  - url: https://api.pax8.com/api/v2
+    description: Pax8 Production API v2
+
+paths:
+  /webhooks:
+    get:
+      operationId: listWebhooks
+      summary: Query webhooks
+      description: |
+        Lists instances of WebhookView with the ability to query against
+        fields in WebhookView.
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/QueryParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/ActiveParam'
+        - $ref: '#/components/parameters/TopicParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/StatusParam'
+        - $ref: '#/components/parameters/AccountIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved webhooks list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookPagedResult'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      operationId: createWebhook
+      summary: Create webhook
+      description: Create an instance of WebhookView.
+      tags:
+        - Webhooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhook'
+      responses:
+        '200':
+          description: Webhook created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /webhooks/topic-definitions:
+    get:
+      operationId: getTopicDefinitions
+      summary: Get topic definitions
+      description: |
+        Get all available webhook subscription topic definitions and their
+        filterable conditions.
+      tags:
+        - Topic Definitions
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/TopicParam'
+      responses:
+        '200':
+          description: Successfully retrieved topic definitions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicDefinitionPagedResult'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /webhooks/{id}:
+    get:
+      operationId: getWebhook
+      summary: Get webhook by ID
+      description: Reads an instance of WebhookView.
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved webhook
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      operationId: deleteWebhook
+      summary: Delete webhook
+      description: Delete an instance of WebhookView.
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookIdParam'
+      responses:
+        '204':
+          description: Webhook deleted successfully
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /webhooks/{id}/configuration:
+    post:
+      operationId: updateWebhookConfiguration
+      summary: Update webhook configuration
+      description: |
+        Update a webhook's configuration. This will replace the configuration details.
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWebhookConfiguration'
+      responses:
+        '200':
+          description: Webhook configuration updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /webhooks/{id}/status:
+    post:
+      operationId: updateWebhookStatus
+      summary: Update webhook status
+      description: Update a webhook's active status.
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWebhookStatus'
+      responses:
+        '200':
+          description: Webhook status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /webhooks/{id}/topics:
+    post:
+      operationId: addWebhookTopic
+      summary: Add webhook topic
+      description: |
+        Add a topic to a webhook. This API only adds, does not replace topics
+        or update existing topics. Will throw if a topic type exists for this
+        webhook already.
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddWebhookTopic'
+      responses:
+        '200':
+          description: Topic added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      operationId: replaceWebhookTopics
+      summary: Replace all webhook topics
+      description: Replace all webhook topics.
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReplaceWebhookTopics'
+      responses:
+        '200':
+          description: Topics replaced successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /webhooks/{id}/topics/{topicId}:
+    delete:
+      operationId: removeWebhookTopic
+      summary: Remove webhook topic
+      description: Remove a specific topic from a webhook.
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookIdParam'
+        - $ref: '#/components/parameters/TopicIdParam'
+      responses:
+        '204':
+          description: Topic removed successfully
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /webhooks/{id}/topics/{topicId}/configuration:
+    post:
+      operationId: updateWebhookTopicConfiguration
+      summary: Update topic configuration
+      description: Update the configuration of a specific topic on a webhook.
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookIdParam'
+        - $ref: '#/components/parameters/TopicIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWebhookTopicConfiguration'
+      responses:
+        '200':
+          description: Topic configuration updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /webhooks/{id}/topics/{topic}/test:
+    post:
+      operationId: testWebhookTopic
+      summary: Test webhook topic
+      description: |
+        Test a webhook by sending a test event for a specific topic. This will
+        send an example payload of what this topic provides.
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookIdParam'
+        - name: topic
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The topic name to test
+      responses:
+        '200':
+          description: Test successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookTest'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /webhooks/{webhookId}/logs:
+    get:
+      operationId: listWebhookLogs
+      summary: Query webhook logs
+      description: |
+        Lists instances of WebhookLogView with the ability to query against
+        fields in WebhookLogView.
+      tags:
+        - Webhook Logs
+      parameters:
+        - name: webhookId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The ID of the webhook
+        - name: topicName
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Query params used to filter results
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/StatusParam'
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Start date filter (ISO 8601)
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+          description: End date filter (ISO 8601)
+        - $ref: '#/components/parameters/SortParam'
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: object
+          description: Query object for filtering
+      responses:
+        '200':
+          description: Successfully retrieved webhook logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookLogPagedResult'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /webhooks/{webhookId}/logs/{id}:
+    get:
+      operationId: getWebhookLog
+      summary: Get webhook log by ID
+      description: Reads an instance of WebhookLogView.
+      tags:
+        - Webhook Logs
+      parameters:
+        - name: webhookId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The ID of the webhook
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The ID of the log entry
+      responses:
+        '200':
+          description: Successfully retrieved webhook log
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookLog'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /webhooks/{webhookId}/logs/{logId}/retry:
+    post:
+      operationId: retryWebhookDelivery
+      summary: Retry webhook delivery
+      description: Retry sending a webhook that previously failed.
+      tags:
+        - Webhook Logs
+      parameters:
+        - name: webhookId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The ID of the webhook
+        - name: logId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The ID of the log entry to retry
+      responses:
+        '202':
+          description: Retry request accepted for processing
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  parameters:
+    WebhookIdParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The ID of the webhook
+
+    TopicIdParam:
+      in: path
+      name: topicId
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The ID of the topic
+
+    PageParam:
+      in: query
+      name: page
+      schema:
+        type: integer
+        format: int32
+        default: 0
+      description: 0-based page number
+
+    SizeParam:
+      in: query
+      name: size
+      schema:
+        type: integer
+        format: int32
+        default: 10
+      description: Page size
+
+    SortParam:
+      in: query
+      name: sort
+      schema:
+        type: string
+      description: Sort field and order, format field:asc/desc
+
+    QueryParam:
+      in: query
+      name: query
+      schema:
+        type: string
+      description: String value to query webhooks
+
+    ActiveParam:
+      in: query
+      name: active
+      schema:
+        type: boolean
+      description: Filter by active status
+
+    TopicParam:
+      in: query
+      name: topic
+      schema:
+        type: string
+      description: Filter by topic name
+
+    StatusParam:
+      in: query
+      name: status
+      schema:
+        type: string
+      description: Filter by delivery status
+
+    AccountIdParam:
+      in: query
+      name: accountId
+      schema:
+        type: string
+        format: uuid
+      description: Filter by account ID
+
+    SearchParam:
+      in: query
+      name: search
+      schema:
+        type: string
+      description: Search string
+
+  schemas:
+    Webhook:
+      type: object
+      required:
+        - id
+        - accountId
+        - displayName
+        - active
+        - errorThreshold
+        - webhookTopics
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the webhook
+          readOnly: true
+        accountId:
+          type: string
+          format: uuid
+          description: Account ID that owns this webhook
+        displayName:
+          type: string
+          description: Display name for the webhook
+        url:
+          type: string
+          description: URL where webhook events will be sent
+        authorization:
+          type: string
+          description: Authorization header value for webhook
+        active:
+          type: boolean
+          description: Whether the webhook is active
+        contactEmail:
+          type: string
+          description: Email address to notify when webhook delivery errors occur
+        errorThreshold:
+          type: integer
+          format: int32
+          description: Number of times a webhook will be retried and consecutive errors will result in an email notification
+        integrationId:
+          type: string
+          format: uuid
+          description: ID of the integration this webhook is associated with, if applicable
+        webhookTopics:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookTopic'
+          description: List of topics and configurations this webhook subscribes to
+        lastDeliveryStatus:
+          $ref: '#/components/schemas/WebhookDeliveryStatus'
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the webhook was created
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the webhook was last updated
+          readOnly: true
+
+    WebhookTopic:
+      type: object
+      required:
+        - id
+        - topic
+        - filters
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the webhook topic
+        topic:
+          type: string
+          description: The topic name
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookFilter'
+          description: Advanced filtering configuration
+
+    WebhookFilter:
+      type: object
+      required:
+        - action
+        - conditions
+      properties:
+        action:
+          type: string
+          description: Action to filter on
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterCondition'
+          description: List of conditions that must all be true
+
+    FilterCondition:
+      type: object
+      required:
+        - field
+        - operator
+        - value
+      properties:
+        field:
+          type: string
+          description: Field path to filter on
+        operator:
+          $ref: '#/components/schemas/FilterOperator'
+        value:
+          type: array
+          items:
+            type: string
+          description: Values to compare against
+
+    FilterOperator:
+      type: string
+      enum:
+        - EQUALS
+        - NOT_EQUALS
+        - GREATER_THAN
+        - LESS_THAN
+        - IN
+        - NOT_IN
+        - CONTAINS
+      description: Filter operator for webhook conditions
+
+    WebhookDeliveryStatus:
+      type: string
+      enum:
+        - PENDING
+        - SUCCESS
+        - FAILED
+        - RETRYING
+      description: Status of webhook delivery
+
+    CreateWebhook:
+      type: object
+      required:
+        - displayName
+      properties:
+        displayName:
+          type: string
+          description: Display name for the webhook
+        url:
+          type: string
+          description: URL where webhook events will be sent
+        authorization:
+          type: string
+          description: Authorization header value for webhook commands
+        active:
+          type: boolean
+          default: false
+          description: Whether the webhook is active
+        contactEmail:
+          type: string
+          description: Email address to notify when webhook delivery errors occur
+        errorThreshold:
+          type: integer
+          format: int32
+          maximum: 20
+          default: 3
+          description: Number of times a webhook will be retried and consecutive errors will result in an email notification
+        integrationId:
+          type: string
+          format: uuid
+          description: ID of the integration this webhook is associated with. Required for 3rd party integrators
+        webhookTopics:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddWebhookTopic'
+          default: []
+          description: List of topics and configurations this webhook subscribes to
+
+    UpdateWebhookConfiguration:
+      type: object
+      properties:
+        displayName:
+          type: string
+          description: Display name for the webhook
+        url:
+          type: string
+          description: URL where webhook events will be sent
+        authorization:
+          type: string
+          description: Authorization header value for webhooks
+        contactEmail:
+          type: string
+          description: Email address to notify when webhook delivery errors occur
+        errorThreshold:
+          type: integer
+          format: int32
+          maximum: 20
+          default: 3
+          description: Number of times a webhook will be retried and consecutive errors will result in an email notification
+
+    UpdateWebhookStatus:
+      type: object
+      required:
+        - active
+      properties:
+        active:
+          type: boolean
+          description: Whether the webhook should be active
+
+    AddWebhookTopic:
+      type: object
+      required:
+        - topic
+        - filters
+      properties:
+        topic:
+          type: string
+          description: The topic name to subscribe to
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateWebhookFilter'
+          description: Advanced filtering configuration
+
+    UpdateWebhookFilter:
+      type: object
+      required:
+        - action
+        - conditions
+      properties:
+        action:
+          type: string
+          description: Action to filter on
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateFilterCondition'
+          description: List of conditions that must all be true
+
+    UpdateFilterCondition:
+      type: object
+      required:
+        - field
+        - operator
+        - value
+      properties:
+        field:
+          type: string
+          description: Field path to filter on
+        operator:
+          $ref: '#/components/schemas/FilterOperator'
+        value:
+          type: array
+          items:
+            type: string
+          description: Values to compare against
+
+    ReplaceWebhookTopics:
+      type: object
+      required:
+        - webhookTopics
+      properties:
+        webhookTopics:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddWebhookTopic'
+          description: List of webhook topics to replace existing ones
+
+    UpdateWebhookTopicConfiguration:
+      type: object
+      required:
+        - filters
+      properties:
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateWebhookFilter'
+          description: Advanced filtering configuration
+
+    TopicDefinition:
+      type: object
+      required:
+        - topic
+        - name
+        - description
+        - availableFilters
+        - samplePayload
+      properties:
+        topic:
+          type: string
+          description: The topic name
+        name:
+          type: string
+          description: Human-readable name of the topic
+        description:
+          type: string
+          description: Description of the topic
+        availableFilters:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookFilterDefinition'
+          description: Available filters for this topic
+        samplePayload:
+          $ref: '#/components/schemas/WebhookPayload'
+
+    WebhookFilterDefinition:
+      type: object
+      required:
+        - action
+        - actionDisplayName
+        - description
+        - conditions
+      properties:
+        action:
+          type: string
+          description: Action to filter on
+        actionDisplayName:
+          type: string
+          description: Display name normalizing the action for consistency in presentation
+        description:
+          type: string
+          description: Description of the filter
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterConditionDefinition'
+          description: Available conditions for this filter
+
+    FilterConditionDefinition:
+      type: object
+      required:
+        - field
+        - operator
+        - dataType
+        - description
+        - value
+      properties:
+        field:
+          type: string
+          description: Field path to filter on
+        operator:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterOperator'
+          description: Available operators for this field
+        dataType:
+          type: string
+          description: Data type of the field
+        description:
+          type: string
+          description: Description of the field
+        value:
+          type: string
+          description: Example value for the field
+
+    WebhookPayload:
+      type: object
+      required:
+        - accountId
+        - url
+        - webhookId
+        - sentAt
+        - webhookTopic
+      properties:
+        accountId:
+          type: string
+          format: uuid
+          description: Account ID associated with the event
+        url:
+          type: string
+          description: URL where the webhook was sent
+        webhookId:
+          type: string
+          format: uuid
+          description: Webhook ID that sent this payload
+        sentAt:
+          type: string
+          format: date-time
+          description: Timestamp when the webhook was sent
+        webhookTopic:
+          $ref: '#/components/schemas/WebhookTopic'
+        payloadData:
+          type: object
+          additionalProperties: true
+          description: The actual event data
+
+    WebhookTest:
+      type: object
+      required:
+        - url
+        - webhook
+      properties:
+        url:
+          type: string
+          description: URL that was called
+        webhook:
+          $ref: '#/components/schemas/Webhook'
+        samplePayload:
+          type: object
+          additionalProperties: true
+          description: Sample payload that was sent
+
+    WebhookLog:
+      type: object
+      required:
+        - id
+        - webhookId
+        - webhookName
+        - finalStatus
+        - callHistory
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the log entry
+          readOnly: true
+        webhookId:
+          type: string
+          format: uuid
+          description: ID of the webhook this log belongs to
+        webhookName:
+          type: string
+          description: Display name of the webhook
+        finalStatus:
+          $ref: '#/components/schemas/WebhookDeliveryStatus'
+        callHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookCall'
+          description: History of delivery attempts
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the log was created
+          readOnly: true
+
+    WebhookCall:
+      type: object
+      required:
+        - id
+        - timestamp
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the call attempt
+          readOnly: true
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the call attempt
+        status:
+          $ref: '#/components/schemas/WebhookDeliveryStatus'
+        errorMessage:
+          type: string
+          description: Error message if the call failed
+        httpStatusCode:
+          type: integer
+          format: int32
+          description: HTTP status code returned by the webhook endpoint
+        payload:
+          type: object
+          additionalProperties: true
+          description: The payload that was sent in the webhook
+
+    Page:
+      type: object
+      required:
+        - number
+        - size
+        - totalElements
+        - totalPages
+      properties:
+        number:
+          type: integer
+          format: int32
+          default: 0
+        size:
+          type: integer
+          format: int32
+          default: 0
+        totalElements:
+          type: integer
+          format: int64
+          default: 0
+        totalPages:
+          type: integer
+          format: int32
+          default: 0
+
+    WebhookPagedResult:
+      type: object
+      required:
+        - content
+        - page
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Webhook'
+          description: List of webhooks
+        page:
+          $ref: '#/components/schemas/Page'
+
+    TopicDefinitionPagedResult:
+      type: object
+      required:
+        - content
+        - number
+        - size
+        - totalElements
+        - totalPages
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicDefinition'
+          description: List of topic definitions
+        number:
+          type: integer
+          format: int32
+          description: Current page number
+        size:
+          type: integer
+          format: int32
+          description: Number of items per page
+        totalElements:
+          type: integer
+          format: int64
+          description: Total number of elements
+        totalPages:
+          type: integer
+          format: int32
+          description: Total number of pages
+
+    WebhookLogPagedResult:
+      type: object
+      required:
+        - content
+        - page
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookLog'
+          description: List of webhook logs
+        page:
+          $ref: '#/components/schemas/Page'
+
+    ErrorType:
+      type: string
+      enum:
+        - NOT_FOUND
+        - UNAUTHORIZED
+        - FORBIDDEN
+        - BAD_REQUEST
+        - INTERNAL_SERVER_ERROR
+        - INVALID_PARAM
+      description: The type of error that occurred
+
+    ApiError:
+      type: object
+      required:
+        - status
+        - type
+        - message
+      properties:
+        status:
+          type: integer
+          format: int32
+        type:
+          $ref: '#/components/schemas/ErrorType'
+        message:
+          type: string
+        instance:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              status:
+                type: integer
+                format: int32
+              type:
+                $ref: '#/components/schemas/ErrorType'
+              message:
+                type: string
+
+  responses:
+    BadRequestError:
+      description: The request is missing required parameters or has invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    UnauthorizedError:
+      description: Missing or invalid token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    ForbiddenError:
+      description: User does not have permission to access this resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    NotFoundError:
+      description: The server cannot find the requested resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+    InternalError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://token-manager.pax8.com/oauth/token
+          scopes: {}
