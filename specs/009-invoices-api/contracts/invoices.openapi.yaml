@@ -1,0 +1,335 @@
+openapi: 3.0.3
+info:
+  title: Pax8 Invoices API - Client Contract
+  description: |
+    OpenAPI contract for the Invoices API client implementation.
+    Covers listing invoices, retrieving invoice details, listing invoice line items,
+    and listing draft invoice items for a company.
+  version: 1.0.0
+  contact:
+    name: Pax8 API Client
+servers:
+  - url: https://api.pax8.com/v1
+    description: Pax8 Production API
+
+paths:
+  /invoices:
+    get:
+      operationId: listInvoices
+      summary: List invoices
+      description: Retrieves a paginated list of invoices. Supports filtering by companyId.
+      tags:
+        - Invoices
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/CompanyIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved invoices list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /invoices/{invoiceId}:
+    get:
+      operationId: getInvoice
+      summary: Get invoice
+      description: Retrieves a specific invoice by ID.
+      tags:
+        - Invoices
+      parameters:
+        - $ref: '#/components/parameters/InvoiceIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /invoices/{invoiceId}/items:
+    get:
+      operationId: listInvoiceItems
+      summary: List invoice items
+      description: Retrieves a paginated list of line items for an invoice.
+      tags:
+        - Invoices
+      parameters:
+        - $ref: '#/components/parameters/InvoiceIdParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+      responses:
+        '200':
+          description: Successfully retrieved invoice items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceItemListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /companies/{companyId}/invoices/draft-items:
+    get:
+      operationId: listDraftInvoiceItems
+      summary: List draft invoice items
+      description: Retrieves a paginated list of draft invoice items for a company.
+      tags:
+        - Invoices
+      parameters:
+        - $ref: '#/components/parameters/CompanyIdPathParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+      responses:
+        '200':
+          description: Successfully retrieved draft invoice items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceItemListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  parameters:
+    PageParam:
+      in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      description: 0-based page number
+    SizeParam:
+      in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 10
+      description: Page size (max 200)
+    CompanyIdParam:
+      in: query
+      name: companyId
+      schema:
+        type: string
+        format: uuid
+      description: Filter invoices by company ID
+    CompanyIdPathParam:
+      in: path
+      name: companyId
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Company identifier
+    InvoiceIdParam:
+      in: path
+      name: invoiceId
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Invoice identifier
+
+  schemas:
+    InvoiceListResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invoice'
+        page:
+          $ref: '#/components/schemas/Page'
+      required: [content, page]
+
+    InvoiceItemListResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceItem'
+        page:
+          $ref: '#/components/schemas/Page'
+      required: [content, page]
+
+    Page:
+      type: object
+      properties:
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        number:
+          type: integer
+      required: [size, totalElements, totalPages, number]
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        invoiceDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        paidDate:
+          type: string
+          format: date
+          nullable: true
+        total:
+          type: number
+          format: double
+        balance:
+          type: number
+          format: double
+        status:
+          $ref: '#/components/schemas/InvoiceStatus'
+        carriedBalance:
+          type: number
+          format: double
+          nullable: true
+        partnerName:
+          type: string
+      required: [id, companyId, invoiceDate, dueDate, total, balance, status]
+
+    InvoiceItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        invoiceId:
+          type: string
+          format: uuid
+          nullable: true
+        companyId:
+          type: string
+          format: uuid
+        subscriptionId:
+          type: string
+          format: uuid
+          nullable: true
+        productId:
+          type: string
+          format: uuid
+        productName:
+          type: string
+        quantity:
+          type: number
+        unitPrice:
+          type: number
+          format: double
+        total:
+          type: number
+          format: double
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        chargeType:
+          $ref: '#/components/schemas/ChargeType'
+      required: [id, companyId, productId, productName, quantity, unitPrice, total, startDate, endDate, chargeType]
+
+    InvoiceStatus:
+      type: string
+      enum:
+        - Unpaid
+        - Paid
+        - Void
+        - Pending
+        - Overdue
+
+    ChargeType:
+      type: string
+      enum:
+        - NewCharge
+        - Renewal
+        - ProRata
+        - Adjustment
+        - Credit
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+      required: [status, message]
+
+  responses:
+    UnauthorizedError:
+      description: Authentication failed or not provided
+    ForbiddenError:
+      description: Insufficient permissions to access resource
+    NotFoundError:
+      description: Resource not found
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RateLimitError:
+      description: Too many requests
+    InternalError:
+      description: Unexpected server error
