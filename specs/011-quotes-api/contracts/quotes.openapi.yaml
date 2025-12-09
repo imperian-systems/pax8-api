@@ -1,0 +1,1426 @@
+openapi: 3.0.3
+info:
+  title: Pax8 Quotes API (Client Subset)
+  description: |
+    OpenAPI contract for Quotes API endpoints used by the pax8-api client library.
+    Based on Pax8 Quoting Endpoints v2 OpenAPI specification.
+  version: 2.0.0
+  contact:
+    name: Pax8 API
+    url: https://devx.pax8.com/
+
+servers:
+  - url: https://api.pax8.com/v2
+    description: Pax8 Production API v2
+
+paths:
+  /quotes:
+    get:
+      operationId: listQuotes
+      summary: List quotes with pagination
+      description: |
+        Retrieves a paginated list of quotes with optional filters.
+        Includes status counts for all quote statuses.
+      tags:
+        - Quotes
+      parameters:
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SortParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/StatusParam'
+        - $ref: '#/components/parameters/AccountParam'
+      responses:
+        '200':
+          description: Successfully retrieved quotes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      operationId: createQuote
+      summary: Create a new quote
+      description: Creates a new quote for the specified client.
+      tags:
+        - Quotes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuotePayload'
+      responses:
+        '201':
+          description: Quote created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /quotes/{quoteId}:
+    get:
+      operationId: getQuote
+      summary: Get a quote by ID
+      description: Retrieves a single quote with all nested details.
+      tags:
+        - Quotes
+      parameters:
+        - $ref: '#/components/parameters/QuoteIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved quote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateQuote
+      summary: Update a quote
+      description: Updates quote details like status, expiration, and messages.
+      tags:
+        - Quotes
+      parameters:
+        - $ref: '#/components/parameters/QuoteIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateQuotePayload'
+      responses:
+        '200':
+          description: Quote updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteQuote
+      summary: Delete a quote
+      description: Deletes a quote by ID.
+      tags:
+        - Quotes
+      parameters:
+        - $ref: '#/components/parameters/QuoteIdParam'
+      responses:
+        '204':
+          description: Quote deleted successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /quotes/{quoteId}/line-items:
+    post:
+      operationId: addLineItems
+      summary: Add line items to a quote
+      description: Adds one or more line items to a quote. Returns the updated quote.
+      tags:
+        - Line Items
+      parameters:
+        - $ref: '#/components/parameters/QuoteIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AddLineItemPayload'
+              minItems: 1
+              maxItems: 30
+      responses:
+        '200':
+          description: Line items added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateLineItems
+      summary: Update line items in a quote
+      description: Updates one or more existing line items. Returns the updated quote.
+      tags:
+        - Line Items
+      parameters:
+        - $ref: '#/components/parameters/QuoteIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/UpdateLineItemPayload'
+              minItems: 1
+      responses:
+        '200':
+          description: Line items updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /quotes/{quoteId}/line-items/{lineItemId}:
+    delete:
+      operationId: deleteLineItem
+      summary: Delete a line item
+      description: Deletes a single line item from a quote.
+      tags:
+        - Line Items
+      parameters:
+        - $ref: '#/components/parameters/QuoteIdParam'
+        - $ref: '#/components/parameters/LineItemIdParam'
+      responses:
+        '204':
+          description: Line item deleted successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /quotes/{quoteId}/line-items/bulk-delete:
+    post:
+      operationId: bulkDeleteLineItems
+      summary: Bulk delete line items
+      description: Deletes multiple line items from a quote.
+      tags:
+        - Line Items
+      parameters:
+        - $ref: '#/components/parameters/QuoteIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDeleteLineItemsPayload'
+      responses:
+        '204':
+          description: Line items deleted successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /quotes/{quoteId}/sections:
+    get:
+      operationId: getSections
+      summary: Get sections for a quote
+      description: Retrieves all sections for a quote.
+      tags:
+        - Sections
+      parameters:
+        - $ref: '#/components/parameters/QuoteIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved sections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Section'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      operationId: createSection
+      summary: Create a section
+      description: Creates a new section within a quote.
+      tags:
+        - Sections
+      parameters:
+        - $ref: '#/components/parameters/QuoteIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSectionPayload'
+      responses:
+        '201':
+          description: Section created successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Section'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateSections
+      summary: Update sections
+      description: Updates sections within a quote (batch operation).
+      tags:
+        - Sections
+      parameters:
+        - $ref: '#/components/parameters/QuoteIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSectionsPayload'
+      responses:
+        '200':
+          description: Sections updated successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Section'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /quotes/{quoteId}/access-list:
+    get:
+      operationId: getAccessList
+      summary: Get access list for a quote
+      description: Retrieves all access list entries for a quote.
+      tags:
+        - Access List
+      parameters:
+        - $ref: '#/components/parameters/QuoteIdParam'
+      responses:
+        '200':
+          description: Successfully retrieved access list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccessListEntry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      operationId: addAccessListEntries
+      summary: Add access list entries
+      description: Adds email recipients to the quote's access list.
+      tags:
+        - Access List
+      parameters:
+        - $ref: '#/components/parameters/QuoteIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAccessListPayload'
+      responses:
+        '201':
+          description: Access list entries added successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccessListEntry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /quotes/{quoteId}/access-list/{accessListEntryId}:
+    delete:
+      operationId: deleteAccessListEntry
+      summary: Delete an access list entry
+      description: Removes an access list entry from a quote.
+      tags:
+        - Access List
+      parameters:
+        - $ref: '#/components/parameters/QuoteIdParam'
+        - $ref: '#/components/parameters/AccessListEntryIdParam'
+      responses:
+        '204':
+          description: Access list entry deleted successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /quote-preferences:
+    get:
+      operationId: getQuotePreferences
+      summary: Get quote preferences
+      description: Retrieves partner-level quote preferences.
+      tags:
+        - Preferences
+      responses:
+        '200':
+          description: Successfully retrieved preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuotePreferences'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateQuotePreferences
+      summary: Update quote preferences
+      description: Creates or updates partner-level quote preferences.
+      tags:
+        - Preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateQuotePreferencesPayload'
+      responses:
+        '200':
+          description: Preferences updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuotePreferences'
+        '201':
+          description: Preferences created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuotePreferences'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  parameters:
+    QuoteIdParam:
+      name: quoteId
+      in: path
+      required: true
+      description: The quote ID
+      schema:
+        type: string
+        format: uuid
+
+    LineItemIdParam:
+      name: lineItemId
+      in: path
+      required: true
+      description: The line item ID
+      schema:
+        type: string
+        format: uuid
+
+    AccessListEntryIdParam:
+      name: accessListEntryId
+      in: path
+      required: true
+      description: The access list entry ID
+      schema:
+        type: string
+        format: uuid
+
+    LimitParam:
+      name: limit
+      in: query
+      description: Number of items per page (1-50, default 10)
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 10
+
+    PageParam:
+      name: page
+      in: query
+      description: Page number (1-indexed, default 1)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    SortParam:
+      name: sort
+      in: query
+      description: Sort field and direction (e.g., "status,desc")
+      schema:
+        type: string
+
+    SearchParam:
+      name: search
+      in: query
+      description: Search term
+      schema:
+        type: string
+
+    StatusParam:
+      name: status
+      in: query
+      description: Filter by quote status
+      schema:
+        $ref: '#/components/schemas/QuoteStatus'
+
+    AccountParam:
+      name: account
+      in: query
+      description: Account scope filter
+      schema:
+        type: string
+        enum:
+          - user
+          - partner
+        default: user
+
+  schemas:
+    Quote:
+      type: object
+      required:
+        - id
+        - status
+        - client
+        - partner
+        - lineItems
+        - totals
+        - attachments
+        - referenceCode
+        - published
+        - createdBy
+        - createdOn
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/QuoteStatus'
+        client:
+          $ref: '#/components/schemas/ClientDetails'
+        partner:
+          $ref: '#/components/schemas/PartnerDetails'
+        lineItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItem'
+        totals:
+          $ref: '#/components/schemas/InvoiceTotals'
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+        referenceCode:
+          type: string
+        introMessage:
+          type: string
+        termsAndDisclaimers:
+          type: string
+        expiresOn:
+          type: string
+          format: date-time
+        published:
+          type: boolean
+        publishedOn:
+          type: string
+          format: date-time
+          nullable: true
+        createdBy:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        respondedOn:
+          type: string
+          format: date-time
+          nullable: true
+        revokedOn:
+          type: string
+          format: date-time
+          nullable: true
+        acceptedBy:
+          $ref: '#/components/schemas/AcceptedBy'
+        quoteRequestId:
+          type: string
+          format: uuid
+          nullable: true
+
+    QuoteStatus:
+      type: string
+      enum:
+        - draft
+        - assigned
+        - sent
+        - closed
+        - declined
+        - accepted
+        - changes_requested
+        - expired
+
+    QuoteListResponse:
+      type: object
+      required:
+        - content
+        - statusCounts
+        - page
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Quote'
+        statusCounts:
+          $ref: '#/components/schemas/QuoteStatusCounts'
+        page:
+          $ref: '#/components/schemas/V2PageInfo'
+
+    QuoteStatusCounts:
+      type: object
+      required:
+        - draft
+        - assigned
+        - sent
+        - closed
+        - declined
+        - accepted
+        - changes_requested
+        - expired
+      properties:
+        draft:
+          type: integer
+        assigned:
+          type: integer
+        sent:
+          type: integer
+        closed:
+          type: integer
+        declined:
+          type: integer
+        accepted:
+          type: integer
+        changes_requested:
+          type: integer
+        expired:
+          type: integer
+
+    V2PageInfo:
+      type: object
+      required:
+        - limit
+        - page
+        - totalElements
+        - totalPages
+      properties:
+        limit:
+          type: integer
+        page:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+    LineItem:
+      type: object
+      required:
+        - id
+        - billingTerm
+        - quantity
+        - price
+        - cost
+        - totals
+      properties:
+        id:
+          type: string
+          format: uuid
+        billingTerm:
+          $ref: '#/components/schemas/BillingTerm'
+        product:
+          $ref: '#/components/schemas/Product'
+        quantity:
+          type: integer
+        price:
+          $ref: '#/components/schemas/AmountCurrency'
+        cost:
+          $ref: '#/components/schemas/AmountCurrency'
+        totals:
+          $ref: '#/components/schemas/InvoiceTotals'
+        effectiveDate:
+          type: string
+          format: date-time
+          nullable: true
+        note:
+          type: string
+          maxLength: 2000
+          nullable: true
+        subscriptionId:
+          type: string
+          format: uuid
+          nullable: true
+        commitmentTerm:
+          $ref: '#/components/schemas/CommitmentTerm'
+        relationship:
+          $ref: '#/components/schemas/LineItemRelationship'
+        usageBased:
+          $ref: '#/components/schemas/UsageBased'
+
+    BillingTerm:
+      type: string
+      enum:
+        - Monthly
+        - Annual
+        - 1 Year
+        - 2 Year
+        - 3 Year
+        - Trial
+        - Activation
+        - One-Time
+
+    AddLineItemPayload:
+      oneOf:
+        - $ref: '#/components/schemas/AddStandardLineItemPayload'
+        - $ref: '#/components/schemas/AddCustomLineItemPayload'
+        - $ref: '#/components/schemas/AddUsageBasedLineItemPayload'
+      discriminator:
+        propertyName: type
+        mapping:
+          Standard: '#/components/schemas/AddStandardLineItemPayload'
+          Custom: '#/components/schemas/AddCustomLineItemPayload'
+          UsageBased: '#/components/schemas/AddUsageBasedLineItemPayload'
+
+    AddStandardLineItemPayload:
+      type: object
+      required:
+        - type
+        - billingTerm
+        - productId
+      properties:
+        type:
+          type: string
+          enum: [Standard]
+        billingTerm:
+          $ref: '#/components/schemas/BillingTerm'
+        productId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          default: 1
+        price:
+          $ref: '#/components/schemas/AmountCurrency'
+        effectiveDate:
+          type: string
+          format: date-time
+        note:
+          type: string
+          maxLength: 2000
+        sectionId:
+          type: string
+          format: uuid
+        commitmentTerm:
+          $ref: '#/components/schemas/CommitmentTerm'
+        relationships:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItemRelationship'
+
+    AddCustomLineItemPayload:
+      type: object
+      required:
+        - type
+        - billingTerm
+        - productName
+        - cost
+        - price
+      properties:
+        type:
+          type: string
+          enum: [Custom]
+        billingTerm:
+          $ref: '#/components/schemas/BillingTerm'
+        productName:
+          type: string
+          maxLength: 255
+        productSku:
+          type: string
+          maxLength: 100
+        cost:
+          $ref: '#/components/schemas/AmountCurrency'
+        price:
+          $ref: '#/components/schemas/AmountCurrency'
+        quantity:
+          type: integer
+          default: 1
+        effectiveDate:
+          type: string
+          format: date-time
+        note:
+          type: string
+          maxLength: 2000
+        sectionId:
+          type: string
+          format: uuid
+        commitmentTerm:
+          $ref: '#/components/schemas/CommitmentTerm'
+        relationships:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItemRelationship'
+
+    AddUsageBasedLineItemPayload:
+      type: object
+      required:
+        - type
+        - billingTerm
+        - productId
+        - cost
+        - usageBased
+      properties:
+        type:
+          type: string
+          enum: [UsageBased]
+        billingTerm:
+          $ref: '#/components/schemas/BillingTerm'
+        productId:
+          type: string
+          format: uuid
+        cost:
+          $ref: '#/components/schemas/AmountCurrency'
+        usageBased:
+          $ref: '#/components/schemas/UsageBasedConfig'
+        quantity:
+          type: integer
+          default: 1
+        effectiveDate:
+          type: string
+          format: date-time
+        note:
+          type: string
+          maxLength: 2000
+        sectionId:
+          type: string
+          format: uuid
+        commitmentTerm:
+          $ref: '#/components/schemas/CommitmentTerm'
+        relationships:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItemRelationship'
+
+    UpdateLineItemPayload:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+        price:
+          $ref: '#/components/schemas/AmountCurrency'
+        effectiveDate:
+          type: string
+          format: date-time
+        note:
+          type: string
+          maxLength: 2000
+        sectionId:
+          type: string
+          format: uuid
+
+    BulkDeleteLineItemsPayload:
+      type: object
+      required:
+        - lineItemIds
+      properties:
+        lineItemIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - sku
+        - type
+        - isMspOnly
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        sku:
+          type: string
+        type:
+          $ref: '#/components/schemas/ProductType'
+        isMspOnly:
+          type: boolean
+
+    ProductType:
+      type: string
+      enum:
+        - Standalone
+        - Solution
+        - Custom
+
+    AmountCurrency:
+      type: object
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: number
+        currency:
+          type: string
+
+    InvoiceTotals:
+      type: object
+      required:
+        - initialCost
+        - initialProfit
+        - initialTotal
+        - recurringCost
+        - recurringProfit
+        - recurringTotal
+      properties:
+        initialCost:
+          $ref: '#/components/schemas/AmountCurrency'
+        initialProfit:
+          $ref: '#/components/schemas/AmountCurrency'
+        initialTotal:
+          $ref: '#/components/schemas/AmountCurrency'
+        recurringCost:
+          $ref: '#/components/schemas/AmountCurrency'
+        recurringProfit:
+          $ref: '#/components/schemas/AmountCurrency'
+        recurringTotal:
+          $ref: '#/components/schemas/AmountCurrency'
+
+    UsageBased:
+      type: object
+      required:
+        - type
+        - displayNote
+      properties:
+        type:
+          $ref: '#/components/schemas/UsageBasedType'
+        displayNote:
+          type: boolean
+
+    UsageBasedConfig:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          $ref: '#/components/schemas/UsageBasedType'
+        displayNote:
+          type: boolean
+
+    UsageBasedType:
+      type: string
+      enum:
+        - PRICE_FLAT
+        - PRICE_VARIES
+        - QTY_VARIES
+
+    CommitmentTerm:
+      type: object
+      required:
+        - termInMonths
+        - autoRenewal
+      properties:
+        termInMonths:
+          type: integer
+        autoRenewal:
+          type: boolean
+
+    LineItemRelationship:
+      type: object
+      properties:
+        requiredLineItemId:
+          type: string
+          format: uuid
+        requiredSubscriptionId:
+          type: string
+          format: uuid
+
+    ClientDetails:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+
+    PartnerDetails:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+
+    AcceptedBy:
+      type: object
+      required:
+        - userId
+        - email
+        - name
+      properties:
+        userId:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+
+    Attachment:
+      type: object
+      required:
+        - id
+        - name
+        - url
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        url:
+          type: string
+
+    Section:
+      type: object
+      required:
+        - id
+        - name
+        - order
+        - lineItems
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        order:
+          type: integer
+        lineItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/SectionLineItem'
+
+    SectionLineItem:
+      type: object
+      required:
+        - lineItemId
+        - order
+      properties:
+        lineItemId:
+          type: string
+          format: uuid
+        order:
+          type: integer
+
+    CreateSectionPayload:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+
+    UpdateSectionsPayload:
+      type: object
+      required:
+        - sections
+      properties:
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateSectionItem'
+
+    UpdateSectionItem:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        order:
+          type: integer
+        lineItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/SectionLineItem'
+
+    AccessListEntry:
+      type: object
+      required:
+        - id
+        - email
+        - link
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        link:
+          type: string
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+
+    AddAccessListPayload:
+      type: object
+      required:
+        - emails
+      properties:
+        emails:
+          type: array
+          items:
+            type: string
+            format: email
+          minItems: 1
+
+    QuotePreferences:
+      type: object
+      required:
+        - daysToExpire
+        - introMessage
+        - termsAndDisclaimers
+      properties:
+        daysToExpire:
+          type: integer
+        introMessage:
+          type: string
+        termsAndDisclaimers:
+          type: string
+
+    UpdateQuotePreferencesPayload:
+      type: object
+      properties:
+        daysToExpire:
+          type: integer
+        introMessage:
+          type: string
+        termsAndDisclaimers:
+          type: string
+
+    CreateQuotePayload:
+      type: object
+      required:
+        - clientId
+      properties:
+        clientId:
+          type: string
+          format: uuid
+        quoteRequestId:
+          type: string
+          format: uuid
+
+    UpdateQuotePayload:
+      type: object
+      properties:
+        expiresOn:
+          type: string
+          format: date-time
+        introMessage:
+          type: string
+        published:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/QuoteStatus'
+        termsAndDisclaimers:
+          type: string
+
+    QuoteApiError:
+      type: object
+      required:
+        - status
+        - message
+        - type
+        - instance
+        - details
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        type:
+          $ref: '#/components/schemas/QuoteErrorType'
+        instance:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuoteErrorDetail'
+
+    QuoteErrorType:
+      type: string
+      enum:
+        - QUOTE_NOT_FOUND
+        - QUOTE_VALIDATION
+        - LINE_ITEM_LIMIT_EXCEEDED
+        - QUOTE_ACCESS_EMAIL_EXISTS
+        - ACCESS_DENIED
+        - INVALID_REQUEST_PARAMETER
+        - REQUEST_VALIDATION_FAILED
+        - PAYLOAD_VALIDATION
+        - SERVICE_UNAVAILABLE
+
+    QuoteErrorDetail:
+      type: object
+      required:
+        - message
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/QuoteApiError'
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/QuoteApiError'
+
+    Forbidden:
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/QuoteApiError'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/QuoteApiError'
+
+    TooManyRequests:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          description: Seconds to wait before retrying
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/QuoteApiError'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/QuoteApiError'
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Quotes
+    description: Quote CRUD operations
+  - name: Line Items
+    description: Line item management within quotes
+  - name: Sections
+    description: Section organization within quotes
+  - name: Access List
+    description: Quote sharing management
+  - name: Preferences
+    description: Partner-level quote preferences
