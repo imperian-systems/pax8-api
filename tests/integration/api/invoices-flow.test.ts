@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getInvoice, listDraftInvoiceItems, listInvoiceItems, listInvoices } from '../../../src/api/invoices';
 import type { InvoicesApiClient } from '../../../src/api/invoices';
-import type { Invoice, InvoiceItem, InvoiceItemListResponse, InvoiceListResponse } from '../../../src/models/invoices';
+import type { Invoice, InvoiceItem, InvoiceItemsResponse, InvoiceListResponse } from '../../../src/models/invoices';
 
 /**
  * Integration tests for Invoices API flows.
@@ -23,24 +23,24 @@ describe('Invoices API Integration Tests', () => {
     companyId,
     invoiceDate: '2024-01-15',
     dueDate: '2024-02-15',
-    paidDate: status === 'Paid' ? '2024-02-10' : undefined,
     total: 1500.0,
     balance: status === 'Paid' ? 0.0 : 1500.0,
     status,
-    carriedBalance: 0.0,
-    partnerName: 'Test Partner',
   });
 
-  const makeInvoiceItem = (id: string, invoiceId: string | undefined, companyId: string): InvoiceItem => ({
-    id,
+  const makeInvoiceItem = (invoiceId: string, companyId: string): InvoiceItem => ({
     invoiceId,
     companyId,
+    companyName: 'Test Company',
     subscriptionId: 'sub-123',
     productId: 'prod-456',
     productName: 'Microsoft 365 Business Standard',
     quantity: 10,
-    unitPrice: 12.5,
-    total: 125.0,
+    price: 12.5,
+    partnerCost: 10.0,
+    productCost: 8.0,
+    lineItemTotal: 125.0,
+    lineItemTotalCustomer: 125.0,
     startDate: '2024-01-01',
     endDate: '2024-01-31',
     chargeType: 'Renewal',
@@ -176,14 +176,14 @@ describe('Invoices API Integration Tests', () => {
       const mockInvoice: Invoice = {
         id: 'inv-detail-123',
         companyId: 'comp-456',
+        companyName: 'Premium Company',
         invoiceDate: '2024-01-15',
         dueDate: '2024-02-15',
-        paidDate: '2024-02-10',
         total: 2500.0,
+        partnerTotal: 2000.0,
         balance: 0.0,
         status: 'Paid',
-        carriedBalance: 50.0,
-        partnerName: 'Premium Partner LLC',
+        currencyCode: 'USD',
       };
 
       vi.mocked(mockClient.request).mockResolvedValueOnce(
@@ -198,8 +198,7 @@ describe('Invoices API Integration Tests', () => {
       expect(result.id).toBe('inv-detail-123');
       expect(result.total).toBe(2500.0);
       expect(result.status).toBe('Paid');
-      expect(result.paidDate).toBe('2024-02-10');
-      expect(result.carriedBalance).toBe(50.0);
+      expect(result.partnerTotal).toBe(2000.0);
     });
 
     it('should handle 404 when invoice not found', async () => {
@@ -258,8 +257,8 @@ describe('Invoices API Integration Tests', () => {
 
   describe('User Story 3: List Invoice Line Items', () => {
     it('should retrieve invoice line items with pagination', async () => {
-      const mockResponse: InvoiceItemListResponse = {
-        content: Array.from({ length: 5 }, (_, i) => makeInvoiceItem(`item-${i + 1}`, 'inv-123', 'comp-456')),
+      const mockResponse: InvoiceItemsResponse = {
+        content: Array.from({ length: 5 }, () => makeInvoiceItem('inv-123', 'comp-456')),
         page: {
           size: 10,
           totalElements: 5,
@@ -283,8 +282,8 @@ describe('Invoices API Integration Tests', () => {
     });
 
     it('should paginate through invoice line items', async () => {
-      const firstPage: InvoiceItemListResponse = {
-        content: Array.from({ length: 10 }, (_, i) => makeInvoiceItem(`item-page1-${i + 1}`, 'inv-456', 'comp-789')),
+      const firstPage: InvoiceItemsResponse = {
+        content: Array.from({ length: 10 }, () => makeInvoiceItem('inv-456', 'comp-789')),
         page: {
           size: 10,
           totalElements: 15,
@@ -293,8 +292,8 @@ describe('Invoices API Integration Tests', () => {
         },
       };
 
-      const secondPage: InvoiceItemListResponse = {
-        content: Array.from({ length: 5 }, (_, i) => makeInvoiceItem(`item-page2-${i + 1}`, 'inv-456', 'comp-789')),
+      const secondPage: InvoiceItemsResponse = {
+        content: Array.from({ length: 5 }, () => makeInvoiceItem('inv-456', 'comp-789')),
         page: {
           size: 10,
           totalElements: 15,
@@ -328,8 +327,8 @@ describe('Invoices API Integration Tests', () => {
 
     it('should retrieve items after getting invoice', async () => {
       const invoiceResponse: Invoice = makeInvoice('inv-789', 'comp-111');
-      const itemsResponse: InvoiceItemListResponse = {
-        content: [makeInvoiceItem('item-1', 'inv-789', 'comp-111'), makeInvoiceItem('item-2', 'inv-789', 'comp-111')],
+      const itemsResponse: InvoiceItemsResponse = {
+        content: [makeInvoiceItem('inv-789', 'comp-111'), makeInvoiceItem('inv-789', 'comp-111')],
         page: {
           size: 10,
           totalElements: 2,
@@ -362,8 +361,8 @@ describe('Invoices API Integration Tests', () => {
 
   describe('User Story 4: List Draft Invoice Items', () => {
     it('should retrieve draft invoice items for a company', async () => {
-      const mockResponse: InvoiceItemListResponse = {
-        content: Array.from({ length: 3 }, (_, i) => makeInvoiceItem(`draft-${i + 1}`, undefined, 'comp-999')),
+      const mockResponse: InvoiceItemsResponse = {
+        content: Array.from({ length: 3 }, () => makeInvoiceItem('draft-inv', 'comp-999')),
         page: {
           size: 10,
           totalElements: 3,
@@ -382,13 +381,12 @@ describe('Invoices API Integration Tests', () => {
       const result = await listDraftInvoiceItems(mockClient, 'comp-999');
 
       expect(result.content).toHaveLength(3);
-      expect(result.content[0].invoiceId).toBeUndefined();
       expect(result.content[0].companyId).toBe('comp-999');
     });
 
     it('should paginate through draft invoice items', async () => {
-      const firstPage: InvoiceItemListResponse = {
-        content: Array.from({ length: 20 }, (_, i) => makeInvoiceItem(`draft-page1-${i + 1}`, undefined, 'comp-abc')),
+      const firstPage: InvoiceItemsResponse = {
+        content: Array.from({ length: 20 }, () => makeInvoiceItem('draft-inv', 'comp-abc')),
         page: {
           size: 20,
           totalElements: 35,
@@ -397,8 +395,8 @@ describe('Invoices API Integration Tests', () => {
         },
       };
 
-      const secondPage: InvoiceItemListResponse = {
-        content: Array.from({ length: 15 }, (_, i) => makeInvoiceItem(`draft-page2-${i + 1}`, undefined, 'comp-abc')),
+      const secondPage: InvoiceItemsResponse = {
+        content: Array.from({ length: 15 }, () => makeInvoiceItem('draft-inv', 'comp-abc')),
         page: {
           size: 20,
           totalElements: 35,
@@ -431,7 +429,7 @@ describe('Invoices API Integration Tests', () => {
     });
 
     it('should return empty results when no draft items exist', async () => {
-      const mockResponse: InvoiceItemListResponse = {
+      const mockResponse: InvoiceItemsResponse = {
         content: [],
         page: {
           size: 10,
@@ -480,8 +478,8 @@ describe('Invoices API Integration Tests', () => {
       };
 
       // Step 3: Get invoice items
-      const itemsResponse: InvoiceItemListResponse = {
-        content: [makeInvoiceItem('item-flow-1', 'inv-flow-1', 'comp-flow')],
+      const itemsResponse: InvoiceItemsResponse = {
+        content: [makeInvoiceItem('inv-flow-1', 'comp-flow')],
         page: {
           size: 10,
           totalElements: 1,

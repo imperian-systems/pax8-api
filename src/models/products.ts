@@ -64,6 +64,7 @@ export interface ProvisioningDetail {
   description?: string;
   valueType: ProvisioningValueType;
   possibleValues?: string[];
+  values?: string[]; // writeOnly field for provisioning values
 }
 
 export interface ProvisioningDetailsResponse {

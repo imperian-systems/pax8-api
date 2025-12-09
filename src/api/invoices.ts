@@ -2,12 +2,12 @@ import { handleErrorResponse, validateNonEmptyString, validatePage, validateSize
 import {
   DEFAULT_PAGE_SIZE,
   Invoice,
-  InvoiceItemListResponse,
+  InvoiceItemsResponse,
   InvoiceListResponse,
   MAX_PAGE_SIZE,
   MIN_PAGE_SIZE,
   assertInvoice,
-  assertInvoiceItemListResponse,
+  assertInvoiceItemsResponse,
   assertInvoiceListResponse,
 } from '../models/invoices';
 
@@ -60,7 +60,7 @@ export class InvoicesApi {
    * @param options - Optional pagination parameters
    * @returns Promise resolving to a paginated list of invoice items
    */
-  async listItems(invoiceId: string, options: ListItemsOptions = {}): Promise<InvoiceItemListResponse> {
+  async listItems(invoiceId: string, options: ListItemsOptions = {}): Promise<InvoiceItemsResponse> {
     return listInvoiceItems(this.client, invoiceId, options);
   }
 
@@ -71,7 +71,7 @@ export class InvoicesApi {
    * @param options - Optional pagination parameters
    * @returns Promise resolving to a paginated list of draft invoice items
    */
-  async listDraftItems(companyId: string, options: ListItemsOptions = {}): Promise<InvoiceItemListResponse> {
+  async listDraftItems(companyId: string, options: ListItemsOptions = {}): Promise<InvoiceItemsResponse> {
     return listDraftInvoiceItems(this.client, companyId, options);
   }
 }
@@ -131,7 +131,7 @@ export const listInvoiceItems = async (
   client: InvoicesApiClient,
   invoiceId: string,
   options: ListItemsOptions = {},
-): Promise<InvoiceItemListResponse> => {
+): Promise<InvoiceItemsResponse> => {
   validateNonEmptyString(invoiceId, 'invoiceId');
 
   // Validate pagination
@@ -151,7 +151,7 @@ export const listInvoiceItems = async (
   }
 
   const data: unknown = await response.json();
-  assertInvoiceItemListResponse(data);
+  assertInvoiceItemsResponse(data);
 
   return data;
 };
@@ -160,7 +160,7 @@ export const listDraftInvoiceItems = async (
   client: InvoicesApiClient,
   companyId: string,
   options: ListItemsOptions = {},
-): Promise<InvoiceItemListResponse> => {
+): Promise<InvoiceItemsResponse> => {
   validateNonEmptyString(companyId, 'companyId');
 
   // Validate pagination
@@ -180,7 +180,7 @@ export const listDraftInvoiceItems = async (
   }
 
   const data: unknown = await response.json();
-  assertInvoiceItemListResponse(data);
+  assertInvoiceItemsResponse(data);
 
   return data;
 };

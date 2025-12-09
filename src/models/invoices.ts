@@ -1,41 +1,71 @@
-export const INVOICE_STATUSES = ['Unpaid', 'Paid', 'Void', 'Pending', 'Overdue'] as const;
-export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
-
-export const CHARGE_TYPES = ['NewCharge', 'Renewal', 'ProRata', 'Adjustment', 'Credit'] as const;
-export type ChargeType = (typeof CHARGE_TYPES)[number];
-
 export const MIN_PAGE_SIZE = 1;
 export const DEFAULT_PAGE_SIZE = 10;
 export const MAX_PAGE_SIZE = 200;
 
-export interface Invoice {
-  id: string;
-  companyId: string;
-  invoiceDate: string;
-  dueDate: string;
-  paidDate?: string;
-  total: number;
-  balance: number;
-  status: InvoiceStatus;
-  carriedBalance?: number;
-  partnerName?: string;
-}
+// Invoice status enum - matches OpenAPI spec
+export const INVOICE_STATUSES = ['Unpaid', 'Paid', 'Void', 'Carried', 'Nothing Due', 'Credited'] as const;
+export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 
+// Charge type enum from OpenAPI spec
+export const CHARGE_TYPES = ['New', 'Renewal', 'Upgrade', 'Downgrade', 'Cancel', 'Adjustment', 'Usage'] as const;
+export type ChargeType = (typeof CHARGE_TYPES)[number];
+
+// Invoice item - matches OpenAPI spec
 export interface InvoiceItem {
-  id: string;
-  invoiceId?: string;
-  companyId: string;
-  subscriptionId?: string;
+  invoiceId: string;
   productId: string;
   productName: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
-  startDate: string;
-  endDate: string;
+  companyId: string;
+  companyName: string;
+  subscriptionId: string;
   chargeType: ChargeType;
+  vendorRatePlanId?: string;
+  vendorSku?: string;
+  quantity: number;
+  price: number;
+  customerDiscount?: number;
+  partnerCost: number;
+  productCost: number;
+  lineItemTotal: number;
+  lineItemTotalCustomer: number;
+  startDate: string; // ISO 8601
+  endDate: string; // ISO 8601
 }
 
+// Invoice entity - matches OpenAPI spec
+export interface Invoice {
+  id: string;
+  invoiceDate: string; // ISO 8601
+  dueDate: string; // ISO 8601
+  status: InvoiceStatus;
+  balance: number;
+  companyId: string;
+  companyName?: string;
+  total: number;
+  partnerTotal?: number;
+  currencyCode?: string; // ISO 4217
+  externalId?: string;
+}
+
+// List invoices options
+export interface ListInvoicesOptions {
+  page?: number;
+  size?: number;
+  sort?: string;
+  companyId?: string;
+  status?: InvoiceStatus;
+  invoiceDateStart?: string; // ISO 8601
+  invoiceDateEnd?: string; // ISO 8601
+}
+
+// List invoice items options
+export interface ListInvoiceItemsOptions {
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+// Page metadata
 export interface PageMetadata {
   size: number;
   totalElements: number;
@@ -43,16 +73,19 @@ export interface PageMetadata {
   number: number;
 }
 
+// Invoice list response
 export interface InvoiceListResponse {
   content: Invoice[];
   page: PageMetadata;
 }
 
-export interface InvoiceItemListResponse {
+// Invoice items list response
+export interface InvoiceItemsResponse {
   content: InvoiceItem[];
   page: PageMetadata;
 }
 
+// Type guards
 const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 const isString = (value: unknown): value is string => typeof value === 'string';
 const isNonEmptyString = (value: unknown): value is string => isString(value) && value.trim().length > 0;
@@ -60,8 +93,7 @@ const isNumber = (value: unknown): value is number => typeof value === 'number' 
 const isInteger = (value: unknown): value is number => isNumber(value) && Number.isInteger(value);
 const isIsoDateString = (value: unknown): value is string => isString(value) && !Number.isNaN(Date.parse(value));
 const isOptionalString = (value: unknown): value is string | undefined => value === undefined || isString(value);
-const isOptionalNumber = (value: unknown): value is number | undefined =>
-  value === undefined || (isNumber(value) && Number.isFinite(value));
+const isOptionalNumber = (value: unknown): value is number | undefined => value === undefined || isNumber(value);
 
 export const isInvoiceStatus = (value: unknown): value is InvoiceStatus =>
   isString(value) && (INVOICE_STATUSES as readonly string[]).includes(value);
@@ -74,21 +106,17 @@ export const isInvoice = (value: unknown): value is Invoice => {
     return false;
   }
 
-  const { id, companyId, invoiceDate, dueDate, paidDate, total, balance, status, carriedBalance, partnerName } = value;
+  const { id, invoiceDate, dueDate, status, balance, companyId, companyName, total, partnerTotal, currencyCode, externalId } = value;
 
-  if (!isNonEmptyString(id) || !isNonEmptyString(companyId)) {
+  if (!isNonEmptyString(id)) {
     return false;
   }
 
-  if (!isIsoDateString(invoiceDate) || !isIsoDateString(dueDate)) {
+  if (!isIsoDateString(invoiceDate)) {
     return false;
   }
 
-  if (paidDate !== undefined && !isIsoDateString(paidDate)) {
-    return false;
-  }
-
-  if (!isNumber(total) || !isNumber(balance)) {
+  if (!isIsoDateString(dueDate)) {
     return false;
   }
 
@@ -96,11 +124,31 @@ export const isInvoice = (value: unknown): value is Invoice => {
     return false;
   }
 
-  if (!isOptionalNumber(carriedBalance)) {
+  if (!isNumber(balance)) {
     return false;
   }
 
-  if (!isOptionalString(partnerName)) {
+  if (!isNonEmptyString(companyId)) {
+    return false;
+  }
+
+  if (!isOptionalString(companyName)) {
+    return false;
+  }
+
+  if (!isNumber(total)) {
+    return false;
+  }
+
+  if (!isOptionalNumber(partnerTotal)) {
+    return false;
+  }
+
+  if (!isOptionalString(currencyCode)) {
+    return false;
+  }
+
+  if (!isOptionalString(externalId)) {
     return false;
   }
 
@@ -113,45 +161,95 @@ export const isInvoiceItem = (value: unknown): value is InvoiceItem => {
   }
 
   const {
-    id,
     invoiceId,
-    companyId,
-    subscriptionId,
     productId,
     productName,
+    companyId,
+    companyName,
+    subscriptionId,
+    chargeType,
+    vendorRatePlanId,
+    vendorSku,
     quantity,
-    unitPrice,
-    total,
+    price,
+    customerDiscount,
+    partnerCost,
+    productCost,
+    lineItemTotal,
+    lineItemTotalCustomer,
     startDate,
     endDate,
-    chargeType,
   } = value;
 
-  if (!isNonEmptyString(id) || !isNonEmptyString(companyId)) {
+  if (!isNonEmptyString(invoiceId)) {
     return false;
   }
 
-  if (!isOptionalString(invoiceId)) {
+  if (!isNonEmptyString(productId)) {
     return false;
   }
 
-  if (!isOptionalString(subscriptionId)) {
+  if (!isNonEmptyString(productName)) {
     return false;
   }
 
-  if (!isNonEmptyString(productId) || !isNonEmptyString(productName)) {
+  if (!isNonEmptyString(companyId)) {
     return false;
   }
 
-  if (!isNumber(quantity) || !isNumber(unitPrice) || !isNumber(total)) {
+  if (!isNonEmptyString(companyName)) {
     return false;
   }
 
-  if (!isIsoDateString(startDate) || !isIsoDateString(endDate)) {
+  if (!isNonEmptyString(subscriptionId)) {
     return false;
   }
 
   if (!isChargeType(chargeType)) {
+    return false;
+  }
+
+  if (!isOptionalString(vendorRatePlanId)) {
+    return false;
+  }
+
+  if (!isOptionalString(vendorSku)) {
+    return false;
+  }
+
+  if (!isNumber(quantity)) {
+    return false;
+  }
+
+  if (!isNumber(price)) {
+    return false;
+  }
+
+  if (!isOptionalNumber(customerDiscount)) {
+    return false;
+  }
+
+  if (!isNumber(partnerCost)) {
+    return false;
+  }
+
+  if (!isNumber(productCost)) {
+    return false;
+  }
+
+  if (!isNumber(lineItemTotal)) {
+    return false;
+  }
+
+  if (!isNumber(lineItemTotalCustomer)) {
+    return false;
+  }
+
+  if (!isIsoDateString(startDate)) {
+    return false;
+  }
+
+  if (!isIsoDateString(endDate)) {
     return false;
   }
 
@@ -202,7 +300,7 @@ export const isInvoiceListResponse = (value: unknown): value is InvoiceListRespo
   return true;
 };
 
-export const isInvoiceItemListResponse = (value: unknown): value is InvoiceItemListResponse => {
+export const isInvoiceItemsResponse = (value: unknown): value is InvoiceItemsResponse => {
   if (!isObject(value)) {
     return false;
   }
@@ -220,29 +318,12 @@ export const isInvoiceItemListResponse = (value: unknown): value is InvoiceItemL
   return true;
 };
 
+// Assertion functions
 export const assertInvoice: (value: unknown, message?: string) => asserts value is Invoice = (
   value: unknown,
   message = 'Invalid invoice payload',
 ): asserts value is Invoice => {
   if (!isInvoice(value)) {
-    throw new TypeError(message);
-  }
-};
-
-export const assertInvoiceItem: (value: unknown, message?: string) => asserts value is InvoiceItem = (
-  value: unknown,
-  message = 'Invalid invoice item payload',
-): asserts value is InvoiceItem => {
-  if (!isInvoiceItem(value)) {
-    throw new TypeError(message);
-  }
-};
-
-export const assertPageMetadata: (value: unknown, message?: string) => asserts value is PageMetadata = (
-  value: unknown,
-  message = 'Invalid pagination metadata',
-): asserts value is PageMetadata => {
-  if (!isPageMetadata(value)) {
     throw new TypeError(message);
   }
 };
@@ -256,14 +337,32 @@ export const assertInvoiceListResponse: (value: unknown, message?: string) => as
   }
 };
 
-export const assertInvoiceItemListResponse: (
+export const assertInvoiceItem: (value: unknown, message?: string) => asserts value is InvoiceItem = (
+  value: unknown,
+  message = 'Invalid invoice item payload',
+): asserts value is InvoiceItem => {
+  if (!isInvoiceItem(value)) {
+    throw new TypeError(message);
+  }
+};
+
+export const assertInvoiceItemsResponse: (
   value: unknown,
   message?: string,
-) => asserts value is InvoiceItemListResponse = (
+) => asserts value is InvoiceItemsResponse = (
   value: unknown,
-  message = 'Invalid invoice item list response',
-): asserts value is InvoiceItemListResponse => {
-  if (!isInvoiceItemListResponse(value)) {
+  message = 'Invalid invoice items response',
+): asserts value is InvoiceItemsResponse => {
+  if (!isInvoiceItemsResponse(value)) {
+    throw new TypeError(message);
+  }
+};
+
+export const assertPageMetadata: (value: unknown, message?: string) => asserts value is PageMetadata = (
+  value: unknown,
+  message = 'Invalid pagination metadata',
+): asserts value is PageMetadata => {
+  if (!isPageMetadata(value)) {
     throw new TypeError(message);
   }
 };
