@@ -1,0 +1,432 @@
+openapi: 3.0.3
+info:
+  title: Pax8 Usage Summaries API (Client Subset)
+  description: |
+    OpenAPI contract for Usage Summaries endpoints used by the pax8-api client library.
+    Based on Pax8 Partner API OpenAPI specification.
+  version: 1.0.0
+  contact:
+    name: Pax8 API
+    url: https://devx.pax8.com/
+
+servers:
+  - url: https://api.pax8.com/v1
+    description: Pax8 Production API
+
+paths:
+  /subscriptions/{subscriptionId}/usage-summaries:
+    get:
+      operationId: listUsageSummaries
+      summary: List usage summaries for a subscription
+      description: |
+        Retrieves a paginated list of usage summaries for the specified subscription.
+        Usage summaries aggregate usage data by product/resource group.
+      tags:
+        - Subscriptions
+        - Usage Summaries
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          description: The subscription ID to retrieve usage summaries for
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved usage summaries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageSummaryPagedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /usage-summaries/{usageSummaryId}:
+    get:
+      operationId: getUsageSummary
+      summary: Get a usage summary by ID
+      description: Retrieves a single usage summary by its unique identifier.
+      tags:
+        - Usage Summaries
+      parameters:
+        - name: usageSummaryId
+          in: path
+          required: true
+          description: The usage summary ID to retrieve
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successfully retrieved usage summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /usage-summaries/{usageSummaryId}/usage-lines:
+    get:
+      operationId: listUsageLines
+      summary: List usage lines for a usage summary
+      description: |
+        Retrieves a paginated list of usage lines for the specified usage summary.
+        The usageDate query parameter is REQUIRED.
+      tags:
+        - Usage Summaries
+        - Usage Lines
+      parameters:
+        - name: usageSummaryId
+          in: path
+          required: true
+          description: The usage summary ID to retrieve lines for
+          schema:
+            type: string
+            format: uuid
+        - name: usageDate
+          in: query
+          required: true
+          description: The date for which to retrieve usage lines (ISO 8601 format)
+          schema:
+            type: string
+            format: date
+          example: '2024-01-15'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Successfully retrieved usage lines
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageLinePagedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    UsageSummary:
+      type: object
+      description: Usage summary for a subscription
+      required:
+        - id
+        - companyId
+        - productId
+        - resourceGroup
+        - vendorName
+        - currentCharges
+        - currencyCode
+        - partnerTotal
+        - isTrial
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the usage summary
+        companyId:
+          type: string
+          format: uuid
+          description: Company ID associated with this usage
+        productId:
+          type: string
+          format: uuid
+          description: Product ID for the usage
+        resourceGroup:
+          type: string
+          description: Resource group name (e.g., "Office 365 E3")
+          example: Office 365 E3
+        vendorName:
+          type: string
+          description: Vendor name (e.g., "Microsoft")
+          example: Microsoft
+        currentCharges:
+          type: number
+          format: double
+          description: Current charges for this usage period
+          example: 150.00
+        currencyCode:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: ISO 4217 currency code
+          example: USD
+        partnerTotal:
+          type: number
+          format: double
+          description: Partner's total amount
+          example: 135.00
+        isTrial:
+          type: boolean
+          description: Whether this is a trial subscription
+          example: false
+
+    UsageLine:
+      type: object
+      description: Individual usage line item within a usage summary
+      required:
+        - usageSummaryId
+        - usageDate
+        - productName
+        - productId
+        - unitOfMeasure
+        - quantity
+        - currentCharges
+        - currentProfit
+        - partnerTotal
+        - unitPrice
+        - currencyCode
+        - isTrial
+      properties:
+        usageSummaryId:
+          type: string
+          format: uuid
+          description: ID of the parent usage summary
+        usageDate:
+          type: string
+          format: date
+          description: Date of the usage (ISO 8601 format)
+          example: '2024-01-15'
+        productName:
+          type: string
+          description: Product name for this line item
+          example: Office 365 E3
+        productId:
+          type: string
+          format: uuid
+          description: Product ID
+        unitOfMeasure:
+          type: string
+          description: Unit of measure (e.g., "User", "GB")
+          example: User
+        quantity:
+          type: number
+          format: double
+          description: Quantity consumed
+          minimum: 0
+          example: 25
+        currentCharges:
+          type: number
+          format: double
+          description: Current charges for this line
+          example: 150.00
+        currentProfit:
+          type: number
+          format: double
+          description: Current profit for partner
+          example: 15.00
+        partnerTotal:
+          type: number
+          format: double
+          description: Partner's total for this line
+          example: 135.00
+        unitPrice:
+          type: number
+          format: double
+          description: Unit price
+          minimum: 0
+          example: 6.00
+        currencyCode:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: ISO 4217 currency code
+          example: USD
+        isTrial:
+          type: boolean
+          description: Whether this is from a trial subscription
+          example: false
+
+    PageInfo:
+      type: object
+      description: Pagination information
+      required:
+        - number
+        - size
+        - totalPages
+        - totalElements
+      properties:
+        number:
+          type: integer
+          description: Current page number (0-indexed)
+          minimum: 0
+          example: 0
+        size:
+          type: integer
+          description: Page size
+          minimum: 1
+          maximum: 200
+          example: 10
+        totalPages:
+          type: integer
+          description: Total number of pages
+          minimum: 0
+          example: 5
+        totalElements:
+          type: integer
+          description: Total number of elements
+          minimum: 0
+          example: 47
+
+    UsageSummaryPagedResponse:
+      type: object
+      description: Paginated response containing usage summaries
+      required:
+        - page
+        - content
+      properties:
+        page:
+          $ref: '#/components/schemas/PageInfo'
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsageSummary'
+
+    UsageLinePagedResponse:
+      type: object
+      description: Paginated response containing usage lines
+      required:
+        - page
+        - content
+      properties:
+        page:
+          $ref: '#/components/schemas/PageInfo'
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsageLine'
+
+    Error:
+      type: object
+      description: Error response
+      properties:
+        status:
+          type: integer
+          description: HTTP status code
+        message:
+          type: string
+          description: Error message
+        requestId:
+          type: string
+          description: Request ID for tracking
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Page number (0-indexed)
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    SizeParam:
+      name: size
+      in: query
+      description: Page size (1-200)
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 10
+    SortParam:
+      name: sort
+      in: query
+      description: Sort field and direction
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - invalid or missing authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    TooManyRequests:
+      description: Too many requests - rate limited
+      headers:
+        Retry-After:
+          description: Seconds to wait before retrying
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: OAuth 2.0 access token
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Subscriptions
+    description: Subscription-related operations
+  - name: Usage Summaries
+    description: Usage summary operations
+  - name: Usage Lines
+    description: Usage line operations
