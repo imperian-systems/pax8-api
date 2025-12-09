@@ -275,3 +275,69 @@ export {
 } from './models/usage-summaries';
 
 // Pagination utilities (none exported for companies; contacts use page/size helpers internally)
+
+// Webhooks API
+export {
+  WebhooksApi,
+  type WebhooksApiClient,
+} from './api';
+
+// Webhooks models and types
+export type {
+  AddWebhookTopic,
+  CreateWebhook,
+  FilterCondition,
+  FilterConditionDefinition,
+  FilterOperator,
+  ListTopicDefinitionsOptions,
+  ListWebhookLogsOptions,
+  ListWebhooksOptions,
+  Page,
+  ReplaceWebhookTopics,
+  TopicDefinition,
+  TopicDefinitionPagedResult,
+  UpdateFilterCondition,
+  UpdateWebhookConfiguration,
+  UpdateWebhookFilter,
+  UpdateWebhookStatus,
+  UpdateWebhookTopicConfiguration,
+  Webhook,
+  WebhookCall,
+  WebhookDeliveryStatus,
+  WebhookFilter,
+  WebhookFilterDefinition,
+  WebhookLog,
+  WebhookLogPagedResult,
+  WebhookPagedResult,
+  WebhookPayload,
+  WebhookTest,
+  WebhookTopic,
+} from './models/webhooks';
+
+export {
+  DEFAULT_PAGE_SIZE as WEBHOOKS_DEFAULT_PAGE_SIZE,
+  FILTER_OPERATORS,
+  MAX_ERROR_THRESHOLD,
+  MAX_PAGE_SIZE as WEBHOOKS_MAX_PAGE_SIZE,
+  MIN_PAGE_SIZE as WEBHOOKS_MIN_PAGE_SIZE,
+  WEBHOOK_DELIVERY_STATUSES,
+  assertTopicDefinition,
+  assertTopicDefinitionPagedResult,
+  assertWebhook,
+  assertWebhookLog,
+  assertWebhookLogPagedResult,
+  assertWebhookPagedResult,
+  isFilterCondition,
+  isFilterOperator,
+  isPage,
+  isTopicDefinition,
+  isTopicDefinitionPagedResult,
+  isWebhook,
+  isWebhookDeliveryStatus,
+  isWebhookFilter,
+  isWebhookLog,
+  isWebhookLogPagedResult,
+  isWebhookPagedResult,
+  isWebhookTopic,
+} from './models/webhooks';
+
