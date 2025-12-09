@@ -274,4 +274,77 @@ export {
   isUsageSummaryListResponse,
 } from './models/usage-summaries';
 
+// Quotes API - Placeholder for API exports (will be added in Phase 2)
+// export { QuotesApi, type QuotesApiClient } from './api';
+// export { QuotePreferencesApi, type QuotePreferencesApiClient } from './api';
+
+// Quotes API
+export { QuotesApi, type QuotesApiClient } from './api';
+
+// Quote Preferences API
+export { QuotePreferencesApi, type QuotePreferencesApiClient } from './api';
+
+// Quote models and types
+export type {
+  AccessListEntry,
+  AcceptedBy,
+  AddAccessListPayload,
+  AddCustomLineItemPayload,
+  AddLineItemPayload,
+  AddStandardLineItemPayload,
+  AddUsageBasedLineItemPayload,
+  AmountCurrency,
+  Attachment,
+  BillingTerm as QuoteBillingTerm,
+  BulkDeleteLineItemsPayload,
+  ClientDetails,
+  CommitmentTerm,
+  CreateQuotePayload,
+  CreateSectionPayload,
+  LineItem,
+  LineItemRelationship,
+  ListQuotesOptions,
+  PartnerDetails,
+  Product as QuoteProduct,
+  ProductType,
+  Quote,
+  QuoteApiError,
+  QuoteErrorDetail,
+  QuoteErrorType,
+  QuoteListResponse,
+  QuoteStatus,
+  QuoteStatusCounts,
+  Section,
+  SectionLineItem,
+  UpdateLineItemPayload,
+  UpdateQuotePayload,
+  UpdateSectionItem,
+  UpdateSectionsPayload,
+  UsageBased,
+  UsageBasedConfig,
+  UsageBasedType,
+  V2PageInfo,
+  InvoiceTotals as QuoteInvoiceTotals,
+} from './models/quotes';
+
+export {
+  DEFAULT_LIMIT,
+  MAX_LIMIT,
+  MAX_LINE_ITEMS_PER_QUOTE,
+  MAX_NOTE_LENGTH,
+  MAX_PRODUCT_NAME_LENGTH,
+  MAX_PRODUCT_SKU_LENGTH,
+  MIN_LIMIT,
+  assertQuote,
+  assertQuoteListResponse,
+  isCustomLineItem,
+  isQuote,
+  isQuoteListResponse,
+  isStandardLineItem,
+  isUsageBasedLineItem,
+} from './models/quotes';
+
+// Quote Preferences models and types
+export type { QuotePreferences, UpdateQuotePreferencesPayload } from './models/quote-preferences';
+
 // Pagination utilities (none exported for companies; contacts use page/size helpers internally)

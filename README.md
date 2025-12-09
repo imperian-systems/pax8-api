@@ -796,40 +796,162 @@ for (const line of lines.content) {
 
 ### Quotes
 
-Manage quote creation and processing.
+Manage sales quotes with full lifecycle support: CRUD operations, line items, sections, and access control. Uses v2 API with 1-indexed pagination.
 
 ```typescript
-// List quotes with optional filters
-client.quotes.list(options?: ListQuotesOptions): Promise<Page<Quote>>
-
-// Get a specific quote by ID
-client.quotes.get(id: string): Promise<Quote>
-
 // Create a new quote
-client.quotes.create(data: CreateQuoteRequest): Promise<Quote>
-
-// Update a quote
-client.quotes.update(id: string, data: UpdateQuoteRequest): Promise<Quote>
-```
-
-#### Example
-
-```typescript
-// Create a quote
 const quote = await client.quotes.create({
-  companyId: 'company-id',
-  lineItems: [
-    {
-      productId: 'product-id',
-      quantity: 10
-    }
-  ],
-  validUntil: '2025-12-31'
+  clientId: 'company-123',
+  quoteRequestId: 'optional-request-id'
 });
 
-// List quotes for a company
-const quotes = await client.quotes.list({ 
-  companyId: 'company-id'
+// List quotes with pagination and filters
+const result = await client.quotes.list({
+  limit: 20,
+  page: 1,
+  status: 'draft',
+  search: 'customer name'
+});
+console.log(result.content);        // Quote[]
+console.log(result.statusCounts);   // Counts by status
+console.log(result.page);           // V2PageInfo (1-indexed)
+
+// Get a specific quote
+const quote = await client.quotes.get('quote-123');
+
+// Update quote details
+const updated = await client.quotes.update('quote-123', {
+  status: 'sent',
+  introMessage: 'Thank you for your interest!',
+  published: true
+});
+
+// Delete a quote
+await client.quotes.delete('quote-123');
+```
+
+#### Line Item Management
+
+Add, update, and remove line items with support for Standard, Custom, and UsageBased types via discriminated unions.
+
+```typescript
+// Add standard product line items
+await client.quotes.addLineItems('quote-123', [
+  {
+    type: 'Standard',
+    productId: 'prod-456',
+    billingTerm: 'Monthly',
+    quantity: 10,
+    price: { amount: 20, currency: 'USD' }
+  }
+]);
+
+// Add custom line items
+await client.quotes.addLineItems('quote-123', [
+  {
+    type: 'Custom',
+    productName: 'Consulting Services',
+    productSku: 'CONSULT-001',
+    billingTerm: 'One-Time',
+    quantity: 1,
+    cost: { amount: 500, currency: 'USD' },
+    price: { amount: 750, currency: 'USD' }
+  }
+]);
+
+// Add usage-based line items
+await client.quotes.addLineItems('quote-123', [
+  {
+    type: 'UsageBased',
+    productId: 'prod-789',
+    billingTerm: 'Monthly',
+    quantity: 1,
+    cost: { amount: 0, currency: 'USD' },
+    usageBased: {
+      type: 'QTY_VARIES',
+      displayNote: true
+    }
+  }
+]);
+
+// Update line items
+await client.quotes.updateLineItems('quote-123', [
+  {
+    id: 'line-item-1',
+    quantity: 15,
+    price: { amount: 25, currency: 'USD' }
+  }
+]);
+
+// Delete a single line item
+await client.quotes.deleteLineItem('quote-123', 'line-item-1');
+
+// Bulk delete line items
+await client.quotes.bulkDeleteLineItems('quote-123', {
+  lineItemIds: ['line-item-1', 'line-item-2']
+});
+```
+
+#### Section Management
+
+Organize line items into named sections for better presentation.
+
+```typescript
+// Get sections
+const sections = await client.quotes.getSections('quote-123');
+
+// Create a new section
+await client.quotes.createSection('quote-123', {
+  name: 'Microsoft Products'
+});
+
+// Update sections (batch)
+await client.quotes.updateSections('quote-123', {
+  sections: [
+    {
+      id: 'section-1',
+      name: 'Updated Name',
+      order: 1,
+      lineItems: [
+        { lineItemId: 'line-item-1', order: 1 },
+        { lineItemId: 'line-item-2', order: 2 }
+      ]
+    }
+  ]
+});
+```
+
+#### Access List Management
+
+Share quotes with customers by managing email access lists.
+
+```typescript
+// Get access list
+const accessList = await client.quotes.getAccessList('quote-123');
+
+// Add email recipients
+await client.quotes.addAccessListEntries('quote-123', {
+  emails: ['customer@example.com', 'stakeholder@example.com']
+});
+
+// Remove access
+await client.quotes.deleteAccessListEntry('quote-123', 'entry-id');
+```
+
+#### Quote Preferences
+
+Manage partner-level default preferences for quotes.
+
+```typescript
+// Get current preferences
+const prefs = await client.quotePreferences.get();
+console.log(`Quotes expire after ${prefs.daysToExpire} days`);
+
+// Update preferences
+await client.quotePreferences.update({
+  daysToExpire: 45,
+  introMessage: 'Thank you for your interest in our services!',
+  termsAndDisclaimers: 'Standard terms and conditions apply.'
 });
 ```
 

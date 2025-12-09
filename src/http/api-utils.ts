@@ -88,3 +88,54 @@ export function validateNonEmptyString(id: unknown, paramName: string): asserts 
     throw new TypeError(`${paramName} is required and must be a non-empty string`);
   }
 }
+
+/**
+ * Validate and normalize a limit parameter for v2 API pagination.
+ *
+ * @param limit - The limit to validate
+ * @param defaultLimit - The default limit to use if undefined
+ * @param minLimit - The minimum allowed limit
+ * @param maxLimit - The maximum allowed limit
+ * @returns The validated limit, or defaultLimit if undefined
+ * @throws TypeError if limit is invalid
+ */
+export const validateLimit = (
+  limit: number | undefined,
+  defaultLimit: number,
+  minLimit: number,
+  maxLimit: number
+): number => {
+  if (limit === undefined) {
+    return defaultLimit;
+  }
+
+  if (typeof limit !== 'number' || !Number.isInteger(limit)) {
+    throw new TypeError('limit must be an integer');
+  }
+
+  if (limit < minLimit || limit > maxLimit) {
+    throw new TypeError(`limit must be between ${minLimit} and ${maxLimit}`);
+  }
+
+  return limit;
+};
+
+/**
+ * Validate and normalize a page number parameter for v2 API pagination.
+ * Note: v2 API uses 1-indexed pages, not 0-indexed like v1.
+ *
+ * @param page - The page number to validate (1-indexed)
+ * @returns The validated page number, or 1 if undefined
+ * @throws TypeError if page is not a positive integer
+ */
+export const validateV2Page = (page?: number): number => {
+  if (page === undefined) {
+    return 1;
+  }
+
+  if (typeof page !== 'number' || !Number.isInteger(page) || page < 1) {
+    throw new TypeError('page must be a positive integer (1-indexed)');
+  }
+
+  return page;
+};

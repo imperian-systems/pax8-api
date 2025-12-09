@@ -58,3 +58,7 @@ export {
 } from './invoices';
 
 export { UsageSummariesApi, getUsageSummary, listUsageLines, type UsageSummariesApiClient } from './usage-summaries';
+
+export { QuotesApi, type QuotesApiClient } from './quotes';
+
+export { QuotePreferencesApi, type QuotePreferencesApiClient } from './quote-preferences';
