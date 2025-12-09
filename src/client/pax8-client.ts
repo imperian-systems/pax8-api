@@ -4,10 +4,10 @@ import { ContactsApi } from '../api/contacts';
 import { InvoicesApi } from '../api/invoices';
 import { OrdersApi } from '../api/orders';
 import { ProductsApi } from '../api/products';
+import { QuotePreferencesApi } from '../api/quote-preferences';
+import { QuotesApi } from '../api/quotes';
 import { SubscriptionsApi } from '../api/subscriptions';
 import { UsageSummariesApi } from '../api/usage-summaries';
-import { QuotesApi } from '../api/quotes';
-import { QuotePreferencesApi } from '../api/quote-preferences';
 import { WebhooksApi } from '../api/webhooks';
 import { TokenManager } from '../auth/token-manager';
 

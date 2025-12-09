@@ -5,7 +5,6 @@ import type { UsageSummariesApiClient } from '../../../src/api/usage-summaries';
 import type {
   UsageSummary,
   UsageSummaryListResponse,
-  UsageLine,
   UsageLineListResponse,
 } from '../../../src/models/usage-summaries';
 
