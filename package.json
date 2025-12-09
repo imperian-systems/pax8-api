@@ -1,6 +1,6 @@
 {
   "name": "@imperian-systems/pax8-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TypeScript client for the Pax8 API with OAuth 2.0 client credentials and zero runtime dependencies.",
   "license": "MIT",
   "type": "commonjs",
