@@ -1078,56 +1078,6 @@ console.log(topicDefs.content.map(t => t.topic));
 
 ## Pagination
 
-The Companies API uses **cursor-based pagination** with opaque tokens. Other Pax8 APIs may use page-based pagination. This section covers both patterns.
-
-### Cursor-Based Pagination (Companies API)
-
-The Companies API uses cursor-based pagination for stable iteration through large result sets:
-
-```typescript
-import { listCompanies, searchCompanies } from '@imperian-systems/pax8-api';
-
-// List companies with cursor pagination
-const firstPage = await client.companies.list({ 
-  limit: 50,           // Default 50, max 100
-  status: 'active' 
-});
-
-console.log(firstPage.items);              // Company[]
-console.log(firstPage.page.limit);         // 50
-console.log(firstPage.page.nextPageToken); // Opaque cursor token
-console.log(firstPage.page.hasMore);       // true if more results
-
-// Get next page using cursor token
-if (firstPage.page.nextPageToken) {
-  const secondPage = await client.companies.list({
-    pageToken: firstPage.page.nextPageToken,
-    limit: 50
-  });
-}
-
-// Iterate through all pages
-let allCompanies: Company[] = [];
-let pageToken: string | undefined;
-
-do {
-  const page = await client.companies.list({ 
-    limit: 100,
-    pageToken,
-    status: 'active'
-  });
-  
-  allCompanies.push(...page.items);
-  pageToken = page.page.nextPageToken;
-} while (pageToken);
-
-console.log(`Total companies: ${allCompanies.length}`);
-```
-
-### Page-Based Pagination (Other APIs)
-
-Other Pax8 APIs may use traditional page-based pagination:
-
 ```typescript
 // Note: This is an example for other APIs that may be added in the future
 // The Companies API uses cursor-based pagination shown above
@@ -1190,11 +1140,6 @@ if (companies.length > 0) {
 
 ### Pagination Tips
 
-- **Companies API**: Uses cursor-based pagination (default limit 50, max 100)
-  - Use `nextPageToken` to navigate forward
-  - Use `prevPageToken` when available to navigate backward
-  - Check `hasMore` flag to determine if more results exist
-- **Other APIs**: May use page-based pagination (default page size 10, max 200)
 - For bulk operations, use larger page sizes (e.g., `100`) to minimize API calls
 - The async iterator automatically handles rate limiting and retries
 - Use `sort` parameter to ensure consistent ordering across pages
