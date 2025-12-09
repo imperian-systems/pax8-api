@@ -750,33 +750,48 @@ const items = await client.invoices.listItems('invoice-id', {
 
 ### Usage Summaries
 
-Access usage-based billing data.
+Access usage-based billing data for subscriptions.
 
 ```typescript
-// List usage summaries with optional filters
-client.usageSummaries.list(options?: ListUsageSummariesOptions): Promise<Page<UsageSummary>>
+// List usage summaries for a subscription
+client.subscriptions.listUsageSummaries(subscriptionId: string, options?: ListUsageSummariesOptions): Promise<Page<UsageSummary>>
 
 // Get a specific usage summary by ID
 client.usageSummaries.get(id: string): Promise<UsageSummary>
 
-// List usage summary lines
-client.usageSummaries.listLines(id: string, options?: ListLinesOptions): Promise<Page<UsageLine>>
+// List usage lines for a summary (requires usageDate)
+client.usageSummaries.listLines(id: string, options: ListUsageLinesOptions): Promise<Page<UsageLine>>
 ```
 
 #### Example
 
 ```typescript
-// List usage summaries for a date range
-const summaries = await client.usageSummaries.list({ 
-  startDate: '2025-01-01',
-  endDate: '2025-01-31',
-  companyId: 'company-id'
+// List usage summaries for a subscription
+const summaries = await client.subscriptions.listUsageSummaries('subscription-id', { 
+  page: 0,
+  size: 50,
+  sort: 'resourceGroup,asc'
 });
 
-// Get detailed usage lines
-const lines = await client.usageSummaries.listLines('summary-id', {
-  size: 200
+for (const summary of summaries.content) {
+  console.log(`${summary.resourceGroup} (${summary.vendorName})`);
+  console.log(`Charges: ${summary.currentCharges} ${summary.currencyCode}`);
+}
+
+// Get a specific usage summary
+const summary = await client.usageSummaries.get('usage-summary-id');
+
+// Get detailed usage lines for a specific date (usageDate is required)
+const lines = await client.usageSummaries.listLines('usage-summary-id', {
+  usageDate: '2024-01-15',
+  page: 0,
+  size: 100
 });
+
+for (const line of lines.content) {
+  console.log(`${line.productName}: ${line.quantity} ${line.unitOfMeasure}`);
+  console.log(`  Charges: ${line.currentCharges} ${line.currencyCode}`);
+}
 ```
 
 ### Quotes
