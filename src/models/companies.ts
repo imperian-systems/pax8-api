@@ -6,8 +6,8 @@ export const DEFAULT_PAGE_SIZE = 10;
 export const MAX_PAGE_SIZE = 200;
 
 export interface CompanyAddress {
-  addressLine1?: string;
-  addressLine2?: string;
+  street?: string;
+  street2?: string;
   city?: string;
   stateOrProvince?: string;
   postalCode?: string;
@@ -18,14 +18,14 @@ export interface Company {
   id: string;
   name: string;
   address: CompanyAddress;
-  phone: string;
-  website: string;
+  phone?: string;
+  website?: string;
   externalId?: string;
   billOnBehalfOfEnabled: boolean;
   selfServiceAllowed: boolean;
   orderApprovalRequired: boolean;
   status: CompanyStatus;
-  updatedDate: string;
+  updatedDate?: string;
 }
 
 export interface PageMetadata {
@@ -64,11 +64,11 @@ const isCompanyAddress = (value: unknown): value is CompanyAddress => {
     return false;
   }
 
-  const { addressLine1, addressLine2, city, stateOrProvince, postalCode, country } = value;
+  const { street, street2, city, stateOrProvince, postalCode, country } = value;
 
   return (
-    isOptionalString(addressLine1) &&
-    isOptionalString(addressLine2) &&
+    isOptionalString(street) &&
+    isOptionalString(street2) &&
     isOptionalString(city) &&
     isOptionalString(stateOrProvince) &&
     isOptionalString(postalCode) &&
@@ -106,11 +106,15 @@ export const isCompany = (value: unknown): value is Company => {
     return false;
   }
 
-  if (!isNonEmptyString(phone) || !isNonEmptyString(website)) {
+  if (phone !== undefined && !isString(phone)) {
     return false;
   }
 
-  if (externalId !== undefined && !isNonEmptyString(externalId)) {
+  if (website !== undefined && !isString(website)) {
+    return false;
+  }
+
+  if (externalId !== undefined && !isString(externalId)) {
     return false;
   }
 
@@ -122,7 +126,7 @@ export const isCompany = (value: unknown): value is Company => {
     return false;
   }
 
-  if (!isIsoDateString(updatedDate)) {
+  if (updatedDate !== undefined && !isIsoDateString(updatedDate)) {
     return false;
   }
 

@@ -127,7 +127,10 @@ export class Pax8Client {
       }
     }
 
-    const url = new URL(path, this.config.baseUrl);
+    // Ensure baseUrl ends with / and strip leading / from path for proper URL resolution
+    const base = this.config.baseUrl.endsWith('/') ? this.config.baseUrl : `${this.config.baseUrl}/`;
+    const relativePath = path.startsWith('/') ? path.slice(1) : path;
+    const url = new URL(relativePath, base);
 
     try {
       return await fetch(url, { ...init, headers, signal: controller.signal });
