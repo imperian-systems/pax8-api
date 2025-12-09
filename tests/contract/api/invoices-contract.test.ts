@@ -183,15 +183,14 @@ describe('Invoices API Contract Tests', () => {
       const mockInvoice: Invoice = {
         id: 'inv-456',
         companyId: 'comp-789',
-        companyName: 'Test Corp',
         invoiceDate: '2024-02-01',
         dueDate: '2024-03-01',
+        paidDate: '2024-02-15',
         total: 3000.0,
-        partnerTotal: 2500.0,
-        balance: 500.0,
-        status: 'Unpaid',
-        currencyCode: 'EUR',
-        externalId: 'ext-456',
+        balance: 0.0,
+        status: 'Paid',
+        carriedBalance: 500.0,
+        partnerName: 'Test Partner Inc',
       };
 
       vi.mocked(mockClient.request).mockResolvedValueOnce(
@@ -203,10 +202,9 @@ describe('Invoices API Contract Tests', () => {
 
       const result = await getInvoice(mockClient, 'inv-456');
 
-      expect(result.companyName).toBe('Test Corp');
-      expect(result.partnerTotal).toBe(2500.0);
-      expect(result.currencyCode).toBe('EUR');
-      expect(result.externalId).toBe('ext-456');
+      expect(result.paidDate).toBe('2024-02-15');
+      expect(result.carriedBalance).toBe(500.0);
+      expect(result.partnerName).toBe('Test Partner Inc');
     });
   });
 
@@ -215,18 +213,15 @@ describe('Invoices API Contract Tests', () => {
       const mockResponse: InvoiceItemsResponse = {
         content: [
           {
+            id: 'item-123',
             invoiceId: 'inv-456',
             companyId: 'comp-789',
-            companyName: 'Test Company',
             subscriptionId: 'sub-111',
             productId: 'prod-222',
             productName: 'Microsoft 365 Business Standard',
             quantity: 10,
-            price: 12.5,
-            partnerCost: 10.0,
-            productCost: 8.0,
-            lineItemTotal: 125.0,
-            lineItemTotalCustomer: 125.0,
+            unitPrice: 12.5,
+            total: 125.0,
             startDate: '2024-01-01',
             endDate: '2024-01-31',
             chargeType: 'Renewal',
@@ -293,24 +288,18 @@ describe('Invoices API Contract Tests', () => {
       const mockResponse: InvoiceItemsResponse = {
         content: [
           {
+            id: 'item-789',
             invoiceId: 'inv-789',
             companyId: 'comp-111',
-            companyName: 'Another Company',
             subscriptionId: 'sub-222',
             productId: 'prod-333',
             productName: 'Adobe Creative Cloud',
             quantity: 5,
-            price: 54.99,
-            partnerCost: 50.0,
-            productCost: 45.0,
-            lineItemTotal: 274.95,
-            lineItemTotalCustomer: 274.95,
+            unitPrice: 54.99,
+            total: 274.95,
             startDate: '2024-02-01',
             endDate: '2024-02-29',
-            chargeType: 'New',
-            vendorRatePlanId: 'vrp-123',
-            vendorSku: 'vsku-456',
-            customerDiscount: 10.0,
+            chargeType: 'NewCharge',
           },
         ],
         page: { size: 10, totalElements: 1, totalPages: 1, number: 0 },
@@ -325,9 +314,9 @@ describe('Invoices API Contract Tests', () => {
 
       const result = await listInvoiceItems(mockClient, 'inv-abc');
 
-      expect(result.content[0].vendorRatePlanId).toBe('vrp-123');
-      expect(result.content[0].vendorSku).toBe('vsku-456');
-      expect(result.content[0].customerDiscount).toBe(10.0);
+      expect(result.content[0].id).toBe('item-789');
+      expect(result.content[0].invoiceId).toBe('inv-789');
+      expect(result.content[0].subscriptionId).toBe('sub-222');
     });
   });
 
@@ -336,18 +325,15 @@ describe('Invoices API Contract Tests', () => {
       const mockResponse: InvoiceItemsResponse = {
         content: [
           {
-            invoiceId: 'draft-123',
+            id: 'draft-item-123',
+            invoiceId: null,
             companyId: 'comp-456',
-            companyName: 'Draft Company',
             subscriptionId: 'sub-789',
             productId: 'prod-111',
             productName: 'Google Workspace Business',
             quantity: 20,
-            price: 18.0,
-            partnerCost: 15.0,
-            productCost: 12.0,
-            lineItemTotal: 360.0,
-            lineItemTotalCustomer: 360.0,
+            unitPrice: 18.0,
+            total: 360.0,
             startDate: '2024-03-01',
             endDate: '2024-03-31',
             chargeType: 'Renewal',

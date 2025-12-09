@@ -3,66 +3,54 @@ export const DEFAULT_PAGE_SIZE = 10;
 export const MAX_PAGE_SIZE = 200;
 
 // Invoice status enum - matches OpenAPI spec
-export const INVOICE_STATUSES = ['Unpaid', 'Paid', 'Void', 'Carried', 'Nothing Due', 'Credited'] as const;
+export const INVOICE_STATUSES = ['Unpaid', 'Paid', 'Void', 'Pending', 'Overdue'] as const;
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 
 // Charge type enum from OpenAPI spec
-export const CHARGE_TYPES = ['New', 'Renewal', 'Upgrade', 'Downgrade', 'Cancel', 'Adjustment', 'Usage'] as const;
+export const CHARGE_TYPES = ['NewCharge', 'Renewal', 'ProRata', 'Adjustment', 'Credit'] as const;
 export type ChargeType = (typeof CHARGE_TYPES)[number];
 
 // Invoice item - matches OpenAPI spec
 export interface InvoiceItem {
-  invoiceId: string;
+  id: string;
+  invoiceId?: string | null;
+  companyId: string;
+  subscriptionId?: string | null;
   productId: string;
   productName: string;
-  companyId: string;
-  companyName: string;
-  subscriptionId: string;
-  chargeType: ChargeType;
-  vendorRatePlanId?: string;
-  vendorSku?: string;
   quantity: number;
-  price: number;
-  customerDiscount?: number;
-  partnerCost: number;
-  productCost: number;
-  lineItemTotal: number;
-  lineItemTotalCustomer: number;
+  unitPrice: number;
+  total: number;
   startDate: string; // ISO 8601
   endDate: string; // ISO 8601
+  chargeType: ChargeType;
 }
 
 // Invoice entity - matches OpenAPI spec
 export interface Invoice {
   id: string;
+  companyId: string;
   invoiceDate: string; // ISO 8601
   dueDate: string; // ISO 8601
-  status: InvoiceStatus;
-  balance: number;
-  companyId: string;
-  companyName?: string;
+  paidDate?: string | null; // ISO 8601
   total: number;
-  partnerTotal?: number;
-  currencyCode?: string; // ISO 4217
-  externalId?: string;
+  balance: number;
+  status: InvoiceStatus;
+  carriedBalance?: number | null;
+  partnerName?: string;
 }
 
 // List invoices options
 export interface ListInvoicesOptions {
   page?: number;
   size?: number;
-  sort?: string;
   companyId?: string;
-  status?: InvoiceStatus;
-  invoiceDateStart?: string; // ISO 8601
-  invoiceDateEnd?: string; // ISO 8601
 }
 
 // List invoice items options
 export interface ListInvoiceItemsOptions {
   page?: number;
   size?: number;
-  sort?: string;
 }
 
 // Page metadata
@@ -92,8 +80,6 @@ const isNonEmptyString = (value: unknown): value is string => isString(value) &&
 const isNumber = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
 const isInteger = (value: unknown): value is number => isNumber(value) && Number.isInteger(value);
 const isIsoDateString = (value: unknown): value is string => isString(value) && !Number.isNaN(Date.parse(value));
-const isOptionalString = (value: unknown): value is string | undefined => value === undefined || isString(value);
-const isOptionalNumber = (value: unknown): value is number | undefined => value === undefined || isNumber(value);
 
 export const isInvoiceStatus = (value: unknown): value is InvoiceStatus =>
   isString(value) && (INVOICE_STATUSES as readonly string[]).includes(value);
@@ -106,9 +92,13 @@ export const isInvoice = (value: unknown): value is Invoice => {
     return false;
   }
 
-  const { id, invoiceDate, dueDate, status, balance, companyId, companyName, total, partnerTotal, currencyCode, externalId } = value;
+  const { id, companyId, invoiceDate, dueDate, paidDate, total, balance, status, carriedBalance, partnerName } = value;
 
   if (!isNonEmptyString(id)) {
+    return false;
+  }
+
+  if (!isNonEmptyString(companyId)) {
     return false;
   }
 
@@ -120,19 +110,7 @@ export const isInvoice = (value: unknown): value is Invoice => {
     return false;
   }
 
-  if (!isInvoiceStatus(status)) {
-    return false;
-  }
-
-  if (!isNumber(balance)) {
-    return false;
-  }
-
-  if (!isNonEmptyString(companyId)) {
-    return false;
-  }
-
-  if (!isOptionalString(companyName)) {
+  if (paidDate !== undefined && paidDate !== null && !isIsoDateString(paidDate)) {
     return false;
   }
 
@@ -140,15 +118,19 @@ export const isInvoice = (value: unknown): value is Invoice => {
     return false;
   }
 
-  if (!isOptionalNumber(partnerTotal)) {
+  if (!isNumber(balance)) {
     return false;
   }
 
-  if (!isOptionalString(currencyCode)) {
+  if (!isInvoiceStatus(status)) {
     return false;
   }
 
-  if (!isOptionalString(externalId)) {
+  if (carriedBalance !== undefined && carriedBalance !== null && !isNumber(carriedBalance)) {
+    return false;
+  }
+
+  if (partnerName !== undefined && !isString(partnerName)) {
     return false;
   }
 
@@ -161,27 +143,33 @@ export const isInvoiceItem = (value: unknown): value is InvoiceItem => {
   }
 
   const {
+    id,
     invoiceId,
+    companyId,
+    subscriptionId,
     productId,
     productName,
-    companyId,
-    companyName,
-    subscriptionId,
-    chargeType,
-    vendorRatePlanId,
-    vendorSku,
     quantity,
-    price,
-    customerDiscount,
-    partnerCost,
-    productCost,
-    lineItemTotal,
-    lineItemTotalCustomer,
+    unitPrice,
+    total,
     startDate,
     endDate,
+    chargeType,
   } = value;
 
-  if (!isNonEmptyString(invoiceId)) {
+  if (!isNonEmptyString(id)) {
+    return false;
+  }
+
+  if (invoiceId !== undefined && invoiceId !== null && !isNonEmptyString(invoiceId)) {
+    return false;
+  }
+
+  if (!isNonEmptyString(companyId)) {
+    return false;
+  }
+
+  if (subscriptionId !== undefined && subscriptionId !== null && !isNonEmptyString(subscriptionId)) {
     return false;
   }
 
@@ -193,55 +181,15 @@ export const isInvoiceItem = (value: unknown): value is InvoiceItem => {
     return false;
   }
 
-  if (!isNonEmptyString(companyId)) {
-    return false;
-  }
-
-  if (!isNonEmptyString(companyName)) {
-    return false;
-  }
-
-  if (!isNonEmptyString(subscriptionId)) {
-    return false;
-  }
-
-  if (!isChargeType(chargeType)) {
-    return false;
-  }
-
-  if (!isOptionalString(vendorRatePlanId)) {
-    return false;
-  }
-
-  if (!isOptionalString(vendorSku)) {
-    return false;
-  }
-
   if (!isNumber(quantity)) {
     return false;
   }
 
-  if (!isNumber(price)) {
+  if (!isNumber(unitPrice)) {
     return false;
   }
 
-  if (!isOptionalNumber(customerDiscount)) {
-    return false;
-  }
-
-  if (!isNumber(partnerCost)) {
-    return false;
-  }
-
-  if (!isNumber(productCost)) {
-    return false;
-  }
-
-  if (!isNumber(lineItemTotal)) {
-    return false;
-  }
-
-  if (!isNumber(lineItemTotalCustomer)) {
+  if (!isNumber(total)) {
     return false;
   }
 
@@ -250,6 +198,10 @@ export const isInvoiceItem = (value: unknown): value is InvoiceItem => {
   }
 
   if (!isIsoDateString(endDate)) {
+    return false;
+  }
+
+  if (!isChargeType(chargeType)) {
     return false;
   }
 
