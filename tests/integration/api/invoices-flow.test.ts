@@ -29,18 +29,15 @@ describe('Invoices API Integration Tests', () => {
   });
 
   const makeInvoiceItem = (invoiceId: string, companyId: string): InvoiceItem => ({
+    id: `item-${invoiceId}`,
     invoiceId,
     companyId,
-    companyName: 'Test Company',
     subscriptionId: 'sub-123',
     productId: 'prod-456',
     productName: 'Microsoft 365 Business Standard',
     quantity: 10,
-    price: 12.5,
-    partnerCost: 10.0,
-    productCost: 8.0,
-    lineItemTotal: 125.0,
-    lineItemTotalCustomer: 125.0,
+    unitPrice: 12.5,
+    total: 125.0,
     startDate: '2024-01-01',
     endDate: '2024-01-31',
     chargeType: 'Renewal',
