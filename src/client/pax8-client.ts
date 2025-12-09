@@ -6,6 +6,8 @@ import { OrdersApi } from '../api/orders';
 import { ProductsApi } from '../api/products';
 import { SubscriptionsApi } from '../api/subscriptions';
 import { UsageSummariesApi } from '../api/usage-summaries';
+import { QuotesApi } from '../api/quotes';
+import { QuotePreferencesApi } from '../api/quote-preferences';
 import { TokenManager } from '../auth/token-manager';
 
 /**
@@ -40,6 +42,12 @@ export class Pax8Client {
   /** Usage Summaries API methods */
   public readonly usageSummaries: UsageSummariesApi;
 
+  /** Quotes API methods */
+  public readonly quotes: QuotesApi;
+
+  /** Quote Preferences API methods */
+  public readonly quotePreferences: QuotePreferencesApi;
+
   /**
    * Create a new client instance.
    *
@@ -56,6 +64,8 @@ export class Pax8Client {
     this.orders = new OrdersApi(this);
     this.subscriptions = new SubscriptionsApi(this);
     this.usageSummaries = new UsageSummariesApi(this);
+    this.quotes = new QuotesApi(this);
+    this.quotePreferences = new QuotePreferencesApi(this);
   }
 
   /** Current client configuration with defaults applied. */
