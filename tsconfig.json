@@ -16,9 +16,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
-    "rootDir": "./src",
+    "rootDir": "./",
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "examples/**/*.ts"],
   "exclude": ["dist", "node_modules"]
 }

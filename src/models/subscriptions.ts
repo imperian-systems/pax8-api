@@ -89,6 +89,9 @@ export interface SubscriptionListResponse {
   page: PageMetadata;
 }
 
+// History entries are full subscription snapshots
+export type SubscriptionHistory = Subscription;
+
 // Type guards
 const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 const isString = (value: unknown): value is string => typeof value === 'string';

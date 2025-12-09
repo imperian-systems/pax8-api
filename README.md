@@ -1,6 +1,6 @@
 # @imperian-systems/pax8-api
 
-[![npm version](https://img.shields.io/npm/v/@imperian-systems/pax8-api.svg)](https://www.npmjs.com/package/@imperian-systems/pax8-api)
+[![npm version](https://img.shields.io/npm/v/%40imperian-systems%2Fpax8-api.svg)](https://www.npmjs.com/package/@imperian-systems/pax8-api)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Build Status](https://github.com/imperian-systems/pax8-api/actions/workflows/ci.yml/badge.svg)](https://github.com/imperian-systems/pax8-api/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
