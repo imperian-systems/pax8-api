@@ -1,12 +1,16 @@
 export {
   CompaniesApi,
+  createCompany,
   getCompany,
   listCompanies,
   searchCompanies,
+  updateCompany,
   type CompaniesApiClient,
   type CompaniesSort,
   type ListCompaniesParams,
   type SearchCompaniesParams,
+  type CreateCompanyRequest,
+  type UpdateCompanyRequest,
 } from './companies';
 
 export {

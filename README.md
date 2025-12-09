@@ -171,6 +171,32 @@ console.log(company.name);
 console.log(company.status);         // 'Active' | 'Inactive' | 'Deleted'
 console.log(company.address);
 
+// Create a new company
+const created = await client.companies.create({
+  name: 'VFC Network, Inc',
+  address: {
+    street: '48918 Liberty Lane Ave',
+    city: 'Denver',
+    stateOrProvince: 'CO',
+    postalCode: '80210',
+    country: 'US'
+  },
+  phone: '123-456-5555',
+  website: 'https://vfc-network-inc-liberty.com',
+  externalId: 'A123',
+  selfServiceAllowed: false,
+  billOnBehalfOfEnabled: false,
+  orderApprovalRequired: false
+});
+
+// Update an existing company (partial)
+const updated = await client.companies.update('comp-123', {
+  phone: '555-000-1234',
+  selfServiceAllowed: true,
+  address: { postalCode: '80211' }
+});
+console.log(updated.phone);
+
 // Search companies by name or domain
 const searchResults = await client.companies.search({
   query: 'acme',         // Required: 2-256 characters
@@ -206,25 +232,61 @@ interface SearchCompaniesParams {
   size?: number;          // 1-200, default 10
 }
 
-interface Company {
-  id: string;
+interface CreateCompanyRequest {
   name: string;
   address: {
-    addressLine1?: string;
-    addressLine2?: string;
+    street?: string;
+    street2?: string;
     city?: string;
     stateOrProvince?: string;
     postalCode?: string;
     country?: string;
   };
-  phone: string;
-  website: string;
+  phone?: string;
+  website?: string;
+  externalId?: string;
+  billOnBehalfOfEnabled: boolean;
+  selfServiceAllowed: boolean;
+  orderApprovalRequired: boolean;
+}
+
+interface UpdateCompanyRequest {
+  name?: string;
+  address?: {
+    street?: string;
+    street2?: string;
+    city?: string;
+    stateOrProvince?: string;
+    postalCode?: string;
+    country?: string;
+  };
+  phone?: string;
+  website?: string;
+  externalId?: string;
+  billOnBehalfOfEnabled?: boolean;
+  selfServiceAllowed?: boolean;
+  orderApprovalRequired?: boolean;
+}
+
+interface Company {
+  id: string;
+  name: string;
+  address: {
+    street?: string;
+    street2?: string;
+    city?: string;
+    stateOrProvince?: string;
+    postalCode?: string;
+    country?: string;
+  };
+  phone?: string;
+  website?: string;
   externalId?: string;
   billOnBehalfOfEnabled: boolean;
   selfServiceAllowed: boolean;
   orderApprovalRequired: boolean;
   status: 'Active' | 'Inactive' | 'Deleted';
-  updatedDate: string;      // ISO 8601
+  updatedDate?: string;      // ISO 8601
 }
 
 interface CompanyListResponse {

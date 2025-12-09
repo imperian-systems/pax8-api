@@ -28,6 +28,28 @@ export interface Company {
   updatedDate?: string;
 }
 
+export interface CreateCompanyRequest {
+  name: string;
+  address: CompanyAddress;
+  phone?: string;
+  website?: string;
+  externalId?: string;
+  billOnBehalfOfEnabled: boolean;
+  selfServiceAllowed: boolean;
+  orderApprovalRequired: boolean;
+}
+
+export interface UpdateCompanyRequest {
+  name?: string;
+  address?: CompanyAddress;
+  phone?: string;
+  website?: string;
+  externalId?: string;
+  billOnBehalfOfEnabled?: boolean;
+  selfServiceAllowed?: boolean;
+  orderApprovalRequired?: boolean;
+}
+
 export interface PageMetadata {
   size: number;
   totalElements: number;
@@ -58,6 +80,9 @@ const isInteger = (value: unknown): value is number => isNumber(value) && Number
 const isIsoDateString = (value: unknown): value is string => isString(value) && !Number.isNaN(Date.parse(value));
 
 const isOptionalString = (value: unknown): value is string | undefined => value === undefined || isString(value);
+const isOptionalBoolean = (value: unknown): value is boolean | undefined => value === undefined || isBoolean(value);
+
+const hasAtLeastOneKey = (value: Record<string, unknown>): boolean => Object.keys(value).length > 0;
 
 const isCompanyAddress = (value: unknown): value is CompanyAddress => {
   if (!isObject(value)) {
@@ -129,6 +154,87 @@ export const isCompany = (value: unknown): value is Company => {
   if (updatedDate !== undefined && !isIsoDateString(updatedDate)) {
     return false;
   }
+
+  return true;
+};
+
+export const isCreateCompanyRequest = (value: unknown): value is CreateCompanyRequest => {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const {
+    name,
+    address,
+    phone,
+    website,
+    externalId,
+    billOnBehalfOfEnabled,
+    selfServiceAllowed,
+    orderApprovalRequired,
+  } = value;
+
+  if (!isNonEmptyString(name)) return false;
+  if (!isCompanyAddress(address)) return false;
+
+  if (phone !== undefined && !isString(phone)) return false;
+  if (website !== undefined && !isString(website)) return false;
+  if (externalId !== undefined && !isString(externalId)) return false;
+
+  if (!isBoolean(billOnBehalfOfEnabled)) return false;
+  if (!isBoolean(selfServiceAllowed)) return false;
+  if (!isBoolean(orderApprovalRequired)) return false;
+
+  return true;
+};
+
+export const isUpdateCompanyRequest = (value: unknown): value is UpdateCompanyRequest => {
+  if (!isObject(value)) {
+    return false;
+  }
+
+  const allowedKeys: Array<keyof UpdateCompanyRequest> = [
+    'name',
+    'address',
+    'phone',
+    'website',
+    'externalId',
+    'billOnBehalfOfEnabled',
+    'selfServiceAllowed',
+    'orderApprovalRequired',
+  ];
+
+  // ensure no unexpected keys
+  for (const key of Object.keys(value)) {
+    if (!allowedKeys.includes(key as keyof UpdateCompanyRequest)) {
+      return false;
+    }
+  }
+
+  if (!hasAtLeastOneKey(value)) {
+    return false;
+  }
+
+  const {
+    name,
+    address,
+    phone,
+    website,
+    externalId,
+    billOnBehalfOfEnabled,
+    selfServiceAllowed,
+    orderApprovalRequired,
+  } = value as UpdateCompanyRequest;
+
+  if (name !== undefined && !isNonEmptyString(name)) return false;
+  if (address !== undefined && !isCompanyAddress(address)) return false;
+  if (phone !== undefined && !isString(phone)) return false;
+  if (website !== undefined && !isString(website)) return false;
+  if (externalId !== undefined && !isString(externalId)) return false;
+
+  if (!isOptionalBoolean(billOnBehalfOfEnabled)) return false;
+  if (!isOptionalBoolean(selfServiceAllowed)) return false;
+  if (!isOptionalBoolean(orderApprovalRequired)) return false;
 
   return true;
 };
@@ -229,6 +335,24 @@ export const assertCompanySearchResponse: (value: unknown, message?: string) => 
   message = 'Invalid company search response',
 ): asserts value is CompanySearchResponse => {
   if (!isCompanySearchResponse(value)) {
+    throw new TypeError(message);
+  }
+};
+
+export const assertCreateCompanyRequest: (value: unknown, message?: string) => asserts value is CreateCompanyRequest = (
+  value: unknown,
+  message = 'Invalid create company request',
+): asserts value is CreateCompanyRequest => {
+  if (!isCreateCompanyRequest(value)) {
+    throw new TypeError(message);
+  }
+};
+
+export const assertUpdateCompanyRequest: (value: unknown, message?: string) => asserts value is UpdateCompanyRequest = (
+  value: unknown,
+  message = 'Invalid update company request',
+): asserts value is UpdateCompanyRequest => {
+  if (!isUpdateCompanyRequest(value)) {
     throw new TypeError(message);
   }
 };

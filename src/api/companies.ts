@@ -8,11 +8,17 @@ import {
   DEFAULT_PAGE_SIZE,
   MAX_PAGE_SIZE,
   MIN_PAGE_SIZE,
+  CreateCompanyRequest,
+  UpdateCompanyRequest,
   assertCompanyListResponse,
   assertCompany,
   isCompanyStatus,
   assertCompanySearchResponse,
+  assertCreateCompanyRequest,
+  assertUpdateCompanyRequest,
 } from '../models/companies';
+
+export type { CreateCompanyRequest, UpdateCompanyRequest } from '../models/companies';
 
 export type CompaniesSortField = 'name' | 'city' | 'country' | 'stateOrProvince' | 'postalCode';
 export type CompaniesSortDirection = 'asc' | 'desc';
@@ -51,6 +57,16 @@ export class CompaniesApi {
   constructor(private readonly client: CompaniesApiClient) {}
 
   /**
+   * Create a company.
+   *
+   * @param request - Company creation payload
+   * @returns Promise resolving to the created company
+   */
+  async create(request: CreateCompanyRequest): Promise<Company> {
+    return createCompany(this.client, request);
+  }
+
+  /**
    * List companies with optional filters and page-based pagination.
    *
    * @param params - Optional filters and pagination parameters
@@ -68,6 +84,17 @@ export class CompaniesApi {
    */
   async get(companyId: string): Promise<Company> {
     return getCompany(this.client, companyId);
+  }
+
+  /**
+   * Update an existing company.
+   *
+   * @param companyId - The company identifier
+   * @param request - Partial company update payload
+   * @returns Promise resolving to the updated company
+   */
+  async update(companyId: string, request: UpdateCompanyRequest): Promise<Company> {
+    return updateCompany(this.client, companyId, request);
   }
 
   /**
@@ -212,6 +239,57 @@ export const getCompany = async (client: CompaniesApiClient, companyId: string):
   const data: unknown = await response.json();
   assertCompany(data);
 
+  return data;
+};
+
+/**
+ * Create a new company.
+ */
+export const createCompany = async (
+  client: CompaniesApiClient,
+  request: CreateCompanyRequest,
+): Promise<Company> => {
+  assertCreateCompanyRequest(request);
+
+  const response = await client.request('/companies', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    await handleErrorResponse(response);
+  }
+
+  const data: unknown = await response.json();
+  assertCompany(data);
+  return data;
+};
+
+/**
+ * Update an existing company.
+ */
+export const updateCompany = async (
+  client: CompaniesApiClient,
+  companyId: string,
+  request: UpdateCompanyRequest,
+): Promise<Company> => {
+  validateNonEmptyString(companyId, 'companyId');
+  assertUpdateCompanyRequest(request);
+
+  const path = `/companies/${encodeURIComponent(companyId)}`;
+  const response = await client.request(path, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    await handleErrorResponse(response);
+  }
+
+  const data: unknown = await response.json();
+  assertCompany(data);
   return data;
 };
 
