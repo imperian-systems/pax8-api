@@ -19,19 +19,19 @@
 
 **Purpose**: Project structure and v2 API support
 
-- [ ] T001 Add v2 pagination validators (validateLimit, validateV2Page) to src/http/api-utils.ts
-- [ ] T002 [P] Create Quote model types in src/models/quotes.ts (Quote, QuoteStatus, LineItem, BillingTerm, InvoiceTotals, AmountCurrency, Product, ProductType, ClientDetails, PartnerDetails, AcceptedBy, Attachment, UsageBased, UsageBasedType, CommitmentTerm, LineItemRelationship)
-- [ ] T003 [P] Create Quote response types in src/models/quotes.ts (QuoteListResponse, QuoteStatusCounts, V2PageInfo)
-- [ ] T004 [P] Create Quote payload types in src/models/quotes.ts (CreateQuotePayload, UpdateQuotePayload, ListQuotesOptions)
-- [ ] T005 [P] Create Line Item payload types in src/models/quotes.ts (AddLineItemPayload discriminated union: AddStandardLineItemPayload, AddCustomLineItemPayload, AddUsageBasedLineItemPayload, UpdateLineItemPayload, BulkDeleteLineItemsPayload)
-- [ ] T006 [P] Create Section types in src/models/quotes.ts (Section, SectionLineItem, CreateSectionPayload, UpdateSectionsPayload, UpdateSectionItem)
-- [ ] T007 [P] Create Access List types in src/models/quotes.ts (AccessListEntry, AddAccessListPayload)
-- [ ] T008 [P] Create QuotePreferences types in src/models/quote-preferences.ts (QuotePreferences, UpdateQuotePreferencesPayload)
-- [ ] T009 [P] Create Quote error types in src/models/quotes.ts (QuoteErrorType, QuoteApiError, QuoteErrorDetail)
-- [ ] T010 [P] Create type guards in src/models/quotes.ts (isQuote, assertQuote, isQuoteListResponse, assertQuoteListResponse, isStandardLineItem, isCustomLineItem, isUsageBasedLineItem)
-- [ ] T011 [P] Create quote constants in src/models/quotes.ts (DEFAULT_LIMIT, MIN_LIMIT, MAX_LIMIT, MAX_LINE_ITEMS_PER_QUOTE, MAX_NOTE_LENGTH, MAX_PRODUCT_NAME_LENGTH, MAX_PRODUCT_SKU_LENGTH)
-- [ ] T012 Export quote models from src/models/index.ts (if exists) or src/index.ts
-- [ ] T013 Export quote-preferences models from src/models/index.ts (if exists) or src/index.ts
+- [X] T001 Add v2 pagination validators (validateLimit, validateV2Page) to src/http/api-utils.ts
+- [X] T002 [P] Create Quote model types in src/models/quotes.ts (Quote, QuoteStatus, LineItem, BillingTerm, InvoiceTotals, AmountCurrency, Product, ProductType, ClientDetails, PartnerDetails, AcceptedBy, Attachment, UsageBased, UsageBasedType, CommitmentTerm, LineItemRelationship)
+- [X] T003 [P] Create Quote response types in src/models/quotes.ts (QuoteListResponse, QuoteStatusCounts, V2PageInfo)
+- [X] T004 [P] Create Quote payload types in src/models/quotes.ts (CreateQuotePayload, UpdateQuotePayload, ListQuotesOptions)
+- [X] T005 [P] Create Line Item payload types in src/models/quotes.ts (AddLineItemPayload discriminated union: AddStandardLineItemPayload, AddCustomLineItemPayload, AddUsageBasedLineItemPayload, UpdateLineItemPayload, BulkDeleteLineItemsPayload)
+- [X] T006 [P] Create Section types in src/models/quotes.ts (Section, SectionLineItem, CreateSectionPayload, UpdateSectionsPayload, UpdateSectionItem)
+- [X] T007 [P] Create Access List types in src/models/quotes.ts (AccessListEntry, AddAccessListPayload)
+- [X] T008 [P] Create QuotePreferences types in src/models/quote-preferences.ts (QuotePreferences, UpdateQuotePreferencesPayload)
+- [X] T009 [P] Create Quote error types in src/models/quotes.ts (QuoteErrorType, QuoteApiError, QuoteErrorDetail)
+- [X] T010 [P] Create type guards in src/models/quotes.ts (isQuote, assertQuote, isQuoteListResponse, assertQuoteListResponse, isStandardLineItem, isCustomLineItem, isUsageBasedLineItem)
+- [X] T011 [P] Create quote constants in src/models/quotes.ts (DEFAULT_LIMIT, MIN_LIMIT, MAX_LIMIT, MAX_LINE_ITEMS_PER_QUOTE, MAX_NOTE_LENGTH, MAX_PRODUCT_NAME_LENGTH, MAX_PRODUCT_SKU_LENGTH)
+- [X] T012 Export quote models from src/models/index.ts (if exists) or src/index.ts
+- [X] T013 Export quote-preferences models from src/models/index.ts (if exists) or src/index.ts
 
 ---
 
@@ -41,12 +41,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T014 Create QuotesApi class skeleton in src/api/quotes.ts with constructor accepting Pax8Client
-- [ ] T015 [P] Create QuotePreferencesApi class skeleton in src/api/quote-preferences.ts with constructor accepting Pax8Client
-- [ ] T016 Add quotes property (QuotesApi instance) to Pax8Client in src/client/pax8-client.ts
-- [ ] T017 Add quotePreferences property (QuotePreferencesApi instance) to Pax8Client in src/client/pax8-client.ts
-- [ ] T018 Export QuotesApi and QuotePreferencesApi from src/api/index.ts
-- [ ] T019 Export QuotesApi and QuotePreferencesApi from src/index.ts
+- [X] T014 Create QuotesApi class skeleton in src/api/quotes.ts with constructor accepting Pax8Client
+- [X] T015 [P] Create QuotePreferencesApi class skeleton in src/api/quote-preferences.ts with constructor accepting Pax8Client
+- [X] T016 Add quotes property (QuotesApi instance) to Pax8Client in src/client/pax8-client.ts
+- [X] T017 Add quotePreferences property (QuotePreferencesApi instance) to Pax8Client in src/client/pax8-client.ts
+- [X] T018 Export QuotesApi and QuotePreferencesApi from src/api/index.ts
+- [X] T019 Export QuotesApi and QuotePreferencesApi from src/index.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -62,20 +62,20 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T020 [P] [US1] Contract test for POST /v2/quotes (createQuote) in tests/contract/api/quotes-contract.test.ts
-- [ ] T021 [P] [US1] Contract test for GET /v2/quotes (listQuotes) in tests/contract/api/quotes-contract.test.ts
-- [ ] T022 [P] [US1] Contract test for GET /v2/quotes/{quoteId} (getQuote) in tests/contract/api/quotes-contract.test.ts
-- [ ] T023 [P] [US1] Contract test for PUT /v2/quotes/{quoteId} (updateQuote) in tests/contract/api/quotes-contract.test.ts
-- [ ] T024 [P] [US1] Contract test for DELETE /v2/quotes/{quoteId} (deleteQuote) in tests/contract/api/quotes-contract.test.ts
+- [X] T020 [P] [US1] Contract test for POST /v2/quotes (createQuote) in tests/contract/api/quotes-contract.test.ts
+- [X] T021 [P] [US1] Contract test for GET /v2/quotes (listQuotes) in tests/contract/api/quotes-contract.test.ts
+- [X] T022 [P] [US1] Contract test for GET /v2/quotes/{quoteId} (getQuote) in tests/contract/api/quotes-contract.test.ts
+- [X] T023 [P] [US1] Contract test for PUT /v2/quotes/{quoteId} (updateQuote) in tests/contract/api/quotes-contract.test.ts
+- [X] T024 [P] [US1] Contract test for DELETE /v2/quotes/{quoteId} (deleteQuote) in tests/contract/api/quotes-contract.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T025 [US1] Implement create(payload: CreateQuotePayload): Promise<Quote> in src/api/quotes.ts using POST /v2/quotes
-- [ ] T026 [US1] Implement list(options?: ListQuotesOptions): Promise<QuoteListResponse> in src/api/quotes.ts using GET /v2/quotes with v2 pagination (limit/page)
-- [ ] T027 [US1] Implement get(quoteId: string): Promise<Quote> in src/api/quotes.ts using GET /v2/quotes/{quoteId}
-- [ ] T028 [US1] Implement update(quoteId: string, payload: UpdateQuotePayload): Promise<Quote> in src/api/quotes.ts using PUT /v2/quotes/{quoteId}
-- [ ] T029 [US1] Implement delete(quoteId: string): Promise<void> in src/api/quotes.ts using DELETE /v2/quotes/{quoteId}
-- [ ] T030 [US1] Add JSDoc documentation to all User Story 1 methods in src/api/quotes.ts
+- [X] T025 [US1] Implement create(payload: CreateQuotePayload): Promise<Quote> in src/api/quotes.ts using POST /v2/quotes
+- [X] T026 [US1] Implement list(options?: ListQuotesOptions): Promise<QuoteListResponse> in src/api/quotes.ts using GET /v2/quotes with v2 pagination (limit/page)
+- [X] T027 [US1] Implement get(quoteId: string): Promise<Quote> in src/api/quotes.ts using GET /v2/quotes/{quoteId}
+- [X] T028 [US1] Implement update(quoteId: string, payload: UpdateQuotePayload): Promise<Quote> in src/api/quotes.ts using PUT /v2/quotes/{quoteId}
+- [X] T029 [US1] Implement delete(quoteId: string): Promise<void> in src/api/quotes.ts using DELETE /v2/quotes/{quoteId}
+- [X] T030 [US1] Add JSDoc documentation to all User Story 1 methods in src/api/quotes.ts
 
 **Checkpoint**: User Story 1 complete - quote CRUD operations work independently
 
@@ -89,20 +89,20 @@
 
 ### Contract Tests for User Story 2
 
-- [ ] T031 [P] [US2] Contract test for POST /v2/quotes/{quoteId}/line-items (addLineItems - Standard type) in tests/contract/api/quotes-contract.test.ts
-- [ ] T032 [P] [US2] Contract test for POST /v2/quotes/{quoteId}/line-items (addLineItems - Custom type) in tests/contract/api/quotes-contract.test.ts
-- [ ] T033 [P] [US2] Contract test for POST /v2/quotes/{quoteId}/line-items (addLineItems - UsageBased type) in tests/contract/api/quotes-contract.test.ts
-- [ ] T034 [P] [US2] Contract test for PUT /v2/quotes/{quoteId}/line-items (updateLineItems) in tests/contract/api/quotes-contract.test.ts
-- [ ] T035 [P] [US2] Contract test for DELETE /v2/quotes/{quoteId}/line-items/{lineItemId} (deleteLineItem) in tests/contract/api/quotes-contract.test.ts
-- [ ] T036 [P] [US2] Contract test for POST /v2/quotes/{quoteId}/line-items/bulk-delete (bulkDeleteLineItems) in tests/contract/api/quotes-contract.test.ts
+- [X] T031 [P] [US2] Contract test for POST /v2/quotes/{quoteId}/line-items (addLineItems - Standard type) in tests/contract/api/quotes-contract.test.ts
+- [X] T032 [P] [US2] Contract test for POST /v2/quotes/{quoteId}/line-items (addLineItems - Custom type) in tests/contract/api/quotes-contract.test.ts
+- [X] T033 [P] [US2] Contract test for POST /v2/quotes/{quoteId}/line-items (addLineItems - UsageBased type) in tests/contract/api/quotes-contract.test.ts
+- [X] T034 [P] [US2] Contract test for PUT /v2/quotes/{quoteId}/line-items (updateLineItems) in tests/contract/api/quotes-contract.test.ts
+- [X] T035 [P] [US2] Contract test for DELETE /v2/quotes/{quoteId}/line-items/{lineItemId} (deleteLineItem) in tests/contract/api/quotes-contract.test.ts
+- [X] T036 [P] [US2] Contract test for POST /v2/quotes/{quoteId}/line-items/bulk-delete (bulkDeleteLineItems) in tests/contract/api/quotes-contract.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T037 [US2] Implement addLineItems(quoteId: string, lineItems: AddLineItemPayload[]): Promise<Quote> in src/api/quotes.ts using POST /v2/quotes/{quoteId}/line-items
-- [ ] T038 [US2] Implement updateLineItems(quoteId: string, lineItems: UpdateLineItemPayload[]): Promise<Quote> in src/api/quotes.ts using PUT /v2/quotes/{quoteId}/line-items
-- [ ] T039 [US2] Implement deleteLineItem(quoteId: string, lineItemId: string): Promise<void> in src/api/quotes.ts using DELETE /v2/quotes/{quoteId}/line-items/{lineItemId}
-- [ ] T040 [US2] Implement bulkDeleteLineItems(quoteId: string, payload: BulkDeleteLineItemsPayload): Promise<void> in src/api/quotes.ts using POST /v2/quotes/{quoteId}/line-items/bulk-delete
-- [ ] T041 [US2] Add JSDoc documentation to all User Story 2 methods in src/api/quotes.ts
+- [X] T037 [US2] Implement addLineItems(quoteId: string, lineItems: AddLineItemPayload[]): Promise<Quote> in src/api/quotes.ts using POST /v2/quotes/{quoteId}/line-items
+- [X] T038 [US2] Implement updateLineItems(quoteId: string, lineItems: UpdateLineItemPayload[]): Promise<Quote> in src/api/quotes.ts using PUT /v2/quotes/{quoteId}/line-items
+- [X] T039 [US2] Implement deleteLineItem(quoteId: string, lineItemId: string): Promise<void> in src/api/quotes.ts using DELETE /v2/quotes/{quoteId}/line-items/{lineItemId}
+- [X] T040 [US2] Implement bulkDeleteLineItems(quoteId: string, payload: BulkDeleteLineItemsPayload): Promise<void> in src/api/quotes.ts using POST /v2/quotes/{quoteId}/line-items/bulk-delete
+- [X] T041 [US2] Add JSDoc documentation to all User Story 2 methods in src/api/quotes.ts
 
 **Checkpoint**: User Story 2 complete - line item management works independently
 
@@ -116,16 +116,16 @@
 
 ### Contract Tests for User Story 3
 
-- [ ] T042 [P] [US3] Contract test for GET /v2/quotes/{quoteId}/sections (getSections) in tests/contract/api/quotes-contract.test.ts
-- [ ] T043 [P] [US3] Contract test for POST /v2/quotes/{quoteId}/sections (createSection) in tests/contract/api/quotes-contract.test.ts
-- [ ] T044 [P] [US3] Contract test for PUT /v2/quotes/{quoteId}/sections (updateSections) in tests/contract/api/quotes-contract.test.ts
+- [X] T042 [P] [US3] Contract test for GET /v2/quotes/{quoteId}/sections (getSections) in tests/contract/api/quotes-contract.test.ts
+- [X] T043 [P] [US3] Contract test for POST /v2/quotes/{quoteId}/sections (createSection) in tests/contract/api/quotes-contract.test.ts
+- [X] T044 [P] [US3] Contract test for PUT /v2/quotes/{quoteId}/sections (updateSections) in tests/contract/api/quotes-contract.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T045 [US3] Implement getSections(quoteId: string): Promise<Section[]> in src/api/quotes.ts using GET /v2/quotes/{quoteId}/sections
-- [ ] T046 [US3] Implement createSection(quoteId: string, payload: CreateSectionPayload): Promise<Section[]> in src/api/quotes.ts using POST /v2/quotes/{quoteId}/sections
-- [ ] T047 [US3] Implement updateSections(quoteId: string, payload: UpdateSectionsPayload): Promise<Section[]> in src/api/quotes.ts using PUT /v2/quotes/{quoteId}/sections
-- [ ] T048 [US3] Add JSDoc documentation to all User Story 3 methods in src/api/quotes.ts
+- [X] T045 [US3] Implement getSections(quoteId: string): Promise<Section[]> in src/api/quotes.ts using GET /v2/quotes/{quoteId}/sections
+- [X] T046 [US3] Implement createSection(quoteId: string, payload: CreateSectionPayload): Promise<Section[]> in src/api/quotes.ts using POST /v2/quotes/{quoteId}/sections
+- [X] T047 [US3] Implement updateSections(quoteId: string, payload: UpdateSectionsPayload): Promise<Section[]> in src/api/quotes.ts using PUT /v2/quotes/{quoteId}/sections
+- [X] T048 [US3] Add JSDoc documentation to all User Story 3 methods in src/api/quotes.ts
 
 **Checkpoint**: User Story 3 complete - section management works independently
 
@@ -139,16 +139,16 @@
 
 ### Contract Tests for User Story 4
 
-- [ ] T049 [P] [US4] Contract test for GET /v2/quotes/{quoteId}/access-list (getAccessList) in tests/contract/api/quotes-contract.test.ts
-- [ ] T050 [P] [US4] Contract test for POST /v2/quotes/{quoteId}/access-list (addAccessListEntries) in tests/contract/api/quotes-contract.test.ts
-- [ ] T051 [P] [US4] Contract test for DELETE /v2/quotes/{quoteId}/access-list/{accessListEntryId} (deleteAccessListEntry) in tests/contract/api/quotes-contract.test.ts
+- [X] T049 [P] [US4] Contract test for GET /v2/quotes/{quoteId}/access-list (getAccessList) in tests/contract/api/quotes-contract.test.ts
+- [X] T050 [P] [US4] Contract test for POST /v2/quotes/{quoteId}/access-list (addAccessListEntries) in tests/contract/api/quotes-contract.test.ts
+- [X] T051 [P] [US4] Contract test for DELETE /v2/quotes/{quoteId}/access-list/{accessListEntryId} (deleteAccessListEntry) in tests/contract/api/quotes-contract.test.ts
 
 ### Implementation for User Story 4
 
-- [ ] T052 [US4] Implement getAccessList(quoteId: string): Promise<AccessListEntry[]> in src/api/quotes.ts using GET /v2/quotes/{quoteId}/access-list
-- [ ] T053 [US4] Implement addAccessListEntries(quoteId: string, payload: AddAccessListPayload): Promise<AccessListEntry[]> in src/api/quotes.ts using POST /v2/quotes/{quoteId}/access-list
-- [ ] T054 [US4] Implement deleteAccessListEntry(quoteId: string, accessListEntryId: string): Promise<void> in src/api/quotes.ts using DELETE /v2/quotes/{quoteId}/access-list/{accessListEntryId}
-- [ ] T055 [US4] Add JSDoc documentation to all User Story 4 methods in src/api/quotes.ts
+- [X] T052 [US4] Implement getAccessList(quoteId: string): Promise<AccessListEntry[]> in src/api/quotes.ts using GET /v2/quotes/{quoteId}/access-list
+- [X] T053 [US4] Implement addAccessListEntries(quoteId: string, payload: AddAccessListPayload): Promise<AccessListEntry[]> in src/api/quotes.ts using POST /v2/quotes/{quoteId}/access-list
+- [X] T054 [US4] Implement deleteAccessListEntry(quoteId: string, accessListEntryId: string): Promise<void> in src/api/quotes.ts using DELETE /v2/quotes/{quoteId}/access-list/{accessListEntryId}
+- [X] T055 [US4] Add JSDoc documentation to all User Story 4 methods in src/api/quotes.ts
 
 **Checkpoint**: User Story 4 complete - access list management works independently
 
@@ -162,14 +162,14 @@
 
 ### Contract Tests for User Story 5
 
-- [ ] T056 [P] [US5] Contract test for GET /v2/quote-preferences (getPreferences) in tests/contract/api/quote-preferences-contract.test.ts
-- [ ] T057 [P] [US5] Contract test for PUT /v2/quote-preferences (updatePreferences) in tests/contract/api/quote-preferences-contract.test.ts
+- [X] T056 [P] [US5] Contract test for GET /v2/quote-preferences (getPreferences) in tests/contract/api/quote-preferences-contract.test.ts
+- [X] T057 [P] [US5] Contract test for PUT /v2/quote-preferences (updatePreferences) in tests/contract/api/quote-preferences-contract.test.ts
 
 ### Implementation for User Story 5
 
-- [ ] T058 [US5] Implement get(): Promise<QuotePreferences> in src/api/quote-preferences.ts using GET /v2/quote-preferences
-- [ ] T059 [US5] Implement update(payload: UpdateQuotePreferencesPayload): Promise<QuotePreferences> in src/api/quote-preferences.ts using PUT /v2/quote-preferences
-- [ ] T060 [US5] Add JSDoc documentation to all User Story 5 methods in src/api/quote-preferences.ts
+- [X] T058 [US5] Implement get(): Promise<QuotePreferences> in src/api/quote-preferences.ts using GET /v2/quote-preferences
+- [X] T059 [US5] Implement update(payload: UpdateQuotePreferencesPayload): Promise<QuotePreferences> in src/api/quote-preferences.ts using PUT /v2/quote-preferences
+- [X] T060 [US5] Add JSDoc documentation to all User Story 5 methods in src/api/quote-preferences.ts
 
 **Checkpoint**: User Story 5 complete - quote preferences work independently
 
@@ -179,10 +179,10 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T061 [P] Update README.md with Quotes API usage examples
+- [X] T061 [P] Update README.md with Quotes API usage examples
 - [ ] T062 [P] Add integration test for full quote lifecycle flow in tests/integration/api/quotes-flow.test.ts (optional if real API creds available)
-- [ ] T063 Run quickstart.md validation - verify all code examples work correctly
-- [ ] T064 Verify all exports are properly exposed from src/index.ts
+- [X] T063 Run quickstart.md validation - verify all code examples work correctly
+- [X] T064 Verify all exports are properly exposed from src/index.ts
 
 ---
 
